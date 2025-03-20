@@ -11,12 +11,10 @@ import type { Component } from "@/types/income";
 
 interface ComponentsContextType {
   components: Component[];
-  selectedComponentId: string | null;
   addComponent: (component: Component) => void;
   updateComponent: (component: Component) => void;
   removeComponent: (id: string) => void;
   clearAllComponents: () => void;
-  setSelectedComponentId: (id: string | null) => void;
 }
 
 const ComponentsContext = createContext<ComponentsContextType | undefined>(
@@ -25,9 +23,6 @@ const ComponentsContext = createContext<ComponentsContextType | undefined>(
 
 export function ComponentsProvider({ children }: { children: ReactNode }) {
   const [components, setComponents] = useState<Component[]>([]);
-  const [selectedComponentId, setSelectedComponentId] = useState<string | null>(
-    null,
-  );
 
   // Load from localStorage after component mounts (client-side only)
   useEffect(() => {
@@ -88,9 +83,6 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
 
   const removeComponent = (id: string) => {
     setComponents((prev) => prev.filter((c) => c.id !== id));
-    if (selectedComponentId === id) {
-      setSelectedComponentId(null);
-    }
   };
 
   const clearAllComponents = () => {
@@ -100,7 +92,6 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
       )
     ) {
       setComponents([]);
-      setSelectedComponentId(null);
       localStorage.removeItem("incomeCalculator.components");
     }
   };
@@ -109,12 +100,10 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
     <ComponentsContext.Provider
       value={{
         components,
-        selectedComponentId,
         addComponent,
         updateComponent,
         removeComponent,
         clearAllComponents,
-        setSelectedComponentId,
       }}
     >
       {children}

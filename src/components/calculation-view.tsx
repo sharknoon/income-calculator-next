@@ -35,40 +35,6 @@ export function CalculationView() {
   );
   const [calculationTab, setCalculationTab] = useState("inputs");
 
-  // Load dates from localStorage after component mounts (client-side only)
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const savedStartDate = localStorage.getItem(
-          "incomeCalculator.startDate",
-        );
-        if (savedStartDate) {
-          setStartDate(Temporal.PlainDate.from(savedStartDate));
-        }
-
-        const savedEndDate = localStorage.getItem("incomeCalculator.endDate");
-        if (savedEndDate) {
-          setEndDate(Temporal.PlainDate.from(savedEndDate));
-        }
-      } catch (error) {
-        console.error("Failed to load dates from localStorage:", error);
-      }
-    }
-  }, []);
-
-  // Save dates to localStorage when they change
-  useEffect(() => {
-    if (typeof window !== "undefined" && startDate) {
-      localStorage.setItem("incomeCalculator.startDate", startDate.toString());
-    }
-  }, [startDate]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && endDate) {
-      localStorage.setItem("incomeCalculator.endDate", endDate.toString());
-    }
-  }, [endDate]);
-
   const formatDate = (date: Temporal.PlainDate | undefined) => {
     if (!date) return "";
     return date.toLocaleString("en-US", {

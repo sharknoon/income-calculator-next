@@ -1,26 +1,36 @@
 import { Temporal } from "@js-temporal/polyfill";
 
-export type Component = {
+type BaseComponent = {
   id: string;
   name: string;
   description?: string;
+};
+
+export type OneTimeComponent = BaseComponent & {
+  type: "one-time";
+  date: Temporal.PlainDate;
+  calculate: Calculation;
+};
+
+export type RecurringComponent = BaseComponent & {
+  type: "recurring";
   periods: Array<Period>;
 };
 
+export type Component = OneTimeComponent | RecurringComponent;
+
 export type Period = {
-  date: OneTime | Recurring;
-  dependencies: Array<string>;
-  inputs: Array<Input>;
-  calculate: string;
+  date: Recurring;
+  calculate: Calculation;
 };
 
-export type OneTime = {
-  type: "one-time";
-  date: Temporal.PlainDate;
-};
+export type Calculation = {
+  inputs: Array<Input>;
+  dependencies: Array<string>;
+  func: string; // js code
+}
 
 export type Recurring = {
-  type: "recurring";
   startDate: Temporal.PlainDate;
   endDate?: Temporal.PlainDate; // Default is infinite
 } & (Daily | Weekly | Monthly | Yearly);

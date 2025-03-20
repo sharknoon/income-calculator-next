@@ -1,6 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,34 +14,32 @@ import { ComponentCard } from "@/components/component-card";
 import { Temporal } from "@js-temporal/polyfill";
 
 export function ComponentsList() {
-  const {
-    components,
-    addComponent,
-    setSelectedComponentId,
-    clearAllComponents,
-  } = useComponents();
+  const { components, addComponent, clearAllComponents } = useComponents();
+  const router = useRouter();
 
   const handleAddComponent = () => {
-    const newId = `component-${Temporal.Now.plainDateTimeISO()}`;
+    const newId = crypto.randomUUID();
     addComponent({
       id: newId,
       name: "New Component",
+      type: "recurring",
       periods: [
         {
           date: {
-            type: "recurring",
             startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
             frequency: "monthly",
             every: 1,
             each: 1,
           },
-          dependencies: [],
-          inputs: [],
-          calculate: "new BigNumber(0)",
+          calculate: {
+            dependencies: [],
+            inputs: [],
+            func: "new BigNumber(0)",
+          },
         },
       ],
     });
-    setSelectedComponentId(newId);
+    router.push(`/component-editor/${newId}`);
   };
 
   return (

@@ -3,9 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentsList } from "@/components/components-list";
-import { ComponentEditor } from "@/components/component-editor";
 import { CalculationView } from "@/components/calculation-view";
-import { ComponentsProvider } from "@/context/components-context";
 import { toast } from "sonner";
 
 export function IncomeCalculator() {
@@ -28,23 +26,17 @@ export function IncomeCalculator() {
   }, []);
 
   return (
-    <ComponentsProvider>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="components">Components</TabsTrigger>
-          <TabsTrigger value="editor">Editor</TabsTrigger>
-          <TabsTrigger value="calculation">Calculation</TabsTrigger>
-        </TabsList>
-        <TabsContent value="components" className="py-4">
-          <ComponentsList />
-        </TabsContent>
-        <TabsContent value="editor" className="py-4">
-          <ComponentEditor />
-        </TabsContent>
-        <TabsContent value="calculation" className="py-4">
-          <CalculationView />
-        </TabsContent>
-      </Tabs>
-    </ComponentsProvider>
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <TabsList className="grid w-full grid-cols-2">
+        <TabsTrigger value="components">Components</TabsTrigger>
+        <TabsTrigger value="calculation">Calculation</TabsTrigger>
+      </TabsList>
+      <TabsContent value="components" className="py-4">
+        <ComponentsList />
+      </TabsContent>
+      <TabsContent value="calculation" className="py-4">
+        <CalculationView />
+      </TabsContent>
+    </Tabs>
   );
 }
