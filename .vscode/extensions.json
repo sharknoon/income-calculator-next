@@ -1,6 +1,3 @@
 {
-    "recommendations": [
-        "vitest.explorer",
-        "pflannery.vscode-versionlens"
-    ]
+  "recommendations": ["vitest.explorer", "pflannery.vscode-versionlens"]
 }

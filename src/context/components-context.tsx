@@ -20,13 +20,13 @@ interface ComponentsContextType {
 }
 
 const ComponentsContext = createContext<ComponentsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function ComponentsProvider({ children }: { children: ReactNode }) {
   const [components, setComponents] = useState<Component[]>([]);
   const [selectedComponentId, setSelectedComponentId] = useState<string | null>(
-    null
+    null,
   );
 
   // Load from localStorage after component mounts (client-side only)
@@ -34,7 +34,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       try {
         const savedComponents = localStorage.getItem(
-          "incomeCalculator.components"
+          "incomeCalculator.components",
         );
         if (savedComponents) {
           const parsedComponents = JSON.parse(savedComponents, (key, value) => {
@@ -68,7 +68,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem(
           "incomeCalculator.components",
-          JSON.stringify(components)
+          JSON.stringify(components),
         );
       } catch (error) {
         console.error("Failed to save components to localStorage:", error);
@@ -82,7 +82,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
 
   const updateComponent = (component: Component) => {
     setComponents((prev) =>
-      prev.map((c) => (c.id === component.id ? component : c))
+      prev.map((c) => (c.id === component.id ? component : c)),
     );
   };
 
@@ -96,7 +96,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
   const clearAllComponents = () => {
     if (
       window.confirm(
-        "Are you sure you want to delete all components? This cannot be undone."
+        "Are you sure you want to delete all components? This cannot be undone.",
       )
     ) {
       setComponents([]);

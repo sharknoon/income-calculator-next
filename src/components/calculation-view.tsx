@@ -28,10 +28,10 @@ export function CalculationView() {
   const { components } = useComponents();
 
   const [startDate, setStartDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO()
+    Temporal.Now.plainDateISO(),
   );
   const [endDate, setEndDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO().add({ months: 1 })
+    Temporal.Now.plainDateISO().add({ months: 1 }),
   );
   const [calculationTab, setCalculationTab] = useState("inputs");
 
@@ -40,7 +40,7 @@ export function CalculationView() {
     if (typeof window !== "undefined") {
       try {
         const savedStartDate = localStorage.getItem(
-          "incomeCalculator.startDate"
+          "incomeCalculator.startDate",
         );
         if (savedStartDate) {
           setStartDate(Temporal.PlainDate.from(savedStartDate));

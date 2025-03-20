@@ -30,7 +30,7 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
     if (typeof window !== "undefined") {
       try {
         const savedValues = localStorage.getItem(
-          `incomeCalculator.inputValues.${component.id}`
+          `incomeCalculator.inputValues.${component.id}`,
         );
         if (savedValues) {
           setInputValues(JSON.parse(savedValues));
@@ -47,7 +47,7 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
       try {
         localStorage.setItem(
           `incomeCalculator.inputValues.${component.id}`,
-          JSON.stringify(inputValues)
+          JSON.stringify(inputValues),
         );
       } catch (error) {
         console.error("Failed to save input values to localStorage:", error);
@@ -101,7 +101,7 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
               onChange={(e) =>
                 handleInputChange(
                   input.id,
-                  Number.parseFloat(e.target.value) || 0
+                  Number.parseFloat(e.target.value) || 0,
                 )
               }
               placeholder={(input as any).placeholder || ""}

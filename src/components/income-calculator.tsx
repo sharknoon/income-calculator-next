@@ -16,7 +16,7 @@ export function IncomeCalculator() {
   useEffect(() => {
     if (typeof window !== "undefined" && !storageEventAttached.current) {
       const handleStorage = () => toast.success("Saved");
-      
+
       window.addEventListener("storage", handleStorage);
       storageEventAttached.current = true;
 
