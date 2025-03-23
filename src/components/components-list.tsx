@@ -23,15 +23,16 @@ export function ComponentsList() {
       id: newId,
       name: "New Component",
       type: "recurring",
-      periods: [
+      calculationPeriods: [
         {
-          date: {
+          period: {
             startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
             frequency: "monthly",
             every: 1,
+            dayOfMonthType: "day",
             each: 1,
           },
-          calculate: {
+          calculation: {
             dependencies: [],
             inputs: [],
             func: "new BigNumber(0)",

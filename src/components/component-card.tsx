@@ -43,21 +43,21 @@ export function ComponentCard({ component }: ComponentCardProps) {
       <CardContent>
         <div className="space-y-2">
           {component.type === "recurring" &&
-            mergeDatePeriods(component.periods.map((p) => p.date)).map(
-              (period, index) => (
-                <div
-                  key={index}
-                  className="flex items-center text-sm border rounded-md p-2"
-                >
-                  <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                  <span className="font-medium mr-1">Period {index + 1}:</span>
-                  <span className="text-muted-foreground">
-                    ({period.startDate.toLocaleString()} to{" "}
-                    {period.endDate?.toLocaleString() || "indefinite"})
-                  </span>
-                </div>
-              )
-            )}
+            mergeDatePeriods(
+              component.calculationPeriods.map((p) => p.period)
+            ).map((period, index) => (
+              <div
+                key={index}
+                className="flex items-center text-sm border rounded-md p-2"
+              >
+                <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                <span className="font-medium mr-1">Period {index + 1}:</span>
+                <span className="text-muted-foreground">
+                  ({period.startDate.toLocaleString()} to{" "}
+                  {period.endDate?.toLocaleString() || "indefinite"})
+                </span>
+              </div>
+            ))}
           {component.type === "one-time" && (
             <div className="flex items-center text-sm border rounded-md p-2">
               <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />

@@ -10,13 +10,7 @@ import { useComponents } from "@/context/components-context";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PeriodEditor } from "@/components/period-editor";
 import { InputsEditor } from "@/components/inputs-editor";
@@ -24,7 +18,14 @@ import { CalculationEditor } from "@/components/calculation-editor";
 import { Temporal } from "@js-temporal/polyfill";
 import { RadioGroup } from "@/components/ui/radio-group";
 import { RadioGroupItem } from "@radix-ui/react-radio-group";
-import { Calculation, Component } from "@/types/income";
+import {
+  Calculation,
+  CalculationPeriod,
+  Component,
+  Period,
+  RecurringComponent,
+} from "@/types/income";
+import { DateEditor } from "@/components/date-editor";
 
 export default function ComponentEditorPage() {
   const { components, updateComponent } = useComponents();
@@ -79,7 +80,7 @@ export default function ComponentEditorPage() {
         name: component.name,
         type: "one-time",
         date: Temporal.Now.plainDateISO(),
-        calculate: {
+        calculation: {
           dependencies: [],
           inputs: [],
           func: "new BigNumber(0)",
@@ -90,15 +91,16 @@ export default function ComponentEditorPage() {
         id: component.id,
         name: component.name,
         type: "recurring",
-        periods: [
+        calculationPeriods: [
           {
-            date: {
+            period: {
               startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
               frequency: "monthly",
               every: 1,
+              dayOfMonthType: "day",
               each: 1,
             },
-            calculate: {
+            calculation: {
               dependencies: [],
               inputs: [],
               func: "new BigNumber(0)",
@@ -111,18 +113,46 @@ export default function ComponentEditorPage() {
     updateComponent(updatedComponent);
   };
 
+  const handleRecurringPeriodChange = (period: Period) => {
+    if (component.type !== "recurring") {
+      return;
+    }
+
+    const updatedComponent = {
+      ...component,
+      calculationPeriods: component.calculationPeriods.map((p, i) =>
+        i === selectedPeriodIndex ? { ...p, period: period } : p
+      ),
+    };
+    setComponent(updatedComponent);
+    updateComponent(updatedComponent);
+  };
+
+  const handleOneTimeDateChange = (date: Temporal.PlainDate) => {
+    if (component.type !== "one-time") {
+      return;
+    }
+
+    const updatedComponent = {
+      ...component,
+      date: date,
+    };
+    setComponent(updatedComponent);
+    updateComponent(updatedComponent);
+  };
+
   const handleCalculationChange = (calculation: Calculation) => {
     let updatedComponent: Component;
     if (component.type === "one-time") {
       updatedComponent = {
         ...component,
-        calculate: calculation,
+        calculation: calculation,
       };
     } else {
       updatedComponent = {
         ...component,
-        periods: component.periods.map((p, i) =>
-          i === selectedPeriodIndex ? { ...p, calculate: calculation } : p
+        calculationPeriods: component.calculationPeriods.map((p, i) =>
+          i === selectedPeriodIndex ? { ...p, calculation: calculation } : p
         ),
       };
     }
@@ -131,57 +161,60 @@ export default function ComponentEditorPage() {
     updateComponent(updatedComponent);
   };
 
-  const handleSave = () => {
-    router.push("/");
-  };
-
-  const addNewPeriod = () => {
+  const addNewCalculationPeriod = () => {
     if (component.type !== "recurring") {
       return;
     }
 
-    // Create a new period based on the last period
-    const lastPeriod = component.periods[component.periods.length - 1];
-    const newPeriod = {
-      ...JSON.parse(JSON.stringify(lastPeriod)), // Deep clone
-      date: {
-        ...lastPeriod.date,
+    const newCalculationPeriod: CalculationPeriod = {
+      period: {
         startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
+        frequency: "monthly",
+        every: 1,
+        dayOfMonthType: "position",
+        on: "last",
+        day: "weekday",
+      },
+      calculation: {
+        dependencies: [],
+        inputs: [],
+        func: "new BigNumber(0)",
       },
     };
 
-    const updatedComponent = {
+    const updatedComponent: RecurringComponent = {
       ...component,
-      periods: [...component.periods, newPeriod],
+      calculationPeriods: [
+        ...component.calculationPeriods,
+        newCalculationPeriod,
+      ],
     };
 
     setComponent(updatedComponent);
     updateComponent(updatedComponent);
-    setSelectedPeriodIndex(updatedComponent.periods.length - 1);
+    setSelectedPeriodIndex(updatedComponent.calculationPeriods.length - 1);
   };
 
-  const removePeriod = (index: number) => {
+  const removeCalculationPeriod = (index: number) => {
     if (component.type !== "recurring") {
       return;
     }
 
-    if (component.periods.length <= 1) {
+    if (component.calculationPeriods.length <= 1) {
       return; // Don't remove the last period
     }
 
-    const updatedPeriods = [...component.periods];
-    updatedPeriods.splice(index, 1);
+    const updatedCalculationPeriods = [...component.calculationPeriods];
+    updatedCalculationPeriods.splice(index, 1);
 
-    const updatedComponent = {
+    const updatedComponent: RecurringComponent = {
       ...component,
-      periods: updatedPeriods,
+      calculationPeriods: updatedCalculationPeriods,
     };
 
     setComponent(updatedComponent);
     updateComponent(updatedComponent);
-    setSelectedPeriodIndex(
-      Math.min(selectedPeriodIndex, updatedPeriods.length - 1)
-    );
+    setSelectedPeriodIndex(updatedCalculationPeriods.length - 1);
   };
 
   return (
@@ -242,13 +275,17 @@ export default function ComponentEditorPage() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <Label>Periods</Label>
-                  <Button variant="outline" size="sm" onClick={addNewPeriod}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={addNewCalculationPeriod}
+                  >
                     <Plus className="size-4 mr-1" /> Add Period
                   </Button>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {component.periods.map((period, index) => (
+                  {component.calculationPeriods.map((period, index) => (
                     <div
                       key={index}
                       className={`
@@ -263,15 +300,17 @@ export default function ComponentEditorPage() {
                     >
                       <span>
                         Period {index + 1} (
-                        {period.date.startDate.toLocaleString()} to{" "}
-                        {period.date.endDate?.toLocaleString() || "indefinite"})
+                        {period.period.startDate.toLocaleString()} to{" "}
+                        {period.period.endDate?.toLocaleString() ||
+                          "indefinite"}
+                        )
                       </span>
-                      {component.periods.length > 1 && (
+                      {component.calculationPeriods.length > 1 && (
                         <button
                           className="text-xs hover:text-destructive"
                           onClick={(e) => {
                             e.stopPropagation();
-                            removePeriod(index);
+                            removeCalculationPeriod(index);
                           }}
                         >
                           <X className="size-3" />
@@ -294,7 +333,20 @@ export default function ComponentEditorPage() {
                 <TabsTrigger value="calculation">Calculation</TabsTrigger>
               </TabsList>
               <TabsContent value="details" className="pt-4">
-                <PeriodEditor component={component} />
+                {component.type === "recurring" && (
+                  <PeriodEditor
+                    period={
+                      component.calculationPeriods[selectedPeriodIndex]?.period
+                    }
+                    onPeriodChange={handleRecurringPeriodChange}
+                  />
+                )}
+                {component.type === "one-time" && (
+                  <DateEditor
+                    date={component.date}
+                    onDateChange={handleOneTimeDateChange}
+                  />
+                )}
               </TabsContent>
               <TabsContent value="inputs" className="pt-4">
                 <InputsEditor component={component} />
@@ -303,8 +355,9 @@ export default function ComponentEditorPage() {
                 <CalculationEditor
                   calculation={
                     component.type === "one-time"
-                      ? component.calculate
-                      : component.periods[selectedPeriodIndex]?.calculate
+                      ? component.calculation
+                      : component.calculationPeriods[selectedPeriodIndex]
+                          ?.calculation
                   }
                   onCalculationChange={handleCalculationChange}
                 />

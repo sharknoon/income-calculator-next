@@ -26,11 +26,11 @@ export function InputsEditor({ component }: InputsEditorProps) {
   const { updateComponent } = useComponents();
   const period = component.periods[0];
   const [selectedInputId, setSelectedInputId] = useState<string | null>(
-    period?.inputs.length > 0 ? period.inputs[0].id : null,
+    period?.inputs.length > 0 ? period.inputs[0].id : null
   );
 
   const selectedInput = period?.inputs.find(
-    (input) => input.id === selectedInputId,
+    (input) => input.id === selectedInputId
   );
 
   const handleAddInput = () => {
@@ -49,7 +49,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
 
     updateComponent({
       ...component,
-      periods: [newPeriod],
+      calculationPeriods: [newPeriod],
     });
 
     setSelectedInputId(newInputId);
@@ -63,12 +63,12 @@ export function InputsEditor({ component }: InputsEditorProps) {
 
     updateComponent({
       ...component,
-      periods: [newPeriod],
+      calculationPeriods: [newPeriod],
     });
 
     if (selectedInputId === inputId) {
       setSelectedInputId(
-        newPeriod.inputs.length > 0 ? newPeriod.inputs[0].id : null,
+        newPeriod.inputs.length > 0 ? newPeriod.inputs[0].id : null
       );
     }
   };
@@ -78,12 +78,12 @@ export function InputsEditor({ component }: InputsEditorProps) {
 
     const newPeriod = { ...period };
     newPeriod.inputs = newPeriod.inputs.map((input) =>
-      input.id === updatedInput.id ? updatedInput : input,
+      input.id === updatedInput.id ? updatedInput : input
     );
 
     updateComponent({
       ...component,
-      periods: [newPeriod],
+      calculationPeriods: [newPeriod],
     });
   };
 
@@ -449,7 +449,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                                 const newOptions = (
                                   selectedInput as any
                                 ).options.filter(
-                                  (_: any, i: number) => i !== index,
+                                  (_: any, i: number) => i !== index
                                 );
                                 handleInputChange({
                                   ...selectedInput,
@@ -460,7 +460,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
-                        ),
+                        )
                       )}
                       <Button
                         variant="outline"
@@ -505,7 +505,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                               <SelectItem key={option.id} value={option.id}>
                                 {option.label}
                               </SelectItem>
-                            ),
+                            )
                           )}
                         </SelectContent>
                       </Select>

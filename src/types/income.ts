@@ -9,31 +9,31 @@ type BaseComponent = {
 export type OneTimeComponent = BaseComponent & {
   type: "one-time";
   date: Temporal.PlainDate;
-  calculate: Calculation;
+  calculation: Calculation;
 };
 
 export type RecurringComponent = BaseComponent & {
   type: "recurring";
-  periods: Array<Period>;
+  calculationPeriods: Array<CalculationPeriod>;
 };
 
 export type Component = OneTimeComponent | RecurringComponent;
 
-export type Period = {
-  date: Recurring;
-  calculate: Calculation;
+export type CalculationPeriod = {
+  period: Period;
+  calculation: Calculation;
 };
 
 export type Calculation = {
   inputs: Array<Input>;
   dependencies: Array<string>;
   func: string; // js code
-}
+};
 
-export type Recurring = {
+type BasePeriod = {
   startDate: Temporal.PlainDate;
-  endDate?: Temporal.PlainDate; // Default is infinite
-} & (Daily | Weekly | Monthly | Yearly);
+  endDate?: Temporal.PlainDate; // Default is indefinite
+};
 
 type Daily = {
   frequency: "daily";
@@ -54,29 +54,35 @@ type Weekly = {
   >;
 };
 
-type Monthly = {
+type BaseMonthly = {
   frequency: "monthly";
   every: number;
-} & ( // every 13th day of the month
-  | { each: number }
-  // every first Monday of the month
-  | {
-      day:
-        | "Monday"
-        | "Tuesday"
-        | "Wednesday"
-        | "Thursday"
-        | "Friday"
-        | "Saturday"
-        | "Sunday"
-        | "day"
-        | "weekday"
-        | "weekend-day";
-      on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
-    }
-);
+};
 
-type Yearly = {
+type MonthlyDay = {
+  dayOfMonthType: "day";
+  each: number;
+};
+
+export type MonthlyPosition = {
+  dayOfMonthType: "position";
+  day:
+    | "Monday"
+    | "Tuesday"
+    | "Wednesday"
+    | "Thursday"
+    | "Friday"
+    | "Saturday"
+    | "Sunday"
+    | "day"
+    | "weekday"
+    | "weekend-day";
+  on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
+};
+
+type Monthly = BaseMonthly & (MonthlyDay | MonthlyPosition);
+
+type BaseYearly = {
   frequency: "yearly";
   every: number;
   months: Array<
@@ -93,24 +99,32 @@ type Yearly = {
     | "November"
     | "December"
   >;
-} & ( // every 13th day of January
-  | { each: number }
-  // every first Monday of January
-  | {
-      day:
-        | "Monday"
-        | "Tuesday"
-        | "Wednesday"
-        | "Thursday"
-        | "Friday"
-        | "Saturday"
-        | "Sunday"
-        | "day"
-        | "weekday"
-        | "weekend-day";
-      on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
-    }
-);
+};
+
+type YearlyDay = {
+  dayOfMonthType: "day";
+  each: number;
+};
+
+type YearlyPosition = {
+  dayOfMonthType: "position";
+  day:
+    | "Monday"
+    | "Tuesday"
+    | "Wednesday"
+    | "Thursday"
+    | "Friday"
+    | "Saturday"
+    | "Sunday"
+    | "day"
+    | "weekday"
+    | "weekend-day";
+  on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
+};
+
+type Yearly = BaseYearly & (YearlyDay | YearlyPosition);
+
+export type Period = BasePeriod & (Daily | Weekly | Monthly | Yearly);
 
 export type Input = {
   id: string;
