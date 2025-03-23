@@ -5,7 +5,7 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, X } from "lucide-react";
 import { useComponents } from "@/context/components-context";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,20 +22,21 @@ import { PeriodEditor } from "@/components/period-editor";
 import { InputsEditor } from "@/components/inputs-editor";
 import { CalculationEditor } from "@/components/calculation-editor";
 import { Temporal } from "@js-temporal/polyfill";
+import { RadioGroup } from "@/components/ui/radio-group";
+import { RadioGroupItem } from "@radix-ui/react-radio-group";
+import { Calculation, Component } from "@/types/income";
 
 export default function ComponentEditorPage() {
   const { components, updateComponent } = useComponents();
   const router = useRouter();
   const params = useParams<{ id: string }>();
-  const [component, setComponent] = useState(
+  const [component, setComponent] = useState<Component | undefined>(
     components.find((c) => c.id === params.id)
   );
   const [editorTab, setEditorTab] = useState("details");
   const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(0);
 
   useEffect(() => {
-    console.log(params.id);
-    console.log(components.map((c) => c.id));
     const selectedComponent = components.find((c) => c.id === params.id);
     if (!selectedComponent) {
       router.push("/");
@@ -70,11 +71,75 @@ export default function ComponentEditorPage() {
     updateComponent(updatedComponent);
   };
 
+  const handleTypeChange = (type: Component["type"]) => {
+    let updatedComponent: Component;
+    if (type === "one-time") {
+      updatedComponent = {
+        id: component.id,
+        name: component.name,
+        type: "one-time",
+        date: Temporal.Now.plainDateISO(),
+        calculate: {
+          dependencies: [],
+          inputs: [],
+          func: "new BigNumber(0)",
+        },
+      };
+    } else {
+      updatedComponent = {
+        id: component.id,
+        name: component.name,
+        type: "recurring",
+        periods: [
+          {
+            date: {
+              startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
+              frequency: "monthly",
+              every: 1,
+              each: 1,
+            },
+            calculate: {
+              dependencies: [],
+              inputs: [],
+              func: "new BigNumber(0)",
+            },
+          },
+        ],
+      };
+    }
+    setComponent(updatedComponent);
+    updateComponent(updatedComponent);
+  };
+
+  const handleCalculationChange = (calculation: Calculation) => {
+    let updatedComponent: Component;
+    if (component.type === "one-time") {
+      updatedComponent = {
+        ...component,
+        calculate: calculation,
+      };
+    } else {
+      updatedComponent = {
+        ...component,
+        periods: component.periods.map((p, i) =>
+          i === selectedPeriodIndex ? { ...p, calculate: calculation } : p
+        ),
+      };
+    }
+
+    setComponent(updatedComponent);
+    updateComponent(updatedComponent);
+  };
+
   const handleSave = () => {
     router.push("/");
   };
 
   const addNewPeriod = () => {
+    if (component.type !== "recurring") {
+      return;
+    }
+
     // Create a new period based on the last period
     const lastPeriod = component.periods[component.periods.length - 1];
     const newPeriod = {
@@ -96,6 +161,10 @@ export default function ComponentEditorPage() {
   };
 
   const removePeriod = (index: number) => {
+    if (component.type !== "recurring") {
+      return;
+    }
+
     if (component.periods.length <= 1) {
       return; // Don't remove the last period
     }
@@ -113,19 +182,6 @@ export default function ComponentEditorPage() {
     setSelectedPeriodIndex(
       Math.min(selectedPeriodIndex, updatedPeriods.length - 1)
     );
-  };
-
-  const formatPeriodDate = (period: any) => {
-    if (!period.date.startDate) return "No start date";
-
-    try {
-      const date = period.date.startDate;
-      return typeof date === "string"
-        ? date
-        : `${date.year}-${String(date.month).padStart(2, "0")}-${String(date.day).padStart(2, "0")}`;
-    } catch (e) {
-      return "Invalid date";
-    }
   };
 
   return (
@@ -161,18 +217,41 @@ export default function ComponentEditorPage() {
             </div>
 
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <Label>Periods</Label>
-                <Button variant="outline" size="sm" onClick={addNewPeriod}>
-                  <Plus className="h-4 w-4 mr-1" /> Add Period
-                </Button>
-              </div>
+              <Label>Component Type</Label>
+              <RadioGroup
+                value={component.type}
+                onValueChange={handleTypeChange}
+                className="flex flex-col space-y-1"
+              >
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="one-time" id="one-time" />
+                  <Label htmlFor="one-time" className="cursor-pointer">
+                    One-time payment
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="recurring" id="recurring" />
+                  <Label htmlFor="recurring" className="cursor-pointer">
+                    Recurring payment
+                  </Label>
+                </div>
+              </RadioGroup>
+            </div>
 
-              <div className="flex flex-wrap gap-2">
-                {component.periods.map((period, index) => (
-                  <div
-                    key={index}
-                    className={`
+            {component.type === "recurring" && (
+              <div className="space-y-2">
+                <div className="flex justify-between items-center">
+                  <Label>Periods</Label>
+                  <Button variant="outline" size="sm" onClick={addNewPeriod}>
+                    <Plus className="size-4 mr-1" /> Add Period
+                  </Button>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {component.periods.map((period, index) => (
+                    <div
+                      key={index}
+                      className={`
                       px-3 py-1 rounded-md cursor-pointer flex items-center gap-2
                       ${
                         selectedPeriodIndex === index
@@ -180,26 +259,29 @@ export default function ComponentEditorPage() {
                           : "bg-muted hover:bg-muted/80"
                       }
                     `}
-                    onClick={() => setSelectedPeriodIndex(index)}
-                  >
-                    <span>
-                      Period {index + 1} ({formatPeriodDate(period)})
-                    </span>
-                    {component.periods.length > 1 && (
-                      <button
-                        className="text-xs hover:text-destructive"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removePeriod(index);
-                        }}
-                      >
-                        ×
-                      </button>
-                    )}
-                  </div>
-                ))}
+                      onClick={() => setSelectedPeriodIndex(index)}
+                    >
+                      <span>
+                        Period {index + 1} (
+                        {period.date.startDate.toLocaleString()} to{" "}
+                        {period.date.endDate?.toLocaleString() || "indefinite"})
+                      </span>
+                      {component.periods.length > 1 && (
+                        <button
+                          className="text-xs hover:text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removePeriod(index);
+                          }}
+                        >
+                          <X className="size-3" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             <Tabs
               value={editorTab}
@@ -211,21 +293,25 @@ export default function ComponentEditorPage() {
                 <TabsTrigger value="inputs">Inputs</TabsTrigger>
                 <TabsTrigger value="calculation">Calculation</TabsTrigger>
               </TabsList>
-              <TabsContent value="details" className="py-4">
+              <TabsContent value="details" className="pt-4">
                 <PeriodEditor component={component} />
               </TabsContent>
-              <TabsContent value="inputs" className="py-4">
+              <TabsContent value="inputs" className="pt-4">
                 <InputsEditor component={component} />
               </TabsContent>
-              <TabsContent value="calculation" className="py-4">
-                <CalculationEditor component={component} />
+              <TabsContent value="calculation" className="pt-4">
+                <CalculationEditor
+                  calculation={
+                    component.type === "one-time"
+                      ? component.calculate
+                      : component.periods[selectedPeriodIndex]?.calculate
+                  }
+                  onCalculationChange={handleCalculationChange}
+                />
               </TabsContent>
             </Tabs>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-end">
-          <Button onClick={handleSave}>Save Changes</Button>
-        </CardFooter>
       </Card>
     </div>
   );

@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/popover";
 import type { Component, Period, Recurring } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
-import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/utils";
+import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
 
 interface PeriodEditorProps {
   component: Component;
@@ -45,7 +45,7 @@ export function PeriodEditor({ component }: PeriodEditorProps) {
 
   const [periodType, setPeriodType] = useState(period.date.type);
   const [frequency, setFrequency] = useState(
-    period.date.type === "recurring" ? period.date.frequency : "monthly",
+    period.date.type === "recurring" ? period.date.frequency : "monthly"
   );
 
   const handlePeriodTypeChange = (value: typeof periodType) => {
@@ -115,7 +115,7 @@ export function PeriodEditor({ component }: PeriodEditorProps) {
   const formatDate = (date: any) => {
     if (!date) return "";
     return `${date.year}-${String(date.month).padStart(2, "0")}-${String(
-      date.day,
+      date.day
     ).padStart(2, "0")}`;
   };
 
@@ -334,7 +334,7 @@ export function PeriodEditor({ component }: PeriodEditorProps) {
                           ];
                           if (weekdays.includes(day)) {
                             (newPeriod.date as any).weekdays = weekdays.filter(
-                              (d) => d !== day,
+                              (d) => d !== day
                             );
                           } else {
                             (newPeriod.date as any).weekdays = [
@@ -625,7 +625,7 @@ export function PeriodEditor({ component }: PeriodEditorProps) {
                           const months = [...(newPeriod.date as any).months];
                           if (months.includes(month)) {
                             (newPeriod.date as any).months = months.filter(
-                              (m) => m !== month,
+                              (m) => m !== month
                             );
                           } else {
                             (newPeriod.date as any).months = [...months, month];

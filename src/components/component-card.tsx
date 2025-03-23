@@ -12,8 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useComponents } from "@/context/components-context";
-import type { Component, Period } from "@/types/income";
-import { Temporal } from "@js-temporal/polyfill";
+import type { Component } from "@/types/income";
+import { mergeDatePeriods } from "@/lib/date";
 
 interface ComponentCardProps {
   component: Component;
@@ -22,14 +22,6 @@ interface ComponentCardProps {
 export function ComponentCard({ component }: ComponentCardProps) {
   const { removeComponent } = useComponents();
   const router = useRouter();
-
-  const getPeriodLabel = (period: Period) => {
-    return `${period.date.frequency.charAt(0).toUpperCase() + period.date.frequency.slice(1)}`;
-  };
-
-  const formatDate = (date: Temporal.PlainDate) => {
-    return date.toLocaleString("en-US");
-  };
 
   const handleEdit = () => {
     router.push(`/component-editor/${component.id}`);
@@ -44,35 +36,34 @@ export function ComponentCard({ component }: ComponentCardProps) {
             {component.type === "one-time" ? "One-time" : "Recurring"}
           </Badge>
         </div>
-      </CardHeader>
-      <CardContent>
-        <p className="text-sm text-muted-foreground mb-3">
+        <p className="text-sm text-muted-foreground">
           {component.description || "No description provided"}
         </p>
-
+      </CardHeader>
+      <CardContent>
         <div className="space-y-2">
           {component.type === "recurring" &&
-            component.periods.map((period, index) => (
-              <div
-                key={index}
-                className="flex items-center text-sm border rounded-md p-2"
-              >
-                <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                <span className="font-medium mr-1">Period {index + 1}:</span>
-                <span className="text-muted-foreground mr-1">
-                  {getPeriodLabel(period)}
-                </span>
-                <span className="text-muted-foreground">
-                  ({formatDate(period.date.startDate)})
-                </span>
-              </div>
-            ))}
+            mergeDatePeriods(component.periods.map((p) => p.date)).map(
+              (period, index) => (
+                <div
+                  key={index}
+                  className="flex items-center text-sm border rounded-md p-2"
+                >
+                  <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
+                  <span className="font-medium mr-1">Period {index + 1}:</span>
+                  <span className="text-muted-foreground">
+                    ({period.startDate.toLocaleString()} to{" "}
+                    {period.endDate?.toLocaleString() || "indefinite"})
+                  </span>
+                </div>
+              )
+            )}
           {component.type === "one-time" && (
             <div className="flex items-center text-sm border rounded-md p-2">
               <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
               <span className="font-medium mr-1">Date:</span>
               <span className="text-muted-foreground">
-                {formatDate(component.date)}
+                {component.date.toLocaleString()}
               </span>
             </div>
           )}

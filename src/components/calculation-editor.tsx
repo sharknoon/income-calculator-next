@@ -5,61 +5,48 @@ import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { Component } from "@/types/income";
+import type { Calculation } from "@/types/income";
 
 interface CalculationEditorProps {
-  component: Component;
+  calculation: Calculation;
+  onCalculationChange: (calculation: Calculation) => void;
 }
 
-export function CalculationEditor({ component }: CalculationEditorProps) {
-  const { updateComponent, components } = useComponents();
-  const period = component.periods[0];
-  const [calculationCode, setCalculationCode] = useState(
-    period?.calculate || "new BigNumber(0)",
+export function CalculationEditor({
+  calculation,
+  onCalculationChange,
+}: CalculationEditorProps) {
+  const { components } = useComponents();
+  const [calculationFunc, setCalculationFunc] = useState(
+    calculation.func || "new BigNumber(0)"
   );
 
-  const handleSaveCalculation = () => {
-    if (!period) return;
+  const handleSaveCalculationFunc = () => {
+    const newCalculation = { ...calculation };
+    newCalculation.func = calculationFunc;
 
-    const newPeriod = { ...period };
-    newPeriod.calculate = calculationCode;
-
-    updateComponent({
-      ...component,
-      periods: [newPeriod],
-    });
-  };
-
-  const getAvailableDependencies = () => {
-    return components.filter((c) => c.id !== component.id);
+    onCalculationChange(newCalculation);
   };
 
   const handleAddDependency = (dependencyId: string) => {
-    if (!period) return;
-
-    const newPeriod = { ...period };
-    if (!newPeriod.dependencies.includes(dependencyId)) {
-      newPeriod.dependencies = [...newPeriod.dependencies, dependencyId];
+    const newCalculation = { ...calculation };
+    if (!newCalculation.dependencies.includes(dependencyId)) {
+      newCalculation.dependencies = [
+        ...newCalculation.dependencies,
+        dependencyId,
+      ];
     }
 
-    updateComponent({
-      ...component,
-      periods: [newPeriod],
-    });
+    onCalculationChange(newCalculation);
   };
 
   const handleRemoveDependency = (dependencyId: string) => {
-    if (!period) return;
-
-    const newPeriod = { ...period };
-    newPeriod.dependencies = newPeriod.dependencies.filter(
-      (id) => id !== dependencyId,
+    const newCalculation = { ...calculation };
+    newCalculation.dependencies = newCalculation.dependencies.filter(
+      (id) => id !== dependencyId
     );
 
-    updateComponent({
-      ...component,
-      periods: [newPeriod],
-    });
+    onCalculationChange(newCalculation);
   };
 
   return (
@@ -68,8 +55,8 @@ export function CalculationEditor({ component }: CalculationEditorProps) {
         <Label htmlFor="calculation">Calculation Formula</Label>
         <Textarea
           id="calculation"
-          value={calculationCode}
-          onChange={(e) => setCalculationCode(e.target.value)}
+          value={calculationFunc}
+          onChange={(e) => setCalculationFunc(e.target.value)}
           className="font-mono h-40"
           placeholder="new BigNumber(0)"
         />
@@ -78,7 +65,7 @@ export function CalculationEditor({ component }: CalculationEditorProps) {
           Access input values using the input ID, e.g.,{" "}
           <code>inputs.hourlyRate * inputs.hoursWorked</code>
         </p>
-        <Button onClick={handleSaveCalculation}>Save Calculation</Button>
+        <Button onClick={handleSaveCalculationFunc}>Save Calculation</Button>
       </div>
 
       <div className="space-y-2">
@@ -88,39 +75,42 @@ export function CalculationEditor({ component }: CalculationEditorProps) {
             Select other components that this calculation depends on:
           </p>
 
-          {getAvailableDependencies().length === 0 ? (
+          {calculation.dependencies.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No other components available
             </p>
           ) : (
             <div className="space-y-2">
-              {getAvailableDependencies().map((dep) => (
-                <div key={dep.id} className="flex items-center space-x-2">
+              {calculation.dependencies.map((depId) => (
+                <div key={depId} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`dep-${dep.id}`}
-                    checked={period?.dependencies.includes(dep.id)}
+                    id={`dep-${depId}`}
+                    checked={calculation.dependencies.includes(depId)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        handleAddDependency(dep.id);
+                        handleAddDependency(depId);
                       } else {
-                        handleRemoveDependency(dep.id);
+                        handleRemoveDependency(depId);
                       }
                     }}
                   />
-                  <Label htmlFor={`dep-${dep.id}`}>{dep.name}</Label>
+                  <Label htmlFor={`dep-${depId}`}>
+                    {components.find((c) => c.id === depId)?.name ||
+                      "Unknown Component"}
+                  </Label>
                 </div>
               ))}
             </div>
           )}
 
-          {period?.dependencies.length > 0 && (
+          {calculation.dependencies.length > 0 && (
             <div className="mt-4">
               <p className="text-sm mb-2">
                 Access dependency values in your calculation using:
               </p>
               <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
-                {period.dependencies.map((depId) => {
+                {calculation.dependencies.map((depId) => {
                   const dep = components.find((c) => c.id === depId);
                   return dep ? `dependencies.${dep.id}\n` : "";
                 })}

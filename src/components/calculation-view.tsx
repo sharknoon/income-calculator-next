@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Calendar } from "lucide-react";
 import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
@@ -22,16 +22,16 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentInputs } from "@/components/component-inputs";
 import { Temporal } from "@js-temporal/polyfill";
-import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/utils";
+import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
 
 export function CalculationView() {
   const { components } = useComponents();
 
   const [startDate, setStartDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO(),
+    Temporal.Now.plainDateISO()
   );
   const [endDate, setEndDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO().add({ months: 1 }),
+    Temporal.Now.plainDateISO().add({ months: 1 })
   );
   const [calculationTab, setCalculationTab] = useState("inputs");
 
