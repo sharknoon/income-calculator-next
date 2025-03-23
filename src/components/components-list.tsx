@@ -29,8 +29,9 @@ export function ComponentsList() {
             startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
             frequency: "monthly",
             every: 1,
-            dayOfMonthType: "day",
-            each: 1,
+            dayOfMonthType: "position",
+            on: "last",
+            day: "Friday",
           },
           calculation: {
             dependencies: [],

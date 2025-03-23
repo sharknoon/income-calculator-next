@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
-import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,27 +15,22 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Component, Input as InputType } from "@/types/income";
+import type { Input as InputType } from "@/types/income";
 
 interface InputsEditorProps {
-  component: Component;
+  inputs: Array<InputType>;
+  onInputChange: (inputs: Array<InputType>) => void;
 }
 
-export function InputsEditor({ component }: InputsEditorProps) {
-  const { updateComponent } = useComponents();
-  const period = component.periods[0];
+export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
   const [selectedInputId, setSelectedInputId] = useState<string | null>(
-    period?.inputs.length > 0 ? period.inputs[0].id : null
+    inputs.length > 0 ? inputs[0].id : null
   );
 
-  const selectedInput = period?.inputs.find(
-    (input) => input.id === selectedInputId
-  );
+  const selectedInput = inputs.find((input) => input.id === selectedInputId);
 
   const handleAddInput = () => {
-    if (!period) return;
-
-    const newInputId = `input-${Date.now()}`;
+    const newInputId = `input-${crypto.randomUUID()}`;
     const newInput: InputType = {
       id: newInputId,
       name: "New Input",
@@ -44,47 +38,24 @@ export function InputsEditor({ component }: InputsEditorProps) {
       required: true,
     };
 
-    const newPeriod = { ...period };
-    newPeriod.inputs = [...newPeriod.inputs, newInput];
-
-    updateComponent({
-      ...component,
-      calculationPeriods: [newPeriod],
-    });
-
+    onInputChange([...inputs, newInput]);
     setSelectedInputId(newInputId);
   };
 
   const handleRemoveInput = (inputId: string) => {
-    if (!period) return;
-
-    const newPeriod = { ...period };
-    newPeriod.inputs = newPeriod.inputs.filter((input) => input.id !== inputId);
-
-    updateComponent({
-      ...component,
-      calculationPeriods: [newPeriod],
-    });
+    onInputChange(inputs.filter((input) => input.id !== inputId));
 
     if (selectedInputId === inputId) {
-      setSelectedInputId(
-        newPeriod.inputs.length > 0 ? newPeriod.inputs[0].id : null
-      );
+      setSelectedInputId(inputs.length > 0 ? inputs[0].id : null);
     }
   };
 
   const handleInputChange = (updatedInput: InputType) => {
-    if (!period) return;
-
-    const newPeriod = { ...period };
-    newPeriod.inputs = newPeriod.inputs.map((input) =>
-      input.id === updatedInput.id ? updatedInput : input
+    onInputChange(
+      inputs.map((input) =>
+        input.id === updatedInput.id ? updatedInput : input
+      )
     );
-
-    updateComponent({
-      ...component,
-      calculationPeriods: [newPeriod],
-    });
   };
 
   return (
@@ -97,7 +68,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
         </Button>
       </div>
 
-      {!period || period.inputs.length === 0 ? (
+      {inputs.length === 0 ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">No Inputs</CardTitle>
@@ -113,7 +84,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
           <div className="md:col-span-1 space-y-2">
             <Label>Available Inputs</Label>
             <div className="border rounded-md overflow-hidden">
-              {period.inputs.map((input) => (
+              {inputs.map((input) => (
                 <div
                   key={input.id}
                   className={`flex justify-between items-center p-3 cursor-pointer ${
@@ -178,26 +149,29 @@ export function InputsEditor({ component }: InputsEditorProps) {
                   <Label htmlFor="input-type">Type</Label>
                   <Select
                     value={selectedInput.type}
-                    onValueChange={(value) => {
-                      // Create a new input with the appropriate type-specific properties
-                      let newInput: InputType = {
-                        ...selectedInput,
-                        type: value as any,
+                    onValueChange={(value: InputType["type"]) => {
+                      const baseInput = {
+                        id: selectedInput.id,
+                        name: selectedInput.name,
+                        description: selectedInput.description,
+                        required: selectedInput.required,
                       };
 
-                      // Add type-specific properties
+                      let newInput: InputType;
                       if (value === "text") {
                         newInput = {
-                          ...newInput,
+                          ...baseInput,
+                          type: "text",
                           defaultValue: "",
                           minLength: undefined,
                           maxLength: undefined,
                           validation: undefined,
                           placeholder: "",
-                        } as any;
+                        };
                       } else if (value === "number") {
                         newInput = {
-                          ...newInput,
+                          ...baseInput,
+                          type: "number",
                           defaultValue: 0,
                           unit: "",
                           min: undefined,
@@ -205,24 +179,32 @@ export function InputsEditor({ component }: InputsEditorProps) {
                           step: 1,
                           validation: undefined,
                           placeholder: "",
-                        } as any;
+                        };
                       } else if (value === "select") {
                         newInput = {
-                          ...newInput,
+                          ...baseInput,
+                          type: "select",
                           options: [
-                            { id: "option1", label: "Option 1" },
-                            { id: "option2", label: "Option 2" },
+                            {
+                              id: `option-${crypto.randomUUID()}`,
+                              label: "Option 1",
+                            },
+                            {
+                              id: `option-${crypto.randomUUID()}`,
+                              label: "Option 2",
+                            },
                           ],
                           defaultOption: "option1",
-                        } as any;
-                      } else if (value === "range") {
+                        };
+                      } else {
                         newInput = {
-                          ...newInput,
+                          ...baseInput,
+                          type: "range",
                           min: 0,
                           max: 100,
                           step: 1,
                           defaultValue: 50,
-                        } as any;
+                        };
                       }
 
                       handleInputChange(newInput);
@@ -260,7 +242,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                       <Label htmlFor="input-default">Default Value</Label>
                       <Input
                         id="input-default"
-                        value={(selectedInput as any).defaultValue || ""}
+                        value={selectedInput.defaultValue || ""}
                         onChange={(e) =>
                           handleInputChange({
                             ...selectedInput,
@@ -275,7 +257,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-min-length"
                           type="number"
-                          value={(selectedInput as any).minLength || ""}
+                          value={selectedInput.minLength || ""}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -291,7 +273,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-max-length"
                           type="number"
-                          value={(selectedInput as any).maxLength || ""}
+                          value={selectedInput.maxLength || ""}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -307,7 +289,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                       <Label htmlFor="input-placeholder">Placeholder</Label>
                       <Input
                         id="input-placeholder"
-                        value={(selectedInput as any).placeholder || ""}
+                        value={selectedInput.placeholder || ""}
                         onChange={(e) =>
                           handleInputChange({
                             ...selectedInput,
@@ -326,7 +308,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                       <Input
                         id="input-default"
                         type="number"
-                        value={(selectedInput as any).defaultValue || ""}
+                        value={selectedInput.defaultValue || ""}
                         onChange={(e) =>
                           handleInputChange({
                             ...selectedInput,
@@ -341,7 +323,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                       <Label htmlFor="input-unit">Unit</Label>
                       <Input
                         id="input-unit"
-                        value={(selectedInput as any).unit || ""}
+                        value={selectedInput.unit || ""}
                         onChange={(e) =>
                           handleInputChange({
                             ...selectedInput,
@@ -356,7 +338,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-min"
                           type="number"
-                          value={(selectedInput as any).min || ""}
+                          value={selectedInput.min || ""}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -372,7 +354,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-max"
                           type="number"
-                          value={(selectedInput as any).max || ""}
+                          value={selectedInput.max || ""}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -388,7 +370,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-step"
                           type="number"
-                          value={(selectedInput as any).step || ""}
+                          value={selectedInput.step || ""}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -404,7 +386,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                       <Label htmlFor="input-placeholder">Placeholder</Label>
                       <Input
                         id="input-placeholder"
-                        value={(selectedInput as any).placeholder || ""}
+                        value={selectedInput.placeholder || ""}
                         onChange={(e) =>
                           handleInputChange({
                             ...selectedInput,
@@ -420,57 +402,51 @@ export function InputsEditor({ component }: InputsEditorProps) {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Options</Label>
-                      {(selectedInput as any).options?.map(
-                        (option: any, index: number) => (
-                          <div
-                            key={option.id}
-                            className="flex items-center space-x-2"
+                      {selectedInput.options.map((option, index) => (
+                        <div
+                          key={option.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Input
+                            value={option.label}
+                            onChange={(e) => {
+                              const newOptions = [...selectedInput.options];
+                              newOptions[index] = {
+                                ...newOptions[index],
+                                label: e.target.value,
+                              };
+                              handleInputChange({
+                                ...selectedInput,
+                                options: newOptions,
+                              });
+                            }}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const newOptions = selectedInput.options.filter(
+                                (_, i) => i !== index
+                              );
+                              handleInputChange({
+                                ...selectedInput,
+                                options: newOptions,
+                              });
+                            }}
                           >
-                            <Input
-                              value={option.label}
-                              onChange={(e) => {
-                                const newOptions = [
-                                  ...(selectedInput as any).options,
-                                ];
-                                newOptions[index] = {
-                                  ...newOptions[index],
-                                  label: e.target.value,
-                                };
-                                handleInputChange({
-                                  ...selectedInput,
-                                  options: newOptions,
-                                });
-                              }}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                const newOptions = (
-                                  selectedInput as any
-                                ).options.filter(
-                                  (_: any, i: number) => i !== index
-                                );
-                                handleInputChange({
-                                  ...selectedInput,
-                                  options: newOptions,
-                                });
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        )
-                      )}
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
                           const newOptions = [
-                            ...((selectedInput as any).options || []),
+                            ...(selectedInput.options || []),
                             {
-                              id: `option-${Date.now()}`,
-                              label: `Option ${((selectedInput as any).options?.length || 0) + 1}`,
+                              id: `option-${crypto.randomUUID()}`,
+                              label: `Option ${(selectedInput.options?.length || 0) + 1}`,
                             },
                           ];
                           handleInputChange({
@@ -488,7 +464,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         Default Option
                       </Label>
                       <Select
-                        value={(selectedInput as any).defaultOption || ""}
+                        value={selectedInput.defaultOption || ""}
                         onValueChange={(value) =>
                           handleInputChange({
                             ...selectedInput,
@@ -500,13 +476,11 @@ export function InputsEditor({ component }: InputsEditorProps) {
                           <SelectValue placeholder="Select default option" />
                         </SelectTrigger>
                         <SelectContent>
-                          {(selectedInput as any).options?.map(
-                            (option: any) => (
-                              <SelectItem key={option.id} value={option.id}>
-                                {option.label}
-                              </SelectItem>
-                            )
-                          )}
+                          {selectedInput.options.map((option) => (
+                            <SelectItem key={option.id} value={option.id}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -520,7 +494,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                       <Input
                         id="input-default-range"
                         type="number"
-                        value={(selectedInput as any).defaultValue || 0}
+                        value={selectedInput.defaultValue || 0}
                         onChange={(e) =>
                           handleInputChange({
                             ...selectedInput,
@@ -536,7 +510,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-min-range"
                           type="number"
-                          value={(selectedInput as any).min || 0}
+                          value={selectedInput.min || 0}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -550,7 +524,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-max-range"
                           type="number"
-                          value={(selectedInput as any).max || 100}
+                          value={selectedInput.max || 100}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,
@@ -564,7 +538,7 @@ export function InputsEditor({ component }: InputsEditorProps) {
                         <Input
                           id="input-step-range"
                           type="number"
-                          value={(selectedInput as any).step || 1}
+                          value={selectedInput.step || 1}
                           onChange={(e) =>
                             handleInputChange({
                               ...selectedInput,

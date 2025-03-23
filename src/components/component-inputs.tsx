@@ -13,15 +13,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Component, Input as InputType } from "@/types/income";
+import type { Input as InputType } from "@/types/income";
 
 interface ComponentInputsProps {
-  component: Component;
+  inputs: Array<InputType>;
+  onInputChange: (inputId: string, value: any) => void;
 }
 
-export function ComponentInputs({ component }: ComponentInputsProps) {
-  const period = component.periods[0];
-
+export function ComponentInputs({ inputs }: ComponentInputsProps) {
   // Initialize input values from localStorage if available
   const [inputValues, setInputValues] = useState<Record<string, any>>({});
 
@@ -30,7 +29,7 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
     if (typeof window !== "undefined") {
       try {
         const savedValues = localStorage.getItem(
-          `incomeCalculator.inputValues.${component.id}`,
+          `incomeCalculator.inputValues.${component.id}`
         );
         if (savedValues) {
           setInputValues(JSON.parse(savedValues));
@@ -47,7 +46,7 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
       try {
         localStorage.setItem(
           `incomeCalculator.inputValues.${component.id}`,
-          JSON.stringify(inputValues),
+          JSON.stringify(inputValues)
         );
       } catch (error) {
         console.error("Failed to save input values to localStorage:", error);
@@ -83,11 +82,11 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
         return (
           <Input
             id={input.id}
-            value={inputValues[input.id] || (input as any).defaultValue || ""}
+            value={inputValues[input.id] || input.defaultValue || ""}
             onChange={(e) => handleInputChange(input.id, e.target.value)}
-            placeholder={(input as any).placeholder || ""}
-            minLength={(input as any).minLength}
-            maxLength={(input as any).maxLength}
+            placeholder={input.placeholder || ""}
+            minLength={input.minLength}
+            maxLength={input.maxLength}
             required={input.required !== false}
           />
         );
@@ -97,38 +96,36 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
             <Input
               id={input.id}
               type="number"
-              value={inputValues[input.id] || (input as any).defaultValue || ""}
+              value={inputValues[input.id] || input.defaultValue || ""}
               onChange={(e) =>
                 handleInputChange(
                   input.id,
-                  Number.parseFloat(e.target.value) || 0,
+                  Number.parseFloat(e.target.value) || 0
                 )
               }
-              placeholder={(input as any).placeholder || ""}
-              min={(input as any).min}
-              max={(input as any).max}
-              step={(input as any).step || 1}
+              placeholder={input.placeholder || ""}
+              min={input.min}
+              max={input.max}
+              step={input.step || 1}
               required={input.required !== false}
               className="flex-1"
             />
-            {(input as any).unit && (
-              <span className="text-muted-foreground">
-                {(input as any).unit}
-              </span>
+            {input.unit && (
+              <span className="text-muted-foreground">{input.unit}</span>
             )}
           </div>
         );
       case "select":
         return (
           <Select
-            value={inputValues[input.id] || (input as any).defaultOption || ""}
+            value={inputValues[input.id] || input.defaultOption || ""}
             onValueChange={(value) => handleInputChange(input.id, value)}
           >
             <SelectTrigger id={input.id}>
               <SelectValue placeholder="Select an option" />
             </SelectTrigger>
             <SelectContent>
-              {(input as any).options?.map((option: any) => (
+              {input.options.map((option) => (
                 <SelectItem key={option.id} value={option.id}>
                   {option.label}
                 </SelectItem>
@@ -141,18 +138,16 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
           <div className="space-y-2">
             <Slider
               id={input.id}
-              min={(input as any).min}
-              max={(input as any).max}
-              step={(input as any).step}
-              value={[inputValues[input.id] || (input as any).defaultValue]}
+              min={input.min}
+              max={input.max}
+              step={input.step}
+              value={[inputValues[input.id] || input.defaultValue]}
               onValueChange={(values) => handleInputChange(input.id, values[0])}
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{(input as any).min}</span>
-              <span>
-                {inputValues[input.id] || (input as any).defaultValue}
-              </span>
-              <span>{(input as any).max}</span>
+              <span>{input.min}</span>
+              <span>{inputValues[input.id] || input.defaultValue}</span>
+              <span>{input.max}</span>
             </div>
           </div>
         );
@@ -164,11 +159,11 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{component.name}</CardTitle>
+        <CardTitle>Name??</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {period.inputs.map((input) => (
+          {inputs.map((input) => (
             <div key={input.id} className="space-y-2">
               <Label htmlFor={input.id}>
                 {input.name}

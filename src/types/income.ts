@@ -126,13 +126,13 @@ type Yearly = BaseYearly & (YearlyDay | YearlyPosition);
 
 export type Period = BasePeriod & (Daily | Weekly | Monthly | Yearly);
 
-export type Input = {
+export type BaseInput = {
   id: string;
   name: string;
   description?: string;
   /** Whether the input is required. `undefined` means required. */
   required?: boolean;
-} & (TextInput | NumberInput | SelectInput | RangeInput);
+};
 
 type TextInput = {
   type: "text";
@@ -167,3 +167,6 @@ type RangeInput = {
   step: number;
   defaultValue: number;
 };
+
+export type Input = BaseInput &
+  (TextInput | NumberInput | SelectInput | RangeInput);

@@ -22,6 +22,7 @@ import {
   Calculation,
   CalculationPeriod,
   Component,
+  Input as InputType,
   Period,
   RecurringComponent,
 } from "@/types/income";
@@ -137,6 +138,31 @@ export default function ComponentEditorPage() {
       ...component,
       date: date,
     };
+    setComponent(updatedComponent);
+    updateComponent(updatedComponent);
+  };
+
+  const handleInputChange = (inputs: Array<InputType>) => {
+    let updatedComponent: Component;
+    if (component.type === "one-time") {
+      updatedComponent = {
+        ...component,
+        calculation: {
+          ...component.calculation,
+          inputs: inputs,
+        },
+      };
+    } else {
+      updatedComponent = {
+        ...component,
+        calculationPeriods: component.calculationPeriods.map((p, i) =>
+          i === selectedPeriodIndex
+            ? { ...p, calculation: { ...p.calculation, inputs: inputs } }
+            : p
+        ),
+      };
+    }
+
     setComponent(updatedComponent);
     updateComponent(updatedComponent);
   };
@@ -349,7 +375,15 @@ export default function ComponentEditorPage() {
                 )}
               </TabsContent>
               <TabsContent value="inputs" className="pt-4">
-                <InputsEditor component={component} />
+                <InputsEditor
+                  inputs={
+                    component.type === "one-time"
+                      ? component.calculation.inputs
+                      : component.calculationPeriods[selectedPeriodIndex]
+                          ?.calculation.inputs
+                  }
+                  onInputChange={handleInputChange}
+                />
               </TabsContent>
               <TabsContent value="calculation" className="pt-4">
                 <CalculationEditor
