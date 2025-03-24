@@ -113,7 +113,6 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {JSON.stringify(inputValues)}
         <div className="space-y-6">
           {/* Input values section */}
           {calculation.inputs.length > 0 && (

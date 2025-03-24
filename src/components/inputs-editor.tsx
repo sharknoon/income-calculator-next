@@ -502,10 +502,28 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     <div className="space-y-2">
                       <Label>Options</Label>
                       {selectedInput.options.map((option, index) => (
-                        <div
-                          key={option.id}
-                          className="flex items-center space-x-2"
-                        >
+                        <div key={option.id} className="flex items-center">
+                          <div className="self-stretch flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+                            ID
+                          </div>
+                          <Input
+                            value={option.id}
+                            onChange={(e) => {
+                              const newOptions = [...selectedInput.options];
+                              newOptions[index] = {
+                                ...newOptions[index],
+                                id: e.target.value,
+                              };
+                              handleInputChange(selectedInput.id, {
+                                ...selectedInput,
+                                options: newOptions,
+                              });
+                            }}
+                            className="rounded-l-none"
+                          />
+                          <div className="self-stretch ml-2 flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
+                            Name
+                          </div>
                           <Input
                             value={option.label}
                             onChange={(e) => {
@@ -519,9 +537,11 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                                 options: newOptions,
                               });
                             }}
+                            className="rounded-l-none"
                           />
                           <Button
                             variant="ghost"
+                            className="ml-2"
                             size="sm"
                             onClick={() => {
                               const newOptions = selectedInput.options.filter(

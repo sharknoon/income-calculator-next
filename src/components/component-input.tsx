@@ -16,7 +16,11 @@ interface ComponentInputProps {
   onChange?: (id: string, value: any) => void;
 }
 
-export function ComponentInput({ input, value, onChange }: ComponentInputProps) {
+export function ComponentInput({
+  input,
+  value,
+  onChange,
+}: ComponentInputProps) {
   switch (input.type) {
     case "text":
       return (
@@ -59,7 +63,7 @@ export function ComponentInput({ input, value, onChange }: ComponentInputProps) 
         <div className="flex items-center space-x-2">
           <Switch
             id={input.id}
-            value={value ?? input.defaultValue ?? false}
+            checked={value ?? input.defaultValue ?? false}
             onCheckedChange={(value) => onChange?.(input.id, value)}
             required={input.required !== false}
           />

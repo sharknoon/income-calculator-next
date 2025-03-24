@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import type { Calculation } from "@/types/income";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Play } from "lucide-react";
-import { FormulaTestPanel } from "./formula-test-panel";
+import { FormulaTestPanel } from "@/components/formula-test-panel";
+import Editor, { useMonaco } from "@monaco-editor/react";
 
 interface CalculationEditorProps {
   calculation: Calculation;
@@ -25,15 +25,35 @@ export function CalculationEditor({
   );
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const monaco = useMonaco();
+
+  useEffect(() => {
+    if (monaco) {
+      // extra libraries
+      const libSource = [
+        "interface Inputs {",
+        ...calculation.inputs.map(
+          (input) =>
+            `  /**\n  * ${input.name}\n  * @description ${input.description} */\n  ${input.id}: ${input.type};`
+        ),
+        "}",
+        "declare const inputs: Inputs;",
+      ].join("\n");
+
+      const libUri = "ts:filename/inputs.d.ts";
+      const libUriParsed = monaco.Uri.parse(libUri);
+      monaco.languages.typescript.javascriptDefaults.addExtraLib(
+        libSource,
+        libUri
+      );
+      // When resolving definitions and references, the editor will try to use created models.
+      // Creating a model for the library allows "peek definition/references" commands to work with the library.
+      monaco.editor.createModel(libSource, "typescript", libUriParsed);
+    }
+  }, [monaco, calculation]);
 
   const handleSaveCalculationFunc = () => {
     try {
-      // Basic validation - check if the code contains BigNumber
-      if (!calculationFunc.includes("BigNumber")) {
-        setError("Formula must use BigNumber.js. Example: new BigNumber(10)");
-        return;
-      }
-
       setError(null);
       const newCalculation = { ...calculation };
       newCalculation.func = calculationFunc;
@@ -81,12 +101,11 @@ export function CalculationEditor({
             {showTestPanel ? "Hide Test Panel" : "Test Formula"}
           </Button>
         </div>
-        <Textarea
-          id="calculation"
-          value={calculationFunc}
-          onChange={(e) => setCalculationFunc(e.target.value)}
-          className="font-mono h-40"
-          placeholder="return new BigNumber(0)"
+        <Editor
+          height="10rem"
+          defaultLanguage="typescript"
+          onChange={(value) => setCalculationFunc(value || "")}
+          className="border"
         />
 
         {error && (
