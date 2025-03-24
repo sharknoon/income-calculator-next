@@ -22,6 +22,8 @@ import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Temporal } from "@js-temporal/polyfill";
+import { useState } from "react";
 
 interface PeriodEditorProps {
   period: Period;
@@ -29,6 +31,9 @@ interface PeriodEditorProps {
 }
 
 export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
+  const [isStartDateCalendarOpen, setIsStartDateCalendarOpen] = useState(false);
+  const [isEndDateCalendarOpen, setIsEndDateCalendarOpen] = useState(false);
+
   const handleFrequencyChange = (value: Period["frequency"]) => {
     const basePeriod = {
       startDate: period.startDate,
@@ -49,7 +54,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
           ...basePeriod,
           frequency: value,
           every: 1,
-          weekdays: ["Monday"],
+          weekdays: ["monday"],
         };
         break;
       case "monthly":
@@ -67,7 +72,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
           ...basePeriod,
           frequency: value,
           every: 1,
-          months: ["January"],
+          months: ["january"],
           dayOfMonthType: "position",
           on: "last",
           day: "weekday",
@@ -83,7 +88,10 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Start Date</Label>
-          <Popover>
+          <Popover
+            open={isStartDateCalendarOpen}
+            onOpenChange={setIsStartDateCalendarOpen}
+          >
             <PopoverTrigger asChild>
               <Button
                 variant="outline"
@@ -100,10 +108,19 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                 selected={plainDateToJsDate(period.startDate)}
                 onSelect={(date) => {
                   if (date) {
+                    const startDate = jsDateToPlainDate(date);
+                    // Don't allow the startDate to be after the endDate
+                    if (
+                      period.endDate &&
+                      Temporal.PlainDate.compare(startDate, period.endDate) > 0
+                    ) {
+                      period.endDate = startDate;
+                    }
                     onPeriodChange({
                       ...period,
-                      startDate: jsDateToPlainDate(date),
+                      startDate,
                     });
+                    setIsStartDateCalendarOpen(false);
                   }
                 }}
               />
@@ -112,7 +129,10 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
         </div>
         <div className="space-y-2">
           <Label>End Date (optional)</Label>
-          <Popover>
+          <Popover
+            open={isEndDateCalendarOpen}
+            onOpenChange={setIsEndDateCalendarOpen}
+          >
             <div className="flex w-full">
               <PopoverTrigger asChild>
                 <Button
@@ -147,13 +167,17 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
               <CalendarComponent
                 timeZone="UTC"
                 mode="single"
-                selected={plainDateToJsDate(period.endDate || period.startDate)}
+                disabled={{ before: plainDateToJsDate(period.startDate) }}
+                selected={
+                  period.endDate ? plainDateToJsDate(period.endDate) : undefined
+                }
                 onSelect={(date) => {
                   if (date) {
                     onPeriodChange({
                       ...period,
                       endDate: jsDateToPlainDate(date),
                     });
+                    setIsEndDateCalendarOpen(false);
                   }
                 }}
               />
@@ -208,13 +232,13 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
           <div className="flex flex-wrap gap-2">
             {(
               [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
+                "monday",
+                "tuesday",
+                "wednesday",
+                "thursday",
+                "friday",
+                "saturday",
+                "sunday",
               ] as const
             ).map((day) => (
               <div key={day} className="flex items-center space-x-2">
@@ -230,7 +254,10 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                     });
                   }}
                 />
-                <Label htmlFor={`weekday-${day}`} className="text-sm">
+                <Label
+                  htmlFor={`weekday-${day}`}
+                  className="text-sm capitalize"
+                >
                   {day}
                 </Label>
               </div>
@@ -331,13 +358,13 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Monday">Monday</SelectItem>
-                    <SelectItem value="Tuesday">Tuesday</SelectItem>
-                    <SelectItem value="Wednesday">Wednesday</SelectItem>
-                    <SelectItem value="Thursday">Thursday</SelectItem>
-                    <SelectItem value="Friday">Friday</SelectItem>
-                    <SelectItem value="Saturday">Saturday</SelectItem>
-                    <SelectItem value="Sunday">Sunday</SelectItem>
+                    <SelectItem value="monday">Monday</SelectItem>
+                    <SelectItem value="tuesday">Tuesday</SelectItem>
+                    <SelectItem value="wednesday">Wednesday</SelectItem>
+                    <SelectItem value="thursday">Thursday</SelectItem>
+                    <SelectItem value="friday">Friday</SelectItem>
+                    <SelectItem value="saturday">Saturday</SelectItem>
+                    <SelectItem value="sunday">Sunday</SelectItem>
                     <SelectItem value="day">Day</SelectItem>
                     <SelectItem value="weekday">Weekday</SelectItem>
                     <SelectItem value="weekend-day">Weekend day</SelectItem>
@@ -357,18 +384,18 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
             <div className="flex flex-wrap gap-2">
               {(
                 [
-                  "January",
-                  "February",
-                  "March",
-                  "April",
-                  "May",
-                  "June",
-                  "July",
-                  "August",
-                  "September",
-                  "October",
-                  "November",
-                  "December",
+                  "january",
+                  "february",
+                  "march",
+                  "april",
+                  "may",
+                  "june",
+                  "july",
+                  "august",
+                  "september",
+                  "october",
+                  "november",
+                  "december",
                 ] as const
               ).map((month) => (
                 <div key={month} className="flex items-center space-x-2">
@@ -384,7 +411,10 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                       });
                     }}
                   />
-                  <Label htmlFor={`month-${month}`} className="text-sm">
+                  <Label
+                    htmlFor={`month-${month}`}
+                    className="text-sm capitalize"
+                  >
                     {month}
                   </Label>
                 </div>
@@ -485,13 +515,13 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Monday">Monday</SelectItem>
-                  <SelectItem value="Tuesday">Tuesday</SelectItem>
-                  <SelectItem value="Wednesday">Wednesday</SelectItem>
-                  <SelectItem value="Thursday">Thursday</SelectItem>
-                  <SelectItem value="Friday">Friday</SelectItem>
-                  <SelectItem value="Saturday">Saturday</SelectItem>
-                  <SelectItem value="Sunday">Sunday</SelectItem>
+                  <SelectItem value="monday">Monday</SelectItem>
+                  <SelectItem value="tuesday">Tuesday</SelectItem>
+                  <SelectItem value="wednesday">Wednesday</SelectItem>
+                  <SelectItem value="thursday">Thursday</SelectItem>
+                  <SelectItem value="friday">Friday</SelectItem>
+                  <SelectItem value="saturday">Saturday</SelectItem>
+                  <SelectItem value="sunday">Sunday</SelectItem>
                   <SelectItem value="day">Day</SelectItem>
                   <SelectItem value="weekday">Weekday</SelectItem>
                   <SelectItem value="weekend-day">Weekend day</SelectItem>

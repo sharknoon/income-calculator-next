@@ -44,13 +44,13 @@ type Weekly = {
   frequency: "weekly";
   every: number;
   weekdays: Array<
-    | "Monday"
-    | "Tuesday"
-    | "Wednesday"
-    | "Thursday"
-    | "Friday"
-    | "Saturday"
-    | "Sunday"
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday"
   >;
 };
 
@@ -67,13 +67,13 @@ type MonthlyDay = {
 export type MonthlyPosition = {
   dayOfMonthType: "position";
   day:
-    | "Monday"
-    | "Tuesday"
-    | "Wednesday"
-    | "Thursday"
-    | "Friday"
-    | "Saturday"
-    | "Sunday"
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday"
     | "day"
     | "weekday"
     | "weekend-day";
@@ -86,18 +86,18 @@ type BaseYearly = {
   frequency: "yearly";
   every: number;
   months: Array<
-    | "January"
-    | "February"
-    | "March"
-    | "April"
-    | "May"
-    | "June"
-    | "July"
-    | "August"
-    | "September"
-    | "October"
-    | "November"
-    | "December"
+    | "january"
+    | "february"
+    | "march"
+    | "april"
+    | "may"
+    | "june"
+    | "july"
+    | "august"
+    | "september"
+    | "october"
+    | "november"
+    | "december"
   >;
 };
 
@@ -109,13 +109,13 @@ type YearlyDay = {
 type YearlyPosition = {
   dayOfMonthType: "position";
   day:
-    | "Monday"
-    | "Tuesday"
-    | "Wednesday"
-    | "Thursday"
-    | "Friday"
-    | "Saturday"
-    | "Sunday"
+    | "monday"
+    | "tuesday"
+    | "wednesday"
+    | "thursday"
+    | "friday"
+    | "saturday"
+    | "sunday"
     | "day"
     | "weekday"
     | "weekend-day";

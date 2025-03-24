@@ -31,7 +31,7 @@ export function ComponentsList() {
             every: 1,
             dayOfMonthType: "position",
             on: "last",
-            day: "Friday",
+            day: "friday",
           },
           calculation: {
             dependencies: [],

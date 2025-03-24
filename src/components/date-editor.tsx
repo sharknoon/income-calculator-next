@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Temporal } from "@js-temporal/polyfill";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
+import { useState } from "react";
 
 interface DateEditorProps {
   date: Temporal.PlainDate;
@@ -16,10 +17,12 @@ interface DateEditorProps {
 }
 
 export function DateEditor({ date, onDateChange }: DateEditorProps) {
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
   return (
     <div className="space-y-2">
       <Label>Date</Label>
-      <Popover>
+      <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
         <PopoverTrigger asChild>
           <Button variant="outline" className="justify-start text-left">
             <Calendar className="mr-2 size-4" />
@@ -34,6 +37,7 @@ export function DateEditor({ date, onDateChange }: DateEditorProps) {
             onSelect={(date) => {
               if (date) {
                 onDateChange(jsDateToPlainDate(date));
+                setIsCalendarOpen(false);
               }
             }}
           />
