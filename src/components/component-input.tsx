@@ -7,7 +7,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 
@@ -23,7 +22,7 @@ export function ComponentInput({ input, value, onChange }: ComponentInputProps) 
       return (
         <Input
           id={input.id}
-          value={value || input.defaultValue || ""}
+          value={value ?? input.defaultValue ?? ""}
           onChange={(e) => onChange?.(input.id, e.target.value)}
           placeholder={input.placeholder || ""}
           minLength={input.minLength}
@@ -38,7 +37,7 @@ export function ComponentInput({ input, value, onChange }: ComponentInputProps) 
           <Input
             id={input.id}
             type="number"
-            value={value || input.defaultValue || ""}
+            value={value ?? input.defaultValue ?? ""}
             onChange={(e) =>
               onChange?.(input.id, Number.parseFloat(e.target.value) || 0)
             }
@@ -60,7 +59,7 @@ export function ComponentInput({ input, value, onChange }: ComponentInputProps) 
         <div className="flex items-center space-x-2">
           <Switch
             id={input.id}
-            value={value || input.defaultValue || false}
+            value={value ?? input.defaultValue ?? false}
             onCheckedChange={(value) => onChange?.(input.id, value)}
             required={input.required !== false}
           />
@@ -69,7 +68,7 @@ export function ComponentInput({ input, value, onChange }: ComponentInputProps) 
     case "select":
       return (
         <Select
-          value={value || input.defaultOption || ""}
+          value={value ?? input.defaultValue ?? ""}
           onValueChange={(value) => onChange?.(input.id, value)}
           required={input.required !== false}
         >
@@ -93,7 +92,7 @@ export function ComponentInput({ input, value, onChange }: ComponentInputProps) 
             min={input.min}
             max={input.max}
             step={input.step}
-            value={value || input.defaultValue}
+            value={value ?? input.defaultValue}
             onValueChange={(values) => onChange?.(input.id, values[0])}
           />
           <div className="flex justify-between text-xs text-muted-foreground">

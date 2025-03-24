@@ -83,7 +83,7 @@ export default function ComponentEditorPage() {
         calculation: {
           dependencies: [],
           inputs: [],
-          func: "new BigNumber(0)",
+          func: "return new BigNumber(0)",
         },
       };
     } else {
@@ -103,7 +103,7 @@ export default function ComponentEditorPage() {
             calculation: {
               dependencies: [],
               inputs: [],
-              func: "new BigNumber(0)",
+              func: "return new BigNumber(0)",
             },
           },
         ],
@@ -203,7 +203,7 @@ export default function ComponentEditorPage() {
       calculation: {
         dependencies: [],
         inputs: [],
-        func: "new BigNumber(0)",
+        func: "return new BigNumber(0)",
       },
     };
 

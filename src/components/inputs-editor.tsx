@@ -53,9 +53,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
 
   const handleInputChange = (oldID: string, updatedInput: InputType) => {
     onInputChange(
-      inputs.map((input) =>
-        input.id === oldID ? updatedInput : input
-      )
+      inputs.map((input) => (input.id === oldID ? updatedInput : input))
     );
     if (oldID !== updatedInput.id) {
       setSelectedInputId(updatedInput.id);
@@ -221,7 +219,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                               label: "Option 2",
                             },
                           ],
-                          defaultOption: "option1",
+                          defaultValue: "option1",
                         };
                       } else {
                         newInput = {
@@ -326,6 +324,31 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         }
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="input-validation">
+                        Regexp Validation
+                      </Label>
+                      <Input
+                        id="input-validation"
+                        value={selectedInput.validation?.source || ""}
+                        onChange={(e) =>
+                          handleInputChange(selectedInput.id, {
+                            ...selectedInput,
+                            validation: new RegExp(e.target.value),
+                          })
+                        }
+                      />
+                      <Label className="text-muted-foreground text-xs">
+                        Test your Regexp here:
+                        <a
+                          href="https://regex101.com"
+                          target="_blank"
+                          className="hover:underline"
+                        >
+                          regex101.com
+                        </a>
+                      </Label>
+                    </div>
                   </>
                 )}
 
@@ -423,6 +446,31 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         }
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="input-validation">
+                        Regexp Validation
+                      </Label>
+                      <Input
+                        id="input-validation"
+                        value={selectedInput.validation?.source || ""}
+                        onChange={(e) =>
+                          handleInputChange(selectedInput.id, {
+                            ...selectedInput,
+                            validation: new RegExp(e.target.value),
+                          })
+                        }
+                      />
+                      <Label className="text-muted-foreground text-xs">
+                        Test your Regexp here:
+                        <a
+                          href="https://regex101.com"
+                          target="_blank"
+                          className="hover:underline"
+                        >
+                          regex101.com
+                        </a>
+                      </Label>
+                    </div>
                   </>
                 )}
 
@@ -515,11 +563,11 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         Default Option
                       </Label>
                       <Select
-                        value={selectedInput.defaultOption || ""}
+                        value={selectedInput.defaultValue || ""}
                         onValueChange={(value) =>
                           handleInputChange(selectedInput.id, {
                             ...selectedInput,
-                            defaultOption: value,
+                            defaultValue: value,
                           })
                         }
                       >

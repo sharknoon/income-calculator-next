@@ -22,7 +22,15 @@ interface FormulaTestPanelProps {
 }
 
 export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
-  const [inputValues, setInputValues] = useState<Record<string, any>>({});
+  const [inputValues, setInputValues] = useState<Record<string, any>>(
+    calculation.inputs.reduce(
+      (acc, input) => {
+        acc[input.id] = input.defaultValue;
+        return acc;
+      },
+      {} as Record<string, any>
+    )
+  );
   const [dependencyValues, setDependencyValues] = useState<Record<string, any>>(
     {}
   );
@@ -31,7 +39,15 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
 
   // Reset values when calculation changes
   useEffect(() => {
-    setInputValues({});
+    setInputValues(
+      calculation.inputs.reduce(
+        (acc, input) => {
+          acc[input.id] = input.defaultValue;
+          return acc;
+        },
+        {} as Record<string, any>
+      )
+    );
     setDependencyValues({});
     setResult(null);
     setError(null);
@@ -62,7 +78,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
         "BigNumber",
         "inputs",
         "dependencies",
-        `try { return ${calculation.func}; } catch (e) { throw new Error("Calculation error: " + e.message); }`
+        `try { ${calculation.func} } catch (e) { throw new Error("Calculation error: " + e.message); }`
       );
 
       // Execute the function with our controlled inputs
@@ -97,6 +113,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {JSON.stringify(inputValues)}
         <div className="space-y-6">
           {/* Input values section */}
           {calculation.inputs.length > 0 && (

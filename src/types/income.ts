@@ -141,7 +141,7 @@ type BooleanInput = {
 type SelectInput = {
   type: "select";
   options: Array<{ id: string; label: string }>;
-  defaultOption?: string;
+  defaultValue?: string;
 };
 
 type RangeInput = {

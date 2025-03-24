@@ -36,7 +36,7 @@ export function ComponentsList() {
           calculation: {
             dependencies: [],
             inputs: [],
-            func: "new BigNumber(0)",
+            func: "return new BigNumber(0)",
           },
         },
       ],

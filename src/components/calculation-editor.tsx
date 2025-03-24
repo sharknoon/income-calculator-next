@@ -21,7 +21,7 @@ export function CalculationEditor({
 }: CalculationEditorProps) {
   const { components } = useComponents();
   const [calculationFunc, setCalculationFunc] = useState(
-    calculation.func || "new BigNumber(0)"
+    calculation.func || "return new BigNumber(0)"
   );
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -86,7 +86,7 @@ export function CalculationEditor({
           value={calculationFunc}
           onChange={(e) => setCalculationFunc(e.target.value)}
           className="font-mono h-40"
-          placeholder="new BigNumber(0)"
+          placeholder="return new BigNumber(0)"
         />
 
         {error && (
