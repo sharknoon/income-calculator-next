@@ -16,8 +16,7 @@ import { PeriodEditor } from "@/components/period-editor";
 import { InputsEditor } from "@/components/inputs-editor";
 import { CalculationEditor } from "@/components/calculation-editor";
 import { Temporal } from "@js-temporal/polyfill";
-import { RadioGroup } from "@/components/ui/radio-group";
-import { RadioGroupItem } from "@radix-ui/react-radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Calculation,
   CalculationPeriod,

@@ -21,6 +21,7 @@ import type { MonthlyPosition, Period } from "@/types/income";
 import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface PeriodEditorProps {
   period: Period;
@@ -240,115 +241,112 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
 
       {period.frequency === "monthly" && (
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="monthly-day"
-              checked={period.dayOfMonthType === "day"}
-              onCheckedChange={(checked) => {
-                if (checked && period.dayOfMonthType !== "day") {
-                  onPeriodChange({
-                    ...period,
-                    dayOfMonthType: "day",
-                    each: 1,
-                  });
-                }
-              }}
-            />
-            <div className="flex items-center gap-2">
-              <Label htmlFor="monthly-day">Day</Label>
-              <Input
-                type="number"
-                min={1}
-                max={31}
-                value={period.dayOfMonthType === "day" ? period.each : 1}
-                onChange={(e) =>
-                  period.dayOfMonthType === "day" &&
-                  onPeriodChange({
-                    ...period,
-                    each: Number.parseInt(e.target.value) || 1,
-                  })
-                }
-                className="w-16"
-                disabled={period.dayOfMonthType !== "day"}
-              />
-              <span>of the month</span>
+          <RadioGroup
+            value={period.dayOfMonthType}
+            onValueChange={(value) => {
+              if (value === "day") {
+                onPeriodChange({
+                  ...period,
+                  dayOfMonthType: "day",
+                  each: 1,
+                });
+              } else if (value === "position") {
+                onPeriodChange({
+                  ...period,
+                  dayOfMonthType: "position",
+                  on: "last",
+                  day: "weekday",
+                });
+              }
+            }}
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="day" id="day" />
+              <div className="flex items-center gap-2">
+                <Label htmlFor="monthly-day">Day</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  max={31}
+                  value={period.dayOfMonthType === "day" ? period.each : 1}
+                  onChange={(e) =>
+                    period.dayOfMonthType === "day" &&
+                    onPeriodChange({
+                      ...period,
+                      each: Number.parseInt(e.target.value) || 1,
+                    })
+                  }
+                  className="w-16"
+                  disabled={period.dayOfMonthType !== "day"}
+                />
+                <span>of the month</span>
+              </div>
             </div>
-          </div>
 
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="monthly-position"
-              checked={period.dayOfMonthType === "position"}
-              onCheckedChange={(checked) => {
-                if (checked && period.dayOfMonthType !== "position") {
-                  onPeriodChange({
-                    ...period,
-                    dayOfMonthType: "position",
-                    on: "last",
-                    day: "weekday",
-                  });
-                }
-              }}
-            />
-            <div className="flex items-center gap-2">
-              <Label htmlFor="monthly-position">The</Label>
-              <Select
-                value={
-                  period.dayOfMonthType === "position" ? period.on : "last"
-                }
-                onValueChange={(value: MonthlyPosition["on"]) =>
-                  period.dayOfMonthType === "position" &&
-                  onPeriodChange({
-                    ...period,
-                    on: value,
-                  })
-                }
-                disabled={period.dayOfMonthType !== "position"}
-              >
-                <SelectTrigger className="w-24">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="first">First</SelectItem>
-                  <SelectItem value="second">Second</SelectItem>
-                  <SelectItem value="third">Third</SelectItem>
-                  <SelectItem value="fourth">Fourth</SelectItem>
-                  <SelectItem value="next-to-last">Next to last</SelectItem>
-                  <SelectItem value="last">Last</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                value={
-                  period.dayOfMonthType === "position" ? period.day : "weekday"
-                }
-                onValueChange={(value: MonthlyPosition["day"]) =>
-                  period.dayOfMonthType === "position" &&
-                  onPeriodChange({
-                    ...period,
-                    day: value,
-                  })
-                }
-                disabled={period.dayOfMonthType !== "position"}
-              >
-                <SelectTrigger className="w-32">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Monday">Monday</SelectItem>
-                  <SelectItem value="Tuesday">Tuesday</SelectItem>
-                  <SelectItem value="Wednesday">Wednesday</SelectItem>
-                  <SelectItem value="Thursday">Thursday</SelectItem>
-                  <SelectItem value="Friday">Friday</SelectItem>
-                  <SelectItem value="Saturday">Saturday</SelectItem>
-                  <SelectItem value="Sunday">Sunday</SelectItem>
-                  <SelectItem value="day">Day</SelectItem>
-                  <SelectItem value="weekday">Weekday</SelectItem>
-                  <SelectItem value="weekend-day">Weekend day</SelectItem>
-                </SelectContent>
-              </Select>
-              <span>of the month</span>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="position" id="position" />
+              <div className="flex items-center gap-2">
+                <Label htmlFor="monthly-position">The</Label>
+                <Select
+                  value={
+                    period.dayOfMonthType === "position" ? period.on : "last"
+                  }
+                  onValueChange={(value: MonthlyPosition["on"]) =>
+                    period.dayOfMonthType === "position" &&
+                    onPeriodChange({
+                      ...period,
+                      on: value,
+                    })
+                  }
+                  disabled={period.dayOfMonthType !== "position"}
+                >
+                  <SelectTrigger className="w-24">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="first">First</SelectItem>
+                    <SelectItem value="second">Second</SelectItem>
+                    <SelectItem value="third">Third</SelectItem>
+                    <SelectItem value="fourth">Fourth</SelectItem>
+                    <SelectItem value="next-to-last">Next to last</SelectItem>
+                    <SelectItem value="last">Last</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={
+                    period.dayOfMonthType === "position"
+                      ? period.day
+                      : "weekday"
+                  }
+                  onValueChange={(value: MonthlyPosition["day"]) =>
+                    period.dayOfMonthType === "position" &&
+                    onPeriodChange({
+                      ...period,
+                      day: value,
+                    })
+                  }
+                  disabled={period.dayOfMonthType !== "position"}
+                >
+                  <SelectTrigger className="w-32">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Monday">Monday</SelectItem>
+                    <SelectItem value="Tuesday">Tuesday</SelectItem>
+                    <SelectItem value="Wednesday">Wednesday</SelectItem>
+                    <SelectItem value="Thursday">Thursday</SelectItem>
+                    <SelectItem value="Friday">Friday</SelectItem>
+                    <SelectItem value="Saturday">Saturday</SelectItem>
+                    <SelectItem value="Sunday">Sunday</SelectItem>
+                    <SelectItem value="day">Day</SelectItem>
+                    <SelectItem value="weekday">Weekday</SelectItem>
+                    <SelectItem value="weekend-day">Weekend day</SelectItem>
+                  </SelectContent>
+                </Select>
+                <span>of the month</span>
+              </div>
             </div>
-          </div>
+          </RadioGroup>
         </div>
       )}
 

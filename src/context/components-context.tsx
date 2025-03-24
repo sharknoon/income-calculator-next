@@ -8,6 +8,7 @@ import {
   useEffect,
 } from "react";
 import type { Component } from "@/types/income";
+import { Temporal } from "@js-temporal/polyfill";
 
 interface ComponentsContextType {
   components: Component[];
@@ -35,17 +36,11 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
           const parsedComponents = JSON.parse(savedComponents, (key, value) => {
             // Handle date objects that were serialized
             if (
-              key === "date" &&
-              value &&
-              value.type === "one-time" &&
-              value.date
+              (key === "date" || key === "startDate" || key === "endDate") &&
+              value
             ) {
               // Reconstruct the date object
-              return value;
-            }
-            if ((key === "startDate" || key === "endDate") && value) {
-              // Reconstruct the date object
-              return value;
+              return Temporal.PlainDate.from(value);
             }
             return value;
           });
