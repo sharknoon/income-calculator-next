@@ -1,11 +1,14 @@
 import { Temporal } from "@js-temporal/polyfill";
+import { TZDate } from "react-day-picker";
 
-export function plainDateToJsDate(plainDate: Temporal.PlainDate) {
-  return new Date(plainDate.toString());
+export function plainDateToTZDate(plainDate: Temporal.PlainDate) {
+  return new TZDate(plainDate.toString(), "UTC");
 }
 
-export function jsDateToPlainDate(jsDate: Date) {
-  return Temporal.PlainDate.from(jsDate.toISOString().substring(0, 10));
+export function tzDateToPlainDate(tzDate: TZDate) {
+  return Temporal.PlainDate.from(
+    tzDate.withTimeZone("UTC").toISOString().substring(0, 10)
+  );
 }
 
 export interface DatePeriod {

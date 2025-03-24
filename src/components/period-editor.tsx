@@ -18,12 +18,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import type { MonthlyPosition, Period } from "@/types/income";
-import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
+import { tzDateToPlainDate, plainDateToTZDate } from "@/lib/date";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Temporal } from "@js-temporal/polyfill";
 import { useState } from "react";
+import { TZDate } from "react-day-picker";
 
 interface PeriodEditorProps {
   period: Period;
@@ -105,11 +106,11 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
               <CalendarComponent
                 timeZone="UTC"
                 mode="single"
-                selected={plainDateToJsDate(period.startDate)}
-                defaultMonth={plainDateToJsDate(period.startDate)}
+                selected={plainDateToTZDate(period.startDate)}
+                defaultMonth={plainDateToTZDate(period.startDate)}
                 onSelect={(date) => {
                   if (date) {
-                    const startDate = jsDateToPlainDate(date);
+                    const startDate = tzDateToPlainDate(new TZDate(date, "UTC"));
                     // Don't allow the startDate to be after the endDate
                     if (
                       period.endDate &&
@@ -168,20 +169,20 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
               <CalendarComponent
                 timeZone="UTC"
                 mode="single"
-                disabled={{ before: plainDateToJsDate(period.startDate) }}
+                disabled={{ before: plainDateToTZDate(period.startDate) }}
                 selected={
-                  period.endDate ? plainDateToJsDate(period.endDate) : undefined
+                  period.endDate ? plainDateToTZDate(period.endDate) : undefined
                 }
                 defaultMonth={
                   period.endDate
-                    ? plainDateToJsDate(period.endDate)
+                    ? plainDateToTZDate(period.endDate)
                     : undefined
                 }
                 onSelect={(date) => {
                   if (date) {
                     onPeriodChange({
                       ...period,
-                      endDate: jsDateToPlainDate(date),
+                      endDate: tzDateToPlainDate(new TZDate(date, "UTC")),
                     });
                     setIsEndDateCalendarOpen(false);
                   }

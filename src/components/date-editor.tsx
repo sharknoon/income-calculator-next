@@ -8,8 +8,9 @@ import { Calendar } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Temporal } from "@js-temporal/polyfill";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
+import { tzDateToPlainDate, plainDateToTZDate } from "@/lib/date";
 import { useState } from "react";
+import { TZDate } from "react-day-picker";
 
 interface DateEditorProps {
   date: Temporal.PlainDate;
@@ -33,10 +34,10 @@ export function DateEditor({ date, onDateChange }: DateEditorProps) {
           <CalendarComponent
             timeZone="UTC"
             mode="single"
-            selected={plainDateToJsDate(Temporal.Now.plainDateISO())}
+            selected={plainDateToTZDate(Temporal.Now.plainDateISO())}
             onSelect={(date) => {
               if (date) {
-                onDateChange(jsDateToPlainDate(date));
+                onDateChange(tzDateToPlainDate(new TZDate(date, "UTC")));
                 setIsCalendarOpen(false);
               }
             }}

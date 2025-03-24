@@ -22,7 +22,8 @@ import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentInputs } from "@/components/component-inputs";
 import { Temporal } from "@js-temporal/polyfill";
-import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
+import { tzDateToPlainDate, plainDateToTZDate } from "@/lib/date";
+import { TZDate } from "react-day-picker";
 
 export function CalculationView() {
   const { components } = useComponents();
@@ -82,21 +83,21 @@ export function CalculationView() {
                       timeZone="UTC"
                       mode="single"
                       selected={
-                        startDate ? plainDateToJsDate(startDate) : undefined
+                        startDate ? plainDateToTZDate(startDate) : undefined
                       }
                       defaultMonth={
-                        startDate ? plainDateToJsDate(startDate) : undefined
+                        startDate ? plainDateToTZDate(startDate) : undefined
                       }
                       onSelect={(date) => {
                         if (date) {
-                          const startDate = jsDateToPlainDate(date);
+                          const startDate = tzDateToPlainDate(new TZDate(date, "UTC"));
                           // Don't allow the startDate to be after the endDate
                           if (
                             Temporal.PlainDate.compare(startDate, endDate) > 0
                           ) {
                             setEndDate(startDate);
                           }
-                          setStartDate(jsDateToPlainDate(date));
+                          setStartDate(tzDateToPlainDate(new TZDate(date, "UTC")));
                           setIsStartDateCalendarOpen(false);
                         }
                       }}
@@ -124,16 +125,16 @@ export function CalculationView() {
                     <CalendarComponent
                       timeZone="UTC"
                       mode="single"
-                      disabled={{ before: plainDateToJsDate(startDate) }}
+                      disabled={{ before: plainDateToTZDate(startDate) }}
                       selected={
-                        endDate ? plainDateToJsDate(endDate) : undefined
+                        endDate ? plainDateToTZDate(endDate) : undefined
                       }
                       defaultMonth={
-                        endDate ? plainDateToJsDate(endDate) : undefined
+                        endDate ? plainDateToTZDate(endDate) : undefined
                       }
                       onSelect={(date) => {
                         if (date) {
-                          setEndDate(jsDateToPlainDate(date));
+                          setEndDate(tzDateToPlainDate(new TZDate(date, "UTC")));
                           setIsEndDateCalendarOpen(false);
                         }
                       }}
