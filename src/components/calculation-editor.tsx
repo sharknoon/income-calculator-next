@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Calculation } from "@/types/income";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Play } from "lucide-react";
+import { FormulaTestPanel } from "./formula-test-panel";
 
 interface CalculationEditorProps {
   calculation: Calculation;
@@ -20,12 +23,27 @@ export function CalculationEditor({
   const [calculationFunc, setCalculationFunc] = useState(
     calculation.func || "new BigNumber(0)"
   );
+  const [showTestPanel, setShowTestPanel] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSaveCalculationFunc = () => {
-    const newCalculation = { ...calculation };
-    newCalculation.func = calculationFunc;
+    try {
+      // Basic validation - check if the code contains BigNumber
+      if (!calculationFunc.includes("BigNumber")) {
+        setError("Formula must use BigNumber.js. Example: new BigNumber(10)");
+        return;
+      }
 
-    onCalculationChange(newCalculation);
+      setError(null);
+      const newCalculation = { ...calculation };
+      newCalculation.func = calculationFunc;
+
+      onCalculationChange(newCalculation);
+    } catch (err) {
+      setError(
+        `Error saving calculation: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
   };
 
   const handleAddDependency = (dependencyId: string) => {
@@ -52,7 +70,17 @@ export function CalculationEditor({
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="calculation">Calculation Formula</Label>
+        <div className="flex justify-between items-center">
+          <Label htmlFor="calculation">Calculation Formula</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowTestPanel(!showTestPanel)}
+          >
+            <Play className="mr-2 h-4 w-4" />
+            {showTestPanel ? "Hide Test Panel" : "Test Formula"}
+          </Button>
+        </div>
         <Textarea
           id="calculation"
           value={calculationFunc}
@@ -60,13 +88,25 @@ export function CalculationEditor({
           className="font-mono h-40"
           placeholder="new BigNumber(0)"
         />
+
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <p className="text-xs text-muted-foreground">
           Use JavaScript with BigNumber.js to create your calculation formula.
           Access input values using the input ID, e.g.,{" "}
           <code>inputs.hourlyRate * inputs.hoursWorked</code>
         </p>
+
         <Button onClick={handleSaveCalculationFunc}>Save Calculation</Button>
       </div>
+
+      {showTestPanel && <FormulaTestPanel calculation={calculation} />}
 
       <div className="space-y-2">
         <Label>Dependencies</Label>

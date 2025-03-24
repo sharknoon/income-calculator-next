@@ -59,12 +59,12 @@ type BaseMonthly = {
   every: number;
 };
 
-type MonthlyDay = {
+type MonthDay = {
   dayOfMonthType: "day";
   each: number;
 };
 
-export type MonthlyPosition = {
+export type MonthPosition = {
   dayOfMonthType: "position";
   day:
     | "monday"
@@ -80,7 +80,7 @@ export type MonthlyPosition = {
   on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
 };
 
-type Monthly = BaseMonthly & (MonthlyDay | MonthlyPosition);
+export type Monthly = BaseMonthly & (MonthDay | MonthPosition);
 
 type BaseYearly = {
   frequency: "yearly";
@@ -101,28 +101,7 @@ type BaseYearly = {
   >;
 };
 
-type YearlyDay = {
-  dayOfMonthType: "day";
-  each: number;
-};
-
-type YearlyPosition = {
-  dayOfMonthType: "position";
-  day:
-    | "monday"
-    | "tuesday"
-    | "wednesday"
-    | "thursday"
-    | "friday"
-    | "saturday"
-    | "sunday"
-    | "day"
-    | "weekday"
-    | "weekend-day";
-  on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
-};
-
-type Yearly = BaseYearly & (YearlyDay | YearlyPosition);
+type Yearly = BaseYearly & (MonthDay | MonthPosition);
 
 export type Period = BasePeriod & (Daily | Weekly | Monthly | Yearly);
 

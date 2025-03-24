@@ -353,7 +353,9 @@ export default function ComponentEditorPage() {
               className="w-full mt-6"
             >
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="details">Period</TabsTrigger>
+                <TabsTrigger value="details">
+                  {component.type === "one-time" ? "Date" : "Period"}
+                </TabsTrigger>
                 <TabsTrigger value="inputs">Inputs</TabsTrigger>
                 <TabsTrigger value="calculation">Calculation</TabsTrigger>
               </TabsList>
