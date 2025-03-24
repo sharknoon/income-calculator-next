@@ -11,21 +11,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Calculator } from "lucide-react";
-import type {
-  Calculation,
-  Input as InputType,
-} from "@/types/income";
+import type { Calculation } from "@/types/income";
 import BigNumber from "bignumber.js";
+import { ComponentInput } from "@/components/component-input";
 
 interface FormulaTestPanelProps {
   calculation: Calculation;
@@ -94,80 +84,6 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
     }
   };
 
-  const renderInput = (input: InputType) => {
-    switch (input.type) {
-      case "text":
-        return (
-          <Input
-            value={inputValues[input.id] || (input as any).defaultValue || ""}
-            onChange={(e) => handleInputChange(input.id, e.target.value)}
-            placeholder={(input as any).placeholder || ""}
-          />
-        );
-      case "number":
-        return (
-          <div className="flex items-center space-x-2">
-            <Input
-              type="number"
-              value={inputValues[input.id] || (input as any).defaultValue || ""}
-              onChange={(e) =>
-                handleInputChange(
-                  input.id,
-                  Number.parseFloat(e.target.value) || 0
-                )
-              }
-              placeholder={(input as any).placeholder || ""}
-              className="flex-1"
-            />
-            {(input as any).unit && (
-              <span className="text-muted-foreground">
-                {(input as any).unit}
-              </span>
-            )}
-          </div>
-        );
-      case "select":
-        return (
-          <Select
-            value={inputValues[input.id] || (input as any).defaultOption || ""}
-            onValueChange={(value) => handleInputChange(input.id, value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select an option" />
-            </SelectTrigger>
-            <SelectContent>
-              {(input as any).options?.map((option: any) => (
-                <SelectItem key={option.id} value={option.id}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      case "range":
-        return (
-          <div className="space-y-2">
-            <Slider
-              min={(input as any).min}
-              max={(input as any).max}
-              step={(input as any).step}
-              value={[inputValues[input.id] || (input as any).defaultValue]}
-              onValueChange={(values) => handleInputChange(input.id, values[0])}
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>{(input as any).min}</span>
-              <span>
-                {inputValues[input.id] || (input as any).defaultValue}
-              </span>
-              <span>{(input as any).max}</span>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <Card>
       <CardHeader>
@@ -195,7 +111,11 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
                         (inputs.{input.id})
                       </span>
                     </Label>
-                    {renderInput(input)}
+                    <ComponentInput
+                      input={input}
+                      value={inputValues[input.id]}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 ))}
               </div>

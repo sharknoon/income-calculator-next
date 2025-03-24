@@ -133,6 +133,11 @@ type NumberInput = {
   placeholder?: string;
 };
 
+type BooleanInput = {
+  type: "boolean";
+  defaultValue?: boolean;
+};
+
 type SelectInput = {
   type: "select";
   options: Array<{ id: string; label: string }>;
@@ -148,4 +153,4 @@ type RangeInput = {
 };
 
 export type Input = BaseInput &
-  (TextInput | NumberInput | SelectInput | RangeInput);
+  (TextInput | NumberInput | BooleanInput | SelectInput | RangeInput);

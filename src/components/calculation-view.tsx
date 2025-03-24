@@ -28,22 +28,17 @@ import { TZDate } from "react-day-picker";
 export function CalculationView() {
   const { components } = useComponents();
 
-  const [isStartDateCalendarOpen, setIsStartDateCalendarOpen] = useState(false);
-  const [isEndDateCalendarOpen, setIsEndDateCalendarOpen] = useState(false);
-  const [startDate, setStartDate] = useState<Temporal.PlainDate>(
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [date, setDate] = useState<Temporal.PlainDate>(
     Temporal.Now.plainDateISO()
-  );
-  const [endDate, setEndDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO().add({ months: 1 })
   );
   const [calculationTab, setCalculationTab] = useState("inputs");
 
   const formatDate = (date: Temporal.PlainDate | undefined) => {
     if (!date) return "";
-    return date.toLocaleString("en-US", {
+    return date.toLocaleString(undefined, {
       year: "numeric",
-      month: "short",
-      day: "numeric",
+      month: "long"
     });
   };
 
@@ -56,93 +51,39 @@ export function CalculationView() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Date Range</CardTitle>
+            <CardTitle>Date</CardTitle>
             <CardDescription>
-              Select the period for your income calculation
+              Select the month for your income calculation
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>Start Date</Label>
-                <Popover
-                  open={isStartDateCalendarOpen}
-                  onOpenChange={setIsStartDateCalendarOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {formatDate(startDate)}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <CalendarComponent
-                      timeZone="UTC"
-                      mode="single"
-                      selected={
-                        startDate ? plainDateToTZDate(startDate) : undefined
+            <div className="flex flex-col gap-2">
+              <Label>Month</Label>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="self-start text-left">
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {formatDate(date)}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    timeZone="UTC"
+                    mode="single"
+                    selected={plainDateToTZDate(date)}
+                    defaultMonth={plainDateToTZDate(date)}
+                    onSelect={(date) => {
+                      if (date) {
+                        setDate(
+                          tzDateToPlainDate(new TZDate(date, "UTC"))
+                        );
+                        setIsCalendarOpen(false);
                       }
-                      defaultMonth={
-                        startDate ? plainDateToTZDate(startDate) : undefined
-                      }
-                      onSelect={(date) => {
-                        if (date) {
-                          const startDate = tzDateToPlainDate(new TZDate(date, "UTC"));
-                          // Don't allow the startDate to be after the endDate
-                          if (
-                            Temporal.PlainDate.compare(startDate, endDate) > 0
-                          ) {
-                            setEndDate(startDate);
-                          }
-                          setStartDate(tzDateToPlainDate(new TZDate(date, "UTC")));
-                          setIsStartDateCalendarOpen(false);
-                        }
-                      }}
-                      autoFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="space-y-2">
-                <Label>End Date</Label>
-                <Popover
-                  open={isEndDateCalendarOpen}
-                  onOpenChange={setIsEndDateCalendarOpen}
-                >
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {formatDate(endDate)}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <CalendarComponent
-                      timeZone="UTC"
-                      mode="single"
-                      disabled={{ before: plainDateToTZDate(startDate) }}
-                      selected={
-                        endDate ? plainDateToTZDate(endDate) : undefined
-                      }
-                      defaultMonth={
-                        endDate ? plainDateToTZDate(endDate) : undefined
-                      }
-                      onSelect={(date) => {
-                        if (date) {
-                          setEndDate(tzDateToPlainDate(new TZDate(date, "UTC")));
-                          setIsEndDateCalendarOpen(false);
-                        }
-                      }}
-                      autoFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
+                    }}
+                    autoFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </CardContent>
         </Card>
@@ -163,9 +104,9 @@ export function CalculationView() {
                 <span>{components.length}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-medium">Period:</span>
+                <span className="font-medium">Date:</span>
                 <span>
-                  {formatDate(startDate)} - {formatDate(endDate)}
+                  {formatDate(date)}
                 </span>
               </div>
             </div>
@@ -178,9 +119,8 @@ export function CalculationView() {
         onValueChange={setCalculationTab}
         className="w-full"
       >
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="inputs">Inputs</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
         </TabsList>
         <TabsContent value="inputs" className="py-4">
@@ -197,23 +137,10 @@ export function CalculationView() {
               </Card>
             ) : (
               components.map((component) => (
-                <ComponentInputs key={component.id} component={component} />
+                <ComponentInputs key={component.id} component={component} date={date} />
               ))
             )}
           </div>
-        </TabsContent>
-        <TabsContent value="timeline" className="py-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Income Timeline</CardTitle>
-              <CardDescription>Visualize your income over time</CardDescription>
-            </CardHeader>
-            <CardContent className="h-80 flex items-center justify-center">
-              <p className="text-muted-foreground">
-                Timeline visualization will appear here
-              </p>
-            </CardContent>
-          </Card>
         </TabsContent>
         <TabsContent value="breakdown" className="py-4">
           <Card>

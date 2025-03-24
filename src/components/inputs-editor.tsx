@@ -16,6 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Input as InputType } from "@/types/income";
+import { Badge } from "@/components/ui/badge";
 
 interface InputsEditorProps {
   inputs: Array<InputType>;
@@ -50,12 +51,15 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
     }
   };
 
-  const handleInputChange = (updatedInput: InputType) => {
+  const handleInputChange = (oldID: string, updatedInput: InputType) => {
     onInputChange(
       inputs.map((input) =>
-        input.id === updatedInput.id ? updatedInput : input
+        input.id === oldID ? updatedInput : input
       )
     );
+    if (oldID !== updatedInput.id) {
+      setSelectedInputId(updatedInput.id);
+    }
   };
 
   return (
@@ -93,7 +97,10 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                   onClick={() => setSelectedInputId(input.id)}
                 >
                   <div>
-                    <p className="font-medium">{input.name}</p>
+                    <div className="flex items-center gap-2">
+                      <div className="font-medium">{input.name}</div>
+                      <Badge variant="outline">{input.id}</Badge>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       {input.type}
                     </p>
@@ -117,12 +124,26 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
             {selectedInput ? (
               <div className="space-y-4 border rounded-md p-4">
                 <div className="space-y-2">
+                  <Label htmlFor="input-id">ID</Label>
+                  <Input
+                    id="input-id"
+                    value={selectedInput.id}
+                    onChange={(e) =>
+                      handleInputChange(selectedInput.id, {
+                        ...selectedInput,
+                        id: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="input-name">Name</Label>
                   <Input
                     id="input-name"
                     value={selectedInput.name}
                     onChange={(e) =>
-                      handleInputChange({
+                      handleInputChange(selectedInput.id, {
                         ...selectedInput,
                         name: e.target.value,
                       })
@@ -136,7 +157,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     id="input-description"
                     value={selectedInput.description || ""}
                     onChange={(e) =>
-                      handleInputChange({
+                      handleInputChange(selectedInput.id, {
                         ...selectedInput,
                         description: e.target.value,
                       })
@@ -180,6 +201,12 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           validation: undefined,
                           placeholder: "",
                         };
+                      } else if (value === "boolean") {
+                        newInput = {
+                          ...baseInput,
+                          type: "boolean",
+                          defaultValue: false,
+                        };
                       } else if (value === "select") {
                         newInput = {
                           ...baseInput,
@@ -207,7 +234,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         };
                       }
 
-                      handleInputChange(newInput);
+                      handleInputChange(selectedInput.id, newInput);
                     }}
                   >
                     <SelectTrigger id="input-type">
@@ -216,6 +243,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     <SelectContent>
                       <SelectItem value="text">Text</SelectItem>
                       <SelectItem value="number">Number</SelectItem>
+                      <SelectItem value="boolean">Boolean</SelectItem>
                       <SelectItem value="select">Select</SelectItem>
                       <SelectItem value="range">Range</SelectItem>
                     </SelectContent>
@@ -227,7 +255,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     id="input-required"
                     checked={selectedInput.required !== false}
                     onCheckedChange={(checked) =>
-                      handleInputChange({
+                      handleInputChange(selectedInput.id, {
                         ...selectedInput,
                         required: checked,
                       })
@@ -244,7 +272,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         id="input-default"
                         value={selectedInput.defaultValue || ""}
                         onChange={(e) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             defaultValue: e.target.value,
                           })
@@ -259,7 +287,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.minLength || ""}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               minLength: e.target.value
                                 ? Number.parseInt(e.target.value)
@@ -275,7 +303,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.maxLength || ""}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               maxLength: e.target.value
                                 ? Number.parseInt(e.target.value)
@@ -291,7 +319,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         id="input-placeholder"
                         value={selectedInput.placeholder || ""}
                         onChange={(e) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             placeholder: e.target.value,
                           })
@@ -310,7 +338,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         type="number"
                         value={selectedInput.defaultValue || ""}
                         onChange={(e) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             defaultValue: e.target.value
                               ? Number.parseFloat(e.target.value)
@@ -325,7 +353,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         id="input-unit"
                         value={selectedInput.unit || ""}
                         onChange={(e) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             unit: e.target.value,
                           })
@@ -340,7 +368,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.min || ""}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               min: e.target.value
                                 ? Number.parseFloat(e.target.value)
@@ -356,7 +384,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.max || ""}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               max: e.target.value
                                 ? Number.parseFloat(e.target.value)
@@ -372,7 +400,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.step || ""}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               step: e.target.value
                                 ? Number.parseFloat(e.target.value)
@@ -388,7 +416,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         id="input-placeholder"
                         value={selectedInput.placeholder || ""}
                         onChange={(e) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             placeholder: e.target.value,
                           })
@@ -396,6 +424,29 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       />
                     </div>
                   </>
+                )}
+
+                {selectedInput.type === "boolean" && (
+                  <div className="space-y-2">
+                    <Label htmlFor="input-default">Default Value</Label>
+                    <Select
+                      value={selectedInput.defaultValue ? "true" : "false"}
+                      onValueChange={(value) =>
+                        handleInputChange(selectedInput.id, {
+                          ...selectedInput,
+                          defaultValue: value === "true",
+                        })
+                      }
+                    >
+                      <SelectTrigger id="input-default">
+                        <SelectValue placeholder="Select default value" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">True</SelectItem>
+                        <SelectItem value="false">False</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 )}
 
                 {selectedInput.type === "select" && (
@@ -415,7 +466,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                                 ...newOptions[index],
                                 label: e.target.value,
                               };
-                              handleInputChange({
+                              handleInputChange(selectedInput.id, {
                                 ...selectedInput,
                                 options: newOptions,
                               });
@@ -428,7 +479,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                               const newOptions = selectedInput.options.filter(
                                 (_, i) => i !== index
                               );
-                              handleInputChange({
+                              handleInputChange(selectedInput.id, {
                                 ...selectedInput,
                                 options: newOptions,
                               });
@@ -449,7 +500,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                               label: `Option ${(selectedInput.options?.length || 0) + 1}`,
                             },
                           ];
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             options: newOptions,
                           });
@@ -466,7 +517,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       <Select
                         value={selectedInput.defaultOption || ""}
                         onValueChange={(value) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             defaultOption: value,
                           })
@@ -496,7 +547,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         type="number"
                         value={selectedInput.defaultValue || 0}
                         onChange={(e) =>
-                          handleInputChange({
+                          handleInputChange(selectedInput.id, {
                             ...selectedInput,
                             defaultValue:
                               Number.parseFloat(e.target.value) || 0,
@@ -512,7 +563,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.min || 0}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               min: Number.parseFloat(e.target.value) || 0,
                             })
@@ -526,7 +577,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.max || 100}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               max: Number.parseFloat(e.target.value) || 100,
                             })
@@ -540,7 +591,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type="number"
                           value={selectedInput.step || 1}
                           onChange={(e) =>
-                            handleInputChange({
+                            handleInputChange(selectedInput.id, {
                               ...selectedInput,
                               step: Number.parseFloat(e.target.value) || 1,
                             })
