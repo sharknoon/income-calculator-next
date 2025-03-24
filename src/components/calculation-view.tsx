@@ -27,6 +27,8 @@ import { jsDateToPlainDate, plainDateToJsDate } from "@/lib/date";
 export function CalculationView() {
   const { components } = useComponents();
 
+  const [isStartDateCalendarOpen, setIsStartDateCalendarOpen] = useState(false);
+  const [isEndDateCalendarOpen, setIsEndDateCalendarOpen] = useState(false);
   const [startDate, setStartDate] = useState<Temporal.PlainDate>(
     Temporal.Now.plainDateISO()
   );
@@ -62,7 +64,10 @@ export function CalculationView() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Start Date</Label>
-                <Popover>
+                <Popover
+                  open={isStartDateCalendarOpen}
+                  onOpenChange={setIsStartDateCalendarOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -79,9 +84,12 @@ export function CalculationView() {
                       selected={
                         startDate ? plainDateToJsDate(startDate) : undefined
                       }
-                      onSelect={(d) =>
-                        d ? setStartDate(jsDateToPlainDate(d)) : undefined
-                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          setStartDate(jsDateToPlainDate(date));
+                          setIsStartDateCalendarOpen(false);
+                        }
+                      }}
                       autoFocus
                     />
                   </PopoverContent>
@@ -89,7 +97,10 @@ export function CalculationView() {
               </div>
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <Popover>
+                <Popover
+                  open={isEndDateCalendarOpen}
+                  onOpenChange={setIsEndDateCalendarOpen}
+                >
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
@@ -106,9 +117,12 @@ export function CalculationView() {
                       selected={
                         endDate ? plainDateToJsDate(endDate) : undefined
                       }
-                      onSelect={(d) =>
-                        d ? setEndDate(jsDateToPlainDate(d)) : undefined
-                      }
+                      onSelect={(date) => {
+                        if (date) {
+                          setEndDate(jsDateToPlainDate(date));
+                          setIsEndDateCalendarOpen(false);
+                        }
+                      }}
                       autoFocus
                     />
                   </PopoverContent>
