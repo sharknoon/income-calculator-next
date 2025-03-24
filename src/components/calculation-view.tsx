@@ -84,8 +84,18 @@ export function CalculationView() {
                       selected={
                         startDate ? plainDateToJsDate(startDate) : undefined
                       }
+                      defaultMonth={
+                        startDate ? plainDateToJsDate(startDate) : undefined
+                      }
                       onSelect={(date) => {
                         if (date) {
+                          const startDate = jsDateToPlainDate(date);
+                          // Don't allow the startDate to be after the endDate
+                          if (
+                            Temporal.PlainDate.compare(startDate, endDate) > 0
+                          ) {
+                            setEndDate(startDate);
+                          }
                           setStartDate(jsDateToPlainDate(date));
                           setIsStartDateCalendarOpen(false);
                         }
@@ -114,7 +124,11 @@ export function CalculationView() {
                     <CalendarComponent
                       timeZone="UTC"
                       mode="single"
+                      disabled={{ before: plainDateToJsDate(startDate) }}
                       selected={
+                        endDate ? plainDateToJsDate(endDate) : undefined
+                      }
+                      defaultMonth={
                         endDate ? plainDateToJsDate(endDate) : undefined
                       }
                       onSelect={(date) => {

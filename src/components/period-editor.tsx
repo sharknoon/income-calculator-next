@@ -106,6 +106,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                 timeZone="UTC"
                 mode="single"
                 selected={plainDateToJsDate(period.startDate)}
+                defaultMonth={plainDateToJsDate(period.startDate)}
                 onSelect={(date) => {
                   if (date) {
                     const startDate = jsDateToPlainDate(date);
@@ -170,6 +171,11 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                 disabled={{ before: plainDateToJsDate(period.startDate) }}
                 selected={
                   period.endDate ? plainDateToJsDate(period.endDate) : undefined
+                }
+                defaultMonth={
+                  period.endDate
+                    ? plainDateToJsDate(period.endDate)
+                    : undefined
                 }
                 onSelect={(date) => {
                   if (date) {
