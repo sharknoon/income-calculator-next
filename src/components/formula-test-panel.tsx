@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Calculator } from "lucide-react";
-import type { Calculation, DependencyValue, InputValue } from "@/types/income";
+import type { Calculation, InputValue } from "@/types/income";
 import { ComponentInput } from "@/components/component-input";
 
 interface FormulaTestPanelProps {
@@ -29,12 +29,12 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
         }
         return acc;
       },
-      {} as Record<string, InputValue>
-    )
+      {} as Record<string, InputValue>,
+    ),
   );
-  const [dependencyValues, setDependencyValues] = useState<Record<string, DependencyValue>>(
-    {}
-  );
+  const [dependencyValues, setDependencyValues] = useState<
+    Record<string, number>
+  >({});
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,8 +48,8 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
           }
           return acc;
         },
-        {} as Record<string, InputValue>
-      )
+        {} as Record<string, InputValue>,
+      ),
     );
     setDependencyValues({});
     setResult(null);
@@ -63,7 +63,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
     }));
   };
 
-  const handleDependencyChange = (depId: string, value: DependencyValue) => {
+  const handleDependencyChange = (depId: string, value: number) => {
     setDependencyValues((prev) => ({
       ...prev,
       [depId]: value,
@@ -85,7 +85,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
           `const dependencies = JSON.parse('${JSON.stringify(dependencies)}');` +
           calculation.func +
           "}" +
-          "calculate();"
+          "calculate();",
       );
 
       // Format the result
@@ -94,7 +94,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
     } catch (err) {
       setResult(null);
       setError(
-        `Error executing formula: ${err instanceof Error ? err.message : String(err)}`
+        `Error executing formula: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   };
@@ -150,13 +150,13 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
                         (dependencies.{depId})
                       </span>
                     </Label>
-                    <ComponentInput
+                    <Input
                       type="number"
-                      value={dependencyValues[depId] || "0"}
+                      value={dependencyValues[depId] || 0}
                       onChange={(e) =>
                         handleDependencyChange(
                           depId,
-                          Number.parseFloat(e.target.value) || 0
+                          Number.parseFloat(e.target.value) || 0,
                         )
                       }
                       placeholder="Enter value"

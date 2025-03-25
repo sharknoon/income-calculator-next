@@ -156,5 +156,3 @@ export type Input = BaseInput &
   (TextInput | NumberInput | BooleanInput | SelectInput | RangeInput);
 
 export type InputValue = string | number | boolean;
-
-export type DependencyValue = InputValue;

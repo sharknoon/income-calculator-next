@@ -100,11 +100,7 @@ export function ComponentInput({
             min={input.min}
             max={input.max}
             step={input.step}
-            value={
-              typeof value === "number"
-                ? [value]
-                : [input.defaultValue]
-            }
+            value={typeof value === "number" ? [value] : [input.defaultValue]}
             onValueChange={(values) => onChange?.(input.id, values[0])}
           />
           <div className="flex justify-between text-xs text-muted-foreground">

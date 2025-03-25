@@ -21,11 +21,11 @@ export function ComponentInputs({ component, date }: ComponentInputsProps) {
           (period) =>
             Temporal.PlainDate.compare(period.period.startDate, date) <= 0 &&
             (!period.period.endDate ||
-              Temporal.PlainDate.compare(period.period.endDate, date) >= 0)
+              Temporal.PlainDate.compare(period.period.endDate, date) >= 0),
         )?.calculation.inputs ?? []);
   // Initialize input values from localStorage if available
   const [inputValues, setInputValues] = useState<Record<string, InputValue>>(
-    {}
+    {},
   );
 
   // Load input values from localStorage after component mounts (client-side only)
@@ -33,7 +33,7 @@ export function ComponentInputs({ component, date }: ComponentInputsProps) {
     if (typeof window !== "undefined") {
       try {
         const savedValues = localStorage.getItem(
-          `incomeCalculator.inputValues.${component.id}`
+          `incomeCalculator.inputValues.${component.id}`,
         );
         if (savedValues) {
           setInputValues(JSON.parse(savedValues));
@@ -50,7 +50,7 @@ export function ComponentInputs({ component, date }: ComponentInputsProps) {
       try {
         localStorage.setItem(
           `incomeCalculator.inputValues.${component.id}`,
-          JSON.stringify(inputValues)
+          JSON.stringify(inputValues),
         );
       } catch (error) {
         console.error("Failed to save input values to localStorage:", error);
