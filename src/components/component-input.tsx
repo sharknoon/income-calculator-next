@@ -1,4 +1,4 @@
-import { Input as InputType } from "@/types/income";
+import { Input as InputType, InputValue } from "@/types/income";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -12,8 +12,8 @@ import { Input } from "@/components/ui/input";
 
 interface ComponentInputProps {
   input: InputType;
-  value?: any;
-  onChange?: (id: string, value: any) => void;
+  value?: InputValue;
+  onChange?: (id: string, value: InputValue) => void;
 }
 
 export function ComponentInput({
@@ -26,7 +26,7 @@ export function ComponentInput({
       return (
         <Input
           id={input.id}
-          value={value ?? input.defaultValue ?? ""}
+          value={typeof value === "string" ? value : (input.defaultValue ?? "")}
           onChange={(e) => onChange?.(input.id, e.target.value)}
           placeholder={input.placeholder || ""}
           minLength={input.minLength}
@@ -41,7 +41,9 @@ export function ComponentInput({
           <Input
             id={input.id}
             type="number"
-            value={value ?? input.defaultValue ?? ""}
+            value={
+              typeof value === "number" ? value : (input.defaultValue ?? "")
+            }
             onChange={(e) =>
               onChange?.(input.id, Number.parseFloat(e.target.value) || 0)
             }
@@ -63,7 +65,9 @@ export function ComponentInput({
         <div className="flex items-center space-x-2">
           <Switch
             id={input.id}
-            checked={value ?? input.defaultValue ?? false}
+            checked={
+              typeof value === "boolean" ? value : (input.defaultValue ?? false)
+            }
             onCheckedChange={(value) => onChange?.(input.id, value)}
             required={input.required !== false}
           />
@@ -72,7 +76,7 @@ export function ComponentInput({
     case "select":
       return (
         <Select
-          value={value ?? input.defaultValue ?? ""}
+          value={typeof value === "string" ? value : (input.defaultValue ?? "")}
           onValueChange={(value) => onChange?.(input.id, value)}
           required={input.required !== false}
         >
@@ -96,7 +100,11 @@ export function ComponentInput({
             min={input.min}
             max={input.max}
             step={input.step}
-            value={value ?? input.defaultValue}
+            value={
+              typeof value === "number"
+                ? [value]
+                : [input.defaultValue]
+            }
             onValueChange={(values) => onChange?.(input.id, values[0])}
           />
           <div className="flex justify-between text-xs text-muted-foreground">

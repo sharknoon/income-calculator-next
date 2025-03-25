@@ -17,11 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type {
-  Monthly,
-  MonthPosition,
-  Period,
-} from "@/types/income";
+import type { Monthly, MonthPosition, Period } from "@/types/income";
 import { tzDateToPlainDate, plainDateToTZDate } from "@/lib/date";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -158,7 +154,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                 onSelect={(date) => {
                   if (date) {
                     const startDate = tzDateToPlainDate(
-                      new TZDate(date, "UTC")
+                      new TZDate(date, "UTC"),
                     );
                     // Don't allow the startDate to be after the endDate
                     if (
@@ -191,7 +187,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                   className={cn(
                     "grow justify-start text-left",
                     !period.endDate && "text-muted-foreground",
-                    period.endDate && "rounded-r-none"
+                    period.endDate && "rounded-r-none",
                   )}
                 >
                   <Calendar className="mr-2 h-4 w-4" />

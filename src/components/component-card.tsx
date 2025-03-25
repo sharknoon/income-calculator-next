@@ -44,7 +44,7 @@ export function ComponentCard({ component }: ComponentCardProps) {
         <div className="space-y-2">
           {component.type === "recurring" &&
             mergeDatePeriods(
-              component.calculationPeriods.map((p) => p.period)
+              component.calculationPeriods.map((p) => p.period),
             ).map((period, index) => (
               <div
                 key={index}

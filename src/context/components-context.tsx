@@ -13,13 +13,12 @@ import { Temporal } from "@js-temporal/polyfill";
 interface ComponentsContextType {
   components: Component[];
   addComponent: (component: Component) => void;
-  updateComponent: (component: Component) => void;
+  updateComponent: (oldID: string, component: Component) => void;
   removeComponent: (id: string) => void;
-  clearAllComponents: () => void;
 }
 
 const ComponentsContext = createContext<ComponentsContextType | undefined>(
-  undefined
+  undefined,
 );
 
 export function ComponentsProvider({ children }: { children: ReactNode }) {
@@ -30,7 +29,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       try {
         const savedComponents = localStorage.getItem(
-          "incomeCalculator.components"
+          "incomeCalculator.components",
         );
         if (savedComponents) {
           const parsedComponents = JSON.parse(savedComponents, (key, value) => {
@@ -58,7 +57,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
       try {
         localStorage.setItem(
           "incomeCalculator.components",
-          JSON.stringify(components)
+          JSON.stringify(components),
         );
       } catch (error) {
         console.error("Failed to save components to localStorage:", error);
@@ -70,25 +69,12 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
     setComponents((prev) => [...prev, component]);
   };
 
-  const updateComponent = (component: Component) => {
-    setComponents((prev) =>
-      prev.map((c) => (c.id === component.id ? component : c))
-    );
+  const updateComponent = (oldID: string, component: Component) => {
+    setComponents((prev) => prev.map((c) => (c.id === oldID ? component : c)));
   };
 
   const removeComponent = (id: string) => {
     setComponents((prev) => prev.filter((c) => c.id !== id));
-  };
-
-  const clearAllComponents = () => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete all components? This cannot be undone."
-      )
-    ) {
-      setComponents([]);
-      localStorage.removeItem("incomeCalculator.components");
-    }
   };
 
   return (
@@ -98,7 +84,6 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
         addComponent,
         updateComponent,
         removeComponent,
-        clearAllComponents,
       }}
     >
       {children}

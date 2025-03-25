@@ -14,11 +14,11 @@ import { ComponentCard } from "@/components/component-card";
 import { Temporal } from "@js-temporal/polyfill";
 
 export function ComponentsList() {
-  const { components, addComponent, clearAllComponents } = useComponents();
+  const { components, addComponent } = useComponents();
   const router = useRouter();
 
   const handleAddComponent = () => {
-    const newId = crypto.randomUUID();
+    const newId = (Math.random() + 1).toString(36).substring(7);
     addComponent({
       id: newId,
       name: "New Component",
@@ -49,11 +49,6 @@ export function ComponentsList() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Income Components</h2>
         <div className="flex gap-2">
-          {components.length > 0 && (
-            <Button variant="outline" onClick={clearAllComponents}>
-              Clear All
-            </Button>
-          )}
           <Button onClick={handleAddComponent}>
             <Plus className="mr-2 h-4 w-4" />
             Add Component

@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Component } from "@/types/income";
+import type { Component, InputValue } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
 import { ComponentInput } from "@/components/component-input";
 
@@ -13,11 +13,20 @@ interface ComponentInputsProps {
   date: Temporal.PlainDate;
 }
 
-export function ComponentInputs({ component }: ComponentInputsProps) {
+export function ComponentInputs({ component, date }: ComponentInputsProps) {
   const inputs =
-    component.type === "one-time" ? component.calculation.inputs : [];
+    component.type === "one-time"
+      ? component.calculation.inputs
+      : (component.calculationPeriods.find(
+          (period) =>
+            Temporal.PlainDate.compare(period.period.startDate, date) <= 0 &&
+            (!period.period.endDate ||
+              Temporal.PlainDate.compare(period.period.endDate, date) >= 0)
+        )?.calculation.inputs ?? []);
   // Initialize input values from localStorage if available
-  const [inputValues, setInputValues] = useState<Record<string, any>>({});
+  const [inputValues, setInputValues] = useState<Record<string, InputValue>>(
+    {}
+  );
 
   // Load input values from localStorage after component mounts (client-side only)
   useEffect(() => {
@@ -64,7 +73,7 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
     );
   }
 
-  const handleInputChange = (inputId: string, value: any) => {
+  const handleInputChange = (inputId: string, value: InputValue) => {
     setInputValues((prev) => ({
       ...prev,
       [inputId]: value,
@@ -91,7 +100,11 @@ export function ComponentInputs({ component }: ComponentInputsProps) {
                   {input.description}
                 </p>
               )}
-              <ComponentInput input={input} value={inputValues[input.id]} onChange={handleInputChange} />
+              <ComponentInput
+                input={input}
+                value={inputValues[input.id]}
+                onChange={handleInputChange}
+              />
             </div>
           ))}
         </div>

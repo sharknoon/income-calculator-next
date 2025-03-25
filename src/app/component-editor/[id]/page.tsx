@@ -10,7 +10,7 @@ import { useComponents } from "@/context/components-context";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PeriodEditor } from "@/components/period-editor";
 import { InputsEditor } from "@/components/inputs-editor";
@@ -32,7 +32,7 @@ export default function ComponentEditorPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const [component, setComponent] = useState<Component | undefined>(
-    components.find((c) => c.id === params.id)
+    components.find((c) => c.id === params.id),
   );
   const [editorTab, setEditorTab] = useState("details");
   const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(0);
@@ -52,24 +52,38 @@ export default function ComponentEditorPage() {
     return null;
   }
 
+  const handleIDChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let newID = e.target.value;
+    // remove invalid characters
+    newID = newID.replace(/[^a-z0-9_\$]/g, "");
+    // ensure it starts with a letter
+    newID = newID.replace(/^[^a-z_\$]/, "i");
+    const updatedComponent = {
+      ...component,
+      id: newID,
+    };
+    setComponent(updatedComponent);
+    updateComponent(component.id, updatedComponent);
+  };
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const updatedComponent = {
       ...component,
       name: e.target.value,
     };
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const updatedComponent = {
       ...component,
       description: e.target.value,
     };
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const handleTypeChange = (type: Component["type"]) => {
@@ -110,7 +124,7 @@ export default function ComponentEditorPage() {
       };
     }
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const handleRecurringPeriodChange = (period: Period) => {
@@ -121,11 +135,11 @@ export default function ComponentEditorPage() {
     const updatedComponent = {
       ...component,
       calculationPeriods: component.calculationPeriods.map((p, i) =>
-        i === selectedPeriodIndex ? { ...p, period: period } : p
+        i === selectedPeriodIndex ? { ...p, period: period } : p,
       ),
     };
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const handleOneTimeDateChange = (date: Temporal.PlainDate) => {
@@ -138,7 +152,7 @@ export default function ComponentEditorPage() {
       date: date,
     };
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const handleInputChange = (inputs: Array<InputType>) => {
@@ -157,13 +171,13 @@ export default function ComponentEditorPage() {
         calculationPeriods: component.calculationPeriods.map((p, i) =>
           i === selectedPeriodIndex
             ? { ...p, calculation: { ...p.calculation, inputs: inputs } }
-            : p
+            : p,
         ),
       };
     }
 
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const handleCalculationChange = (calculation: Calculation) => {
@@ -177,13 +191,13 @@ export default function ComponentEditorPage() {
       updatedComponent = {
         ...component,
         calculationPeriods: component.calculationPeriods.map((p, i) =>
-          i === selectedPeriodIndex ? { ...p, calculation: calculation } : p
+          i === selectedPeriodIndex ? { ...p, calculation: calculation } : p,
         ),
       };
     }
 
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
   };
 
   const addNewCalculationPeriod = () => {
@@ -216,7 +230,7 @@ export default function ComponentEditorPage() {
     };
 
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
     setSelectedPeriodIndex(updatedComponent.calculationPeriods.length - 1);
   };
 
@@ -238,7 +252,7 @@ export default function ComponentEditorPage() {
     };
 
     setComponent(updatedComponent);
-    updateComponent(updatedComponent);
+    updateComponent(updatedComponent.id, updatedComponent);
     setSelectedPeriodIndex(updatedCalculationPeriods.length - 1);
   };
 
@@ -252,17 +266,28 @@ export default function ComponentEditorPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>
-            <Input
-              value={component.name}
-              onChange={handleNameChange}
-              className="text-xl font-bold"
-            />
-          </CardTitle>
-        </CardHeader>
         <CardContent>
           <div className="space-y-4">
+            <div>
+              <Label htmlFor="id">ID</Label>
+              <Input
+                id="id"
+                value={component.id || ""}
+                onChange={handleIDChange}
+                className="mt-1"
+              />
+            </div>
+
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                value={component.name || ""}
+                onChange={handleNameChange}
+                className="mt-1"
+              />
+            </div>
+
             <div>
               <Label htmlFor="description">Description</Label>
               <Textarea

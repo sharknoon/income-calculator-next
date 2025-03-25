@@ -25,13 +25,13 @@ interface InputsEditorProps {
 
 export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
   const [selectedInputId, setSelectedInputId] = useState<string | null>(
-    inputs.length > 0 ? inputs[0].id : null
+    inputs.length > 0 ? inputs[0].id : null,
   );
 
   const selectedInput = inputs.find((input) => input.id === selectedInputId);
 
   const handleAddInput = () => {
-    const newInputId = `input-${crypto.randomUUID()}`;
+    const newInputId = (Math.random() + 1).toString(36).substring(7);
     const newInput: InputType = {
       id: newInputId,
       name: "New Input",
@@ -53,7 +53,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
 
   const handleInputChange = (oldID: string, updatedInput: InputType) => {
     onInputChange(
-      inputs.map((input) => (input.id === oldID ? updatedInput : input))
+      inputs.map((input) => (input.id === oldID ? updatedInput : input)),
     );
     if (oldID !== updatedInput.id) {
       setSelectedInputId(updatedInput.id);
@@ -97,7 +97,12 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <div className="font-medium">{input.name}</div>
-                      <Badge variant="outline" className="inline truncate shrink">{input.id}</Badge>
+                      <Badge
+                        variant="outline"
+                        className="inline truncate shrink"
+                      >
+                        {input.id}
+                      </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {input.type}
@@ -126,13 +131,22 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                   <Input
                     id="input-id"
                     value={selectedInput.id}
-                    onChange={(e) =>
+                    onChange={(e) => {
+                      let newId = e.target.value;
+                      // remove invalid characters
+                      newId = newId.replace(/[^a-z0-9_\$]/g, "");
+                      // ensure it starts with a letter
+                      newId = newId.replace(/^[^a-z_\$]/, "i");
                       handleInputChange(selectedInput.id, {
                         ...selectedInput,
-                        id: e.target.value,
-                      })
-                    }
+                        id: newId,
+                      });
+                    }}
                   />
+                  <Label className="text-muted-foreground text-xs">
+                    Must start with a letter and only contain letters, numbers,
+                    underscores, and dollar signs
+                  </Label>
                 </div>
 
                 <div className="space-y-2">
@@ -211,11 +225,11 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           type: "select",
                           options: [
                             {
-                              id: `option-${crypto.randomUUID()}`,
+                              id: (Math.random() + 1).toString(36).substring(7),
                               label: "Option 1",
                             },
                             {
-                              id: `option-${crypto.randomUUID()}`,
+                              id: (Math.random() + 1).toString(36).substring(7),
                               label: "Option 2",
                             },
                           ],
@@ -501,6 +515,10 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label>Options</Label>
+                      <Label className="text-muted-foreground text-xs">
+                        IDs must start with a letter and only contain letters,
+                        numbers, underscores, and dollar signs
+                      </Label>
                       {selectedInput.options.map((option, index) => (
                         <div key={option.id} className="flex items-center">
                           <div className="self-stretch flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
@@ -510,9 +528,14 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                             value={option.id}
                             onChange={(e) => {
                               const newOptions = [...selectedInput.options];
+                              let newId = e.target.value;
+                              // remove invalid characters
+                              newId = newId.replace(/[^a-z0-9_\$]/g, "");
+                              // ensure it starts with a letter
+                              newId = newId.replace(/^[^a-z_\$]/, "i");
                               newOptions[index] = {
                                 ...newOptions[index],
-                                id: e.target.value,
+                                id: newId,
                               };
                               handleInputChange(selectedInput.id, {
                                 ...selectedInput,
@@ -545,7 +568,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                             size="sm"
                             onClick={() => {
                               const newOptions = selectedInput.options.filter(
-                                (_, i) => i !== index
+                                (_, i) => i !== index,
                               );
                               handleInputChange(selectedInput.id, {
                                 ...selectedInput,
@@ -564,7 +587,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           const newOptions = [
                             ...(selectedInput.options || []),
                             {
-                              id: `option-${crypto.randomUUID()}`,
+                              id: (Math.random() + 1).toString(36).substring(7),
                               label: `Option ${(selectedInput.options?.length || 0) + 1}`,
                             },
                           ];

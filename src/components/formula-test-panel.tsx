@@ -13,8 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Calculator } from "lucide-react";
-import type { Calculation } from "@/types/income";
-import BigNumber from "bignumber.js";
+import type { Calculation, DependencyValue, InputValue } from "@/types/income";
 import { ComponentInput } from "@/components/component-input";
 
 interface FormulaTestPanelProps {
@@ -22,16 +21,18 @@ interface FormulaTestPanelProps {
 }
 
 export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
-  const [inputValues, setInputValues] = useState<Record<string, any>>(
+  const [inputValues, setInputValues] = useState<Record<string, InputValue>>(
     calculation.inputs.reduce(
       (acc, input) => {
-        acc[input.id] = input.defaultValue;
+        if (input.defaultValue !== undefined) {
+          acc[input.id] = input.defaultValue;
+        }
         return acc;
       },
-      {} as Record<string, any>
+      {} as Record<string, InputValue>
     )
   );
-  const [dependencyValues, setDependencyValues] = useState<Record<string, any>>(
+  const [dependencyValues, setDependencyValues] = useState<Record<string, DependencyValue>>(
     {}
   );
   const [result, setResult] = useState<string | null>(null);
@@ -42,10 +43,12 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
     setInputValues(
       calculation.inputs.reduce(
         (acc, input) => {
-          acc[input.id] = input.defaultValue;
+          if (input.defaultValue !== undefined) {
+            acc[input.id] = input.defaultValue;
+          }
           return acc;
         },
-        {} as Record<string, any>
+        {} as Record<string, InputValue>
       )
     );
     setDependencyValues({});
@@ -53,50 +56,46 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
     setError(null);
   }, [calculation]);
 
-  const handleInputChange = (inputId: string, value: any) => {
+  const handleInputChange = (inputId: string, value: InputValue) => {
     setInputValues((prev) => ({
       ...prev,
       [inputId]: value,
     }));
   };
 
-  const handleDependencyChange = (depId: string, value: any) => {
+  const handleDependencyChange = (depId: string, value: DependencyValue) => {
     setDependencyValues((prev) => ({
       ...prev,
       [depId]: value,
     }));
   };
 
-  const executeFormula = () => {
+  const executeFormula = async () => {
     try {
       // Create a safe execution context with BigNumber available
       const inputs = { ...inputValues };
       const dependencies = { ...dependencyValues };
 
       // Create a function that will execute the formula in a controlled context
-      const calculateFn = new Function(
-        "BigNumber",
-        "inputs",
-        "dependencies",
-        `try { ${calculation.func} } catch (e) { throw new Error("Calculation error: " + e.message); }`
+      const ShadowRealm = (await import("shadowrealm-api")).default;
+      const realm = new ShadowRealm();
+      const calculationResult = realm.evaluate(
+        "function calculate() {" +
+          `const inputs = JSON.parse('${JSON.stringify(inputs)}');` +
+          `const dependencies = JSON.parse('${JSON.stringify(dependencies)}');` +
+          calculation.func +
+          "}" +
+          "calculate();"
       );
 
-      // Execute the function with our controlled inputs
-      const calculationResult = calculateFn(BigNumber, inputs, dependencies);
-
       // Format the result
-      if (calculationResult instanceof BigNumber) {
-        setResult(calculationResult.toString());
-      } else {
-        setResult(String(calculationResult));
-      }
-
+      setResult(String(calculationResult));
       setError(null);
     } catch (err) {
+      setResult(null);
       setError(
         `Error executing formula: ${err instanceof Error ? err.message : String(err)}`
       );
-      setResult(null);
     }
   };
 
@@ -151,7 +150,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
                         (dependencies.{depId})
                       </span>
                     </Label>
-                    <Input
+                    <ComponentInput
                       type="number"
                       value={dependencyValues[depId] || "0"}
                       onChange={(e) =>

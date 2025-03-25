@@ -7,7 +7,7 @@ export function plainDateToTZDate(plainDate: Temporal.PlainDate) {
 
 export function tzDateToPlainDate(tzDate: TZDate) {
   return Temporal.PlainDate.from(
-    tzDate.withTimeZone("UTC").toISOString().substring(0, 10)
+    tzDate.withTimeZone("UTC").toISOString().substring(0, 10),
   );
 }
 
@@ -22,7 +22,7 @@ export interface DatePeriod {
  * @returns Array of merged date periods
  */
 export function mergeDatePeriods(
-  periods: Array<DatePeriod>
+  periods: Array<DatePeriod>,
 ): Array<DatePeriod> {
   // Return empty array if input is empty
   if (periods.length === 0) {
@@ -31,7 +31,7 @@ export function mergeDatePeriods(
 
   // Create a copy and sort by startDate
   const sortedPeriods = [...periods].sort((a, b) =>
-    Temporal.PlainDate.compare(a.startDate, b.startDate)
+    Temporal.PlainDate.compare(a.startDate, b.startDate),
   );
 
   // Initialize result with the first period
@@ -57,7 +57,7 @@ export function mergeDatePeriods(
     if (
       Temporal.PlainDate.compare(
         currentPeriod.startDate,
-        lastMergedPeriod.endDate
+        lastMergedPeriod.endDate,
       ) <= 0 ||
       Temporal.PlainDate.compare(currentPeriod.startDate, dayAfterLastEnd) === 0
     ) {
@@ -71,7 +71,7 @@ export function mergeDatePeriods(
         lastMergedPeriod.endDate =
           Temporal.PlainDate.compare(
             lastMergedPeriod.endDate,
-            currentPeriod.endDate
+            currentPeriod.endDate,
           ) >= 0
             ? lastMergedPeriod.endDate
             : currentPeriod.endDate;

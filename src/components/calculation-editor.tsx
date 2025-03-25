@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { Calculation } from "@/types/income";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Play } from "lucide-react";
+import type { Calculation, Input } from "@/types/income";
+import { Play } from "lucide-react";
 import { FormulaTestPanel } from "@/components/formula-test-panel";
 import Editor, { type Monaco } from "@monaco-editor/react";
 
@@ -21,21 +20,52 @@ export function CalculationEditor({
 }: CalculationEditorProps) {
   const { components } = useComponents();
   const [calculationFunc, setCalculationFunc] = useState(
-    calculation.func || "return new BigNumber(0)"
+    calculation.func || "",
   );
   const [showTestPanel, setShowTestPanel] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [monaco, setMonaco] = useState<Monaco | null>(null);
 
   useEffect(() => {
     if (monaco) {
+      // Ignore the error "return can only occur within functions"
+      monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+        diagnosticCodesToIgnore: [1108],
+      });
+
+      function formatInputType(input: Input): string {
+        const lines = [`/**`, ` * ${input.name}`];
+        if (input.description) {
+          lines.push(` * @description ${input.description}`);
+        }
+        lines.push(` */`);
+        let jsType;
+        switch (input.type) {
+          case "number":
+            jsType = "number";
+            break;
+          case "boolean":
+            jsType = "boolean";
+            break;
+          case "text":
+            jsType = "string";
+            break;
+          case "select":
+            jsType = input.options.map((o) => `"${o.id}"`).join(" | ");
+            break;
+          case "range":
+            jsType = "number";
+            break;
+        }
+        lines.push(`"${input.id}": ${jsType};`);
+        const types = lines.join("\n");
+        console.log(types);
+        return types;
+      }
+
       // extra libraries
       const libSource = [
         "interface Inputs {",
-        ...calculation.inputs.map(
-          (input) =>
-            `  /**\n  * ${input.name}\n  * @description ${input.description} */\n  ${input.id}: ${input.type};`
-        ),
+        ...calculation.inputs.map(formatInputType),
         "}",
         "declare const inputs: Inputs;",
       ].join("\n");
@@ -44,27 +74,21 @@ export function CalculationEditor({
       const libUriParsed = monaco.Uri.parse(libUri);
       monaco.languages.typescript.javascriptDefaults.addExtraLib(
         libSource,
-        libUri
+        libUri,
       );
       // When resolving definitions and references, the editor will try to use created models.
       // Creating a model for the library allows "peek definition/references" commands to work with the library.
       monaco.editor.getModel(libUriParsed)?.dispose();
+      console.log("setting types");
       monaco.editor.createModel(libSource, "typescript", libUriParsed);
     }
   }, [monaco, calculation]);
 
   const handleSaveCalculationFunc = () => {
-    try {
-      setError(null);
-      const newCalculation = { ...calculation };
-      newCalculation.func = calculationFunc;
+    const newCalculation = { ...calculation };
+    newCalculation.func = calculationFunc;
 
-      onCalculationChange(newCalculation);
-    } catch (err) {
-      setError(
-        `Error saving calculation: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
+    onCalculationChange(newCalculation);
   };
 
   const handleAddDependency = (dependencyId: string) => {
@@ -82,7 +106,7 @@ export function CalculationEditor({
   const handleRemoveDependency = (dependencyId: string) => {
     const newCalculation = { ...calculation };
     newCalculation.dependencies = newCalculation.dependencies.filter(
-      (id) => id !== dependencyId
+      (id) => id !== dependencyId,
     );
 
     onCalculationChange(newCalculation);
@@ -108,20 +132,13 @@ export function CalculationEditor({
           onChange={(value) => setCalculationFunc(value || "")}
           className="border"
           onMount={(_, monaco) => setMonaco(monaco)}
+          defaultValue={calculation.func}
         />
 
-        {error && (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
         <p className="text-xs text-muted-foreground">
-          Use JavaScript with BigNumber.js to create your calculation formula.
-          Access input values using the input ID, e.g.,{" "}
-          <code>inputs.hourlyRate * inputs.hoursWorked</code>
+          Use JavaScript to create your calculation formula. Access
+          input/dependency values using the their ID, e.g.,{" "}
+          <code>return inputs.hourlyRate * inputs.hoursWorked</code>
         </p>
 
         <Button onClick={handleSaveCalculationFunc}>Save Calculation</Button>
@@ -136,30 +153,27 @@ export function CalculationEditor({
             Select other components that this calculation depends on:
           </p>
 
-          {calculation.dependencies.length === 0 ? (
+          {components.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No other components available
             </p>
           ) : (
             <div className="space-y-2">
-              {calculation.dependencies.map((depId) => (
-                <div key={depId} className="flex items-center space-x-2">
+              {components.map(({ id, name }) => (
+                <div key={id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
-                    id={`dep-${depId}`}
-                    checked={calculation.dependencies.includes(depId)}
+                    id={`dep-${id}`}
+                    checked={calculation.dependencies.includes(id)}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        handleAddDependency(depId);
+                        handleAddDependency(id);
                       } else {
-                        handleRemoveDependency(depId);
+                        handleRemoveDependency(id);
                       }
                     }}
                   />
-                  <Label htmlFor={`dep-${depId}`}>
-                    {components.find((c) => c.id === depId)?.name ||
-                      "Unknown Component"}
-                  </Label>
+                  <Label htmlFor={`dep-${id}`}>{name}</Label>
                 </div>
               ))}
             </div>

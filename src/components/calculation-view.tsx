@@ -30,7 +30,7 @@ export function CalculationView() {
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [date, setDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO()
+    Temporal.Now.plainDateISO(),
   );
   const [calculationTab, setCalculationTab] = useState("inputs");
 
@@ -38,7 +38,7 @@ export function CalculationView() {
     if (!date) return "";
     return date.toLocaleString(undefined, {
       year: "numeric",
-      month: "long"
+      month: "long",
     });
   };
 
@@ -74,9 +74,7 @@ export function CalculationView() {
                     defaultMonth={plainDateToTZDate(date)}
                     onSelect={(date) => {
                       if (date) {
-                        setDate(
-                          tzDateToPlainDate(new TZDate(date, "UTC"))
-                        );
+                        setDate(tzDateToPlainDate(new TZDate(date, "UTC")));
                         setIsCalendarOpen(false);
                       }
                     }}
@@ -105,9 +103,7 @@ export function CalculationView() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-medium">Date:</span>
-                <span>
-                  {formatDate(date)}
-                </span>
+                <span>{formatDate(date)}</span>
               </div>
             </div>
           </CardContent>
@@ -137,7 +133,11 @@ export function CalculationView() {
               </Card>
             ) : (
               components.map((component) => (
-                <ComponentInputs key={component.id} component={component} date={date} />
+                <ComponentInputs
+                  key={component.id}
+                  component={component}
+                  date={date}
+                />
               ))
             )}
           </div>
