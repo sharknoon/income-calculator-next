@@ -8,7 +8,7 @@ import type { Calculation } from "@/types/income";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Play } from "lucide-react";
 import { FormulaTestPanel } from "@/components/formula-test-panel";
-import Editor, { useMonaco } from "@monaco-editor/react";
+import Editor, { type Monaco } from "@monaco-editor/react";
 
 interface CalculationEditorProps {
   calculation: Calculation;
@@ -25,7 +25,7 @@ export function CalculationEditor({
   );
   const [showTestPanel, setShowTestPanel] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const monaco = useMonaco();
+  const [monaco, setMonaco] = useState<Monaco | null>(null);
 
   useEffect(() => {
     if (monaco) {
@@ -48,6 +48,7 @@ export function CalculationEditor({
       );
       // When resolving definitions and references, the editor will try to use created models.
       // Creating a model for the library allows "peek definition/references" commands to work with the library.
+      monaco.editor.getModel(libUriParsed)?.dispose();
       monaco.editor.createModel(libSource, "typescript", libUriParsed);
     }
   }, [monaco, calculation]);
@@ -106,6 +107,7 @@ export function CalculationEditor({
           defaultLanguage="typescript"
           onChange={(value) => setCalculationFunc(value || "")}
           className="border"
+          onMount={(_, monaco) => setMonaco(monaco)}
         />
 
         {error && (

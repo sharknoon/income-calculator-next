@@ -89,15 +89,15 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
               {inputs.map((input) => (
                 <div
                   key={input.id}
-                  className={`flex justify-between items-center p-3 cursor-pointer ${
+                  className={`flex justify-between items-center gap-2 p-3 cursor-pointer ${
                     selectedInputId === input.id ? "bg-muted" : ""
                   } hover:bg-muted/50`}
                   onClick={() => setSelectedInputId(input.id)}
                 >
-                  <div>
+                  <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <div className="font-medium">{input.name}</div>
-                      <Badge variant="outline">{input.id}</Badge>
+                      <Badge variant="outline" className="inline truncate shrink">{input.id}</Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {input.type}
