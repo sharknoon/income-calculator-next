@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Trash2, Calendar } from "lucide-react";
+import { Edit, Trash2, Calendar, Download } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +44,7 @@ export function ComponentCard({ component }: ComponentCardProps) {
         <div className="space-y-2">
           {component.type === "recurring" &&
             mergeDatePeriods(
-              component.calculationPeriods.map((p) => p.period),
+              component.calculationPeriods.map((p) => p.period)
             ).map((period, index) => (
               <div
                 key={index}
@@ -76,6 +76,23 @@ export function ComponentCard({ component }: ComponentCardProps) {
           onClick={() => removeComponent(component.id)}
         >
           <Trash2 className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => {
+            const blob = new Blob([JSON.stringify(component, null, 2)], {
+              type: "application/json",
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.setAttribute("href", url);
+            a.setAttribute("download", `${component.name}.json`);
+            a.click();
+            URL.revokeObjectURL(url);
+          }}
+        >
+          <Download className="h-4 w-4" />
         </Button>
         <Button size="sm" onClick={handleEdit}>
           <Edit className="mr-2 h-4 w-4" />

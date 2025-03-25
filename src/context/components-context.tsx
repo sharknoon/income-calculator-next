@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Component } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
+import { toast } from "sonner";
 
 interface ComponentsContextType {
   components: Component[];
@@ -63,6 +64,7 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
         console.error("Failed to save components to localStorage:", error);
       }
     }
+    toast.success("Component saved successfully");
   }, [components]);
 
   const addComponent = (component: Component) => {

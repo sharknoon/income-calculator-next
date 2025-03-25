@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +16,29 @@ import { Temporal } from "@js-temporal/polyfill";
 export function ComponentsList() {
   const { components, addComponent } = useComponents();
   const router = useRouter();
+
+  const handleUploadComponent = () => {
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.accept = ".json";
+    fileInput.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const fileReader = new FileReader();
+      fileReader.onload = async (e) => {
+        try {
+          if (!e.target) return;
+          const component = JSON.parse(e.target.result as string);
+          addComponent(component);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fileReader.readAsText(file);
+    }
+    fileInput.click();
+  };
 
   const handleAddComponent = () => {
     const newId = (Math.random() + 1).toString(36).substring(7);
@@ -49,6 +72,7 @@ export function ComponentsList() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Income Components</h2>
         <div className="flex gap-2">
+          <Button variant="outline" onClick={handleUploadComponent}><Upload /></Button>
           <Button onClick={handleAddComponent}>
             <Plus className="mr-2 h-4 w-4" />
             Add Component

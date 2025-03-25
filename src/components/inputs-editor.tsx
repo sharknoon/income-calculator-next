@@ -520,7 +520,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         numbers, underscores, and dollar signs
                       </Label>
                       {selectedInput.options.map((option, index) => (
-                        <div key={option.id} className="flex items-center">
+                        <div key={index} className="flex items-center">
                           <div className="self-stretch flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
                             ID
                           </div>
