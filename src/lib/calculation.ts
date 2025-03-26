@@ -15,16 +15,15 @@ export interface ComponentResult {
 
 export function calculate(
   components: Component[],
-  date: Temporal.PlainYearMonth,
   inputValues: Record<string, Record<string, InputValue>>,
+  startDate: Temporal.PlainDate,
+  endDate: Temporal.PlainDate,
 ): ComponentResult[] {
   // Get all component calculations that match the given date
   const componentCalculations: Array<ComponentCalculation> = [];
   for (const component of components) {
-    const calculation = getCalculcationForDate(component, date);
-    if (calculation) {
-      componentCalculations.push(calculation);
-    }
+    const calculations = getCalculcationsForDate(component, startDate, endDate);
+    componentCalculations.push(...calculations);
   }
 
   // Store calculated results for reuse
@@ -129,10 +128,11 @@ export function calculate(
  * @param date The date to find the period for / to check the one-time date against
  * @returns The first matching calculation for the given date or undefined if no match
  */
-export function getCalculcationForDate(
+export function getCalculcationsForDate(
   component: Component,
-  date: Temporal.PlainYearMonth,
-): ComponentCalculation | undefined {
+  startDate: Temporal.PlainDate,
+  endDate: Temporal.PlainDate,
+): Array<ComponentCalculation> {
   if (component.type === "one-time") {
     if (Temporal.PlainYearMonth.compare(component.date, date) === 0) {
       return {

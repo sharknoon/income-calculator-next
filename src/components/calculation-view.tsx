@@ -1,9 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import { useEffect, useState } from "react";
-import { Calendar } from "lucide-react";
+import { AlertCircle, Calendar } from "lucide-react";
 import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,29 +19,36 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentsInputs } from "@/components/components-inputs";
 import { Temporal } from "@js-temporal/polyfill";
-import { MonthYearSelector } from "./month-year-selector";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { calculate, ComponentResult } from "@/lib/calculation";
 import { useInputValues } from "@/context/input-values-context";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Label } from "./ui/label";
+import { plainDateToTZDate, tzDateToPlainDate } from "@/lib/date";
+import { TZDate } from "react-day-picker";
 
 export function CalculationView() {
   const { components } = useComponents();
   const { inputValues } = useInputValues();
 
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [date, setDate] = useState<Temporal.PlainYearMonth>(
-    Temporal.Now.plainDateISO().toPlainYearMonth(),
+  const [startDate, setStartDate] = useState<Temporal.PlainDate>(
+    Temporal.Now.plainDateISO(),
+  );
+  const [endDate, setEndDate] = useState<Temporal.PlainDate>(
+    Temporal.Now.plainDateISO(),
   );
   const [componentResults, setComponentResults] = useState<
     Array<ComponentResult>
   >([]);
   const [calculationTab, setCalculationTab] = useState("inputs");
+  const [error, setError] = useState<string | null>(null);
 
-  const formatDate = (date: Temporal.PlainYearMonth | undefined) => {
+  const formatDate = (date: Temporal.PlainDate | undefined) => {
     if (!date) return "";
     return date.toLocaleString(undefined, {
-      calendar: date.getCalendar(),
-      year: "numeric",
+      day: "numeric",
       month: "long",
+      year: "numeric",
     });
   };
 
@@ -55,9 +60,14 @@ export function CalculationView() {
   };
 
   useEffect(() => {
-    const results = calculate(components, date, inputValues);
-    setComponentResults(results);
-  }, [components, date, inputValues]);
+    try {
+      const results = calculate(components, inputValues, startDate, endDate);
+      setComponentResults(results);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    }
+  }, [components, inputValues, startDate, endDate]);
 
   return (
     <div className="space-y-6">
@@ -68,29 +78,71 @@ export function CalculationView() {
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Date</CardTitle>
+            <CardTitle>Date Range</CardTitle>
             <CardDescription>
-              Select the month for your income calculation
+              Select the period for your income calculation
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-col gap-2">
-              <div className="text-sm font-medium leading-none">Month</div>
-              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="self-start text-left">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {formatDate(date)}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <MonthYearSelector
-                    defaultValue={date}
-                    onChange={setDate}
-                    onApply={() => setIsCalendarOpen(false)}
-                  />
-                </PopoverContent>
-              </Popover>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Start Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left"
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {formatDate(startDate)}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      timeZone="UTC"
+                      mode="single"
+                      selected={plainDateToTZDate(startDate)}
+                      onSelect={(date) =>
+                        date
+                          ? setStartDate(
+                              tzDateToPlainDate(new TZDate(date, "UTC")),
+                            )
+                          : null
+                      }
+                      autoFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="space-y-2">
+                <Label>End Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left"
+                    >
+                      <Calendar className="mr-2 h-4 w-4" />
+                      {formatDate(endDate)}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      timeZone="UTC"
+                      mode="single"
+                      selected={plainDateToTZDate(endDate)}
+                      onSelect={(date) =>
+                        date
+                          ? setEndDate(
+                              tzDateToPlainDate(new TZDate(date, "UTC")),
+                            )
+                          : null
+                      }
+                      autoFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -118,12 +170,22 @@ export function CalculationView() {
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-medium">Date:</span>
-                <span>{formatDate(date)}</span>
+                <span>
+                  {formatDate(startDate)} to {formatDate(endDate)}
+                </span>
               </div>
             </div>
           </CardContent>
         </Card>
       </div>
+
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
 
       <Tabs
         value={calculationTab}
@@ -149,7 +211,8 @@ export function CalculationView() {
             ) : (
               <ComponentsInputs
                 components={components}
-                date={date.toPlainDate({ day: 1 })}
+                startDate={startDate}
+                endDate={endDate}
               />
             )}
           </div>

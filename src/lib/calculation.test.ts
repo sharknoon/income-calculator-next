@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { Temporal } from "@js-temporal/polyfill";
-import { getCalculcationForDate, calculate } from "@/lib/calculation";
+import { getCalculcationsForDate, calculate } from "@/lib/calculation";
 import { Component } from "@/types/income";
 
 describe("getCalculcationForDate", () => {
@@ -18,7 +18,7 @@ describe("getCalculcationForDate", () => {
     };
 
     const date = Temporal.PlainYearMonth.from("2023-10");
-    const result = getCalculcationForDate(component, date);
+    const result = getCalculcationsForDate(component, date);
 
     expect(result).toEqual({
       id: "one",
@@ -45,7 +45,7 @@ describe("getCalculcationForDate", () => {
     };
 
     const date = Temporal.PlainYearMonth.from("2023-09");
-    const result = getCalculcationForDate(component, date);
+    const result = getCalculcationsForDate(component, date);
 
     expect(result).toBeUndefined();
   });
@@ -73,7 +73,7 @@ describe("getCalculcationForDate", () => {
     };
 
     const date = Temporal.PlainYearMonth.from("2023-06");
-    const result = getCalculcationForDate(component, date);
+    const result = getCalculcationsForDate(component, date);
 
     expect(result).toEqual({
       id: "two",
@@ -109,7 +109,7 @@ describe("getCalculcationForDate", () => {
     };
 
     const date = Temporal.PlainYearMonth.from("2024-01");
-    const result = getCalculcationForDate(component, date);
+    const result = getCalculcationsForDate(component, date);
 
     expect(result).toBeUndefined();
   });
@@ -137,7 +137,7 @@ describe("getCalculcationForDate", () => {
     };
 
     const date = Temporal.PlainYearMonth.from("2024-01");
-    const result = getCalculcationForDate(component, date);
+    const result = getCalculcationsForDate(component, date);
 
     expect(result).toEqual({
       id: "three",

@@ -11,10 +11,15 @@ import { useInputValues } from "@/context/input-values-context";
 
 interface ComponentInputsProps {
   components: Array<Component>;
-  date: Temporal.PlainDate;
+  startDate: Temporal.PlainDate;
+  endDate: Temporal.PlainDate;
 }
 
-export function ComponentsInputs({ components, date }: ComponentInputsProps) {
+export function ComponentsInputs({
+  components,
+  startDate,
+  endDate,
+}: ComponentInputsProps) {
   const { inputValues, updateInputValues, updateInputValue } = useInputValues();
 
   const getInputsForDate = (component: Component, date: Temporal.PlainDate) => {
