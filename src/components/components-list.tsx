@@ -36,7 +36,7 @@ export function ComponentsList() {
         }
       };
       fileReader.readAsText(file);
-    }
+    };
     fileInput.click();
   };
 
@@ -72,7 +72,9 @@ export function ComponentsList() {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Income Components</h2>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={handleUploadComponent}><Upload /></Button>
+          <Button variant="outline" onClick={handleUploadComponent}>
+            <Upload />
+          </Button>
           <Button onClick={handleAddComponent}>
             <Plus className="mr-2 h-4 w-4" />
             Add Component

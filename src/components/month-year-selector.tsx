@@ -26,7 +26,7 @@ export function MonthYearSelector({
 }: MonthYearSelectorProps) {
   const [date, setDate] = useState<Temporal.PlainYearMonth>(defaultValue);
 
-  useEffect(() => onChange?.(date), [date]);
+  useEffect(() => onChange?.(date), [onChange, date]);
 
   // Generate a range of years (current year - 100 to current year + 10)
   const currentYear = Temporal.Now.plainDateISO().year;

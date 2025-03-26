@@ -23,5 +23,10 @@ export default function ComponentEditorPage() {
     }
   };
 
-  return <ComponentEditor component={component} onComponentChange={handleComponentChange} />;
+  return (
+    <ComponentEditor
+      component={component}
+      onComponentChange={handleComponentChange}
+    />
+  );
 }

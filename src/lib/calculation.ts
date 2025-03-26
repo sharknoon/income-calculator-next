@@ -16,7 +16,7 @@ export interface ComponentResult {
 export function calculate(
   components: Component[],
   date: Temporal.PlainYearMonth,
-  inputValues: Record<string, Record<string, InputValue>>
+  inputValues: Record<string, Record<string, InputValue>>,
 ): ComponentResult[] {
   // Get all component calculations that match the given date
   const componentCalculations: Array<ComponentCalculation> = [];
@@ -83,7 +83,7 @@ export function calculate(
       const func = new Function(
         "dependencies",
         "inputs",
-        component.calculation.func
+        component.calculation.func,
       );
       const result = func(dependenciesContext, inputContext);
 
@@ -98,13 +98,17 @@ export function calculate(
 
       // Add to results if not already added
       if (!results.some((r) => r.id === component.id)) {
-        results.push({ id: component.id, name: component.name, amount: result });
+        results.push({
+          id: component.id,
+          name: component.name,
+          amount: result,
+        });
       }
 
       return result;
     } catch (error) {
       throw new Error(
-        `Error evaluating function for ${component.id}: ${error}`
+        `Error evaluating function for ${component.id}: ${error}`,
       );
     }
   }
@@ -127,7 +131,7 @@ export function calculate(
  */
 export function getCalculcationForDate(
   component: Component,
-  date: Temporal.PlainYearMonth
+  date: Temporal.PlainYearMonth,
 ): ComponentCalculation | undefined {
   if (component.type === "one-time") {
     if (Temporal.PlainYearMonth.compare(component.date, date) === 0) {
@@ -152,4 +156,4 @@ export function getCalculcationForDate(
       }
     }
   }
-};
+}

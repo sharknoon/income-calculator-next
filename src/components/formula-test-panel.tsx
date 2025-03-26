@@ -129,7 +129,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
                     <ComponentInput
                       input={input}
                       value={inputValues[input.id]}
-                      onChange={handleInputChange}
+                      onChange={(value) => handleInputChange(input.id, value)}
                     />
                   </div>
                 ))}

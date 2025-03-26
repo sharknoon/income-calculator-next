@@ -278,7 +278,7 @@ describe("calculate", () => {
     const date = Temporal.PlainYearMonth.from("2023-10");
 
     expect(() => calculate(components, date, {})).toThrow(
-      "Circular dependency detected involving one"
+      "Circular dependency detected involving one",
     );
   });
 

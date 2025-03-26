@@ -67,7 +67,7 @@ export default function ComponentEditor({
   };
 
   const handleDescriptionChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLTextAreaElement>,
   ) => {
     const updatedComponent = {
       ...component,
@@ -126,7 +126,7 @@ export default function ComponentEditor({
     const updatedComponent = {
       ...component,
       calculationPeriods: component.calculationPeriods.map((p, i) =>
-        i === selectedPeriodIndex ? { ...p, period: period } : p
+        i === selectedPeriodIndex ? { ...p, period: period } : p,
       ),
     };
 
@@ -162,7 +162,7 @@ export default function ComponentEditor({
         calculationPeriods: component.calculationPeriods.map((p, i) =>
           i === selectedPeriodIndex
             ? { ...p, calculation: { ...p.calculation, inputs: inputs } }
-            : p
+            : p,
         ),
       };
     }
@@ -181,7 +181,7 @@ export default function ComponentEditor({
       updatedComponent = {
         ...component,
         calculationPeriods: component.calculationPeriods.map((p, i) =>
-          i === selectedPeriodIndex ? { ...p, calculation: calculation } : p
+          i === selectedPeriodIndex ? { ...p, calculation: calculation } : p,
         ),
       };
     }
@@ -404,6 +404,7 @@ export default function ComponentEditor({
               </TabsContent>
               <TabsContent value="calculation" className="pt-4">
                 <CalculationEditor
+                  componentId={component.id}
                   calculation={
                     component.type === "one-time"
                       ? component.calculation
@@ -417,7 +418,10 @@ export default function ComponentEditor({
           </div>
         </CardContent>
         <CardFooter className="flex justify-end">
-          <Button onClick={handleSave}><Save />Save Changes</Button>
+          <Button onClick={handleSave}>
+            <Save />
+            Save Changes
+          </Button>
         </CardFooter>
       </Card>
     </div>

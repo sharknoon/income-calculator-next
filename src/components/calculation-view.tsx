@@ -19,21 +19,19 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ComponentInputs } from "@/components/component-inputs";
+import { ComponentsInputs } from "@/components/component-inputs";
 import { Temporal } from "@js-temporal/polyfill";
 import { MonthYearSelector } from "./month-year-selector";
 import { InputValue } from "@/types/income";
 import { calculate, ComponentResult } from "@/lib/calculation";
-
 
 export function CalculationView() {
   const { components } = useComponents();
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [date, setDate] = useState<Temporal.PlainYearMonth>(
-    Temporal.Now.plainDateISO().toPlainYearMonth()
+    Temporal.Now.plainDateISO().toPlainYearMonth(),
   );
-  const [overallResult, setOverallResult] = useState(0);
   const [componentResults, setComponentResults] = useState<
     Array<ComponentResult>
   >([]);
@@ -55,11 +53,13 @@ export function CalculationView() {
     }).format(amount);
   };
 
-  const handleCalculation = (inputs: Record<string, InputValue>) => {
-    const results = calculate(components, date, inputs)
+  const handleCalculation = (
+    inputValues: Record<string, Record<string, InputValue>>,
+  ) => {
+    const results = calculate(components, date, inputValues);
     setComponentResults(results);
-  }
-  
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -106,7 +106,11 @@ export function CalculationView() {
               <div className="flex justify-between items-center">
                 <span className="font-medium">Total Income:</span>
                 <span className="text-xl font-bold">
-                  {formatCurrency(overallResult)}
+                  {formatCurrency(
+                    componentResults.length > 0
+                      ? componentResults[componentResults.length - 1].amount
+                      : 0,
+                  )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
@@ -144,14 +148,11 @@ export function CalculationView() {
                 </CardHeader>
               </Card>
             ) : (
-              components.map((component) => (
-                <ComponentInputs
-                  key={component.id}
-                  component={component}
-                  date={date.toPlainDate({ day: 1 })}
-                  onInputsChange={handleCalculation}
-                />
-              ))
+              <ComponentsInputs
+                components={components}
+                date={date.toPlainDate({ day: 1 })}
+                onInputValuesChange={handleCalculation}
+              />
             )}
           </div>
         </TabsContent>

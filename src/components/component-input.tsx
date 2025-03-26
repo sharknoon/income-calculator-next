@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 interface ComponentInputProps {
   input: InputType;
   value?: InputValue;
-  onChange?: (id: string, value: InputValue) => void;
+  onChange?: (value: InputValue) => void;
 }
 
 export function ComponentInput({
@@ -27,7 +27,7 @@ export function ComponentInput({
         <Input
           id={input.id}
           value={typeof value === "string" ? value : (input.defaultValue ?? "")}
-          onChange={(e) => onChange?.(input.id, e.target.value)}
+          onChange={(e) => onChange?.(e.target.value)}
           placeholder={input.placeholder || ""}
           minLength={input.minLength}
           maxLength={input.maxLength}
@@ -44,9 +44,7 @@ export function ComponentInput({
             value={
               typeof value === "number" ? value : (input.defaultValue ?? 0)
             }
-            onChange={(e) =>
-              onChange?.(input.id, Number.parseFloat(e.target.value) || 0)
-            }
+            onChange={(e) => onChange?.(Number.parseFloat(e.target.value) || 0)}
             placeholder={input.placeholder || ""}
             min={input.min}
             max={input.max}
@@ -68,7 +66,7 @@ export function ComponentInput({
             checked={
               typeof value === "boolean" ? value : (input.defaultValue ?? false)
             }
-            onCheckedChange={(value) => onChange?.(input.id, value)}
+            onCheckedChange={(value) => onChange?.(value)}
             required={input.required !== false}
           />
         </div>
@@ -77,7 +75,7 @@ export function ComponentInput({
       return (
         <Select
           value={typeof value === "string" ? value : input.defaultValue}
-          onValueChange={(value) => onChange?.(input.id, value)}
+          onValueChange={(value) => onChange?.(value)}
           required={input.required !== false}
         >
           <SelectTrigger id={input.id}>
@@ -101,7 +99,7 @@ export function ComponentInput({
             max={input.max}
             step={input.step}
             value={typeof value === "number" ? [value] : [input.defaultValue]}
-            onValueChange={(values) => onChange?.(input.id, values[0])}
+            onValueChange={(values) => onChange?.(values[0])}
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>{input.min}</span>

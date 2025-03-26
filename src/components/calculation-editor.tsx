@@ -10,15 +10,18 @@ import { FormulaTestPanel } from "@/components/formula-test-panel";
 import Editor, { type Monaco } from "@monaco-editor/react";
 
 interface CalculationEditorProps {
+  componentId: string;
   calculation: Calculation;
   onCalculationChange: (calculation: Calculation) => void;
 }
 
 export function CalculationEditor({
+  componentId,
   calculation,
   onCalculationChange,
 }: CalculationEditorProps) {
   const { components } = useComponents();
+  const availableDependencies = components.filter((c) => c.id !== componentId);
   const [calculationFunc, setCalculationFunc] = useState(
     calculation.func || "",
   );
@@ -153,13 +156,13 @@ export function CalculationEditor({
             Select other components that this calculation depends on:
           </p>
 
-          {components.length === 0 ? (
+          {availableDependencies.length === 0 ? (
             <p className="text-sm text-muted-foreground">
               No other components available
             </p>
           ) : (
             <div className="space-y-2">
-              {components.map(({ id, name }) => (
+              {availableDependencies.map(({ id, name }) => (
                 <div key={id} className="flex items-center space-x-2">
                   <input
                     type="checkbox"
