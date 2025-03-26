@@ -18,25 +18,24 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentInputs } from "@/components/component-inputs";
 import { Temporal } from "@js-temporal/polyfill";
-import { tzDateToPlainDate, plainDateToTZDate } from "@/lib/date";
-import { TZDate } from "react-day-picker";
+import { MonthYearSelector } from "./month-year-selector";
 
 export function CalculationView() {
   const { components } = useComponents();
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [date, setDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO(),
+  const [date, setDate] = useState<Temporal.PlainYearMonth>(
+    Temporal.Now.plainDateISO().toPlainYearMonth()
   );
   const [calculationTab, setCalculationTab] = useState("inputs");
 
-  const formatDate = (date: Temporal.PlainDate | undefined) => {
+  const formatDate = (date: Temporal.PlainYearMonth | undefined) => {
     if (!date) return "";
     return date.toLocaleString(undefined, {
+      calendar: date.getCalendar(),
       year: "numeric",
       month: "long",
     });
@@ -66,19 +65,11 @@ export function CalculationView() {
                     {formatDate(date)}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <CalendarComponent
-                    timeZone="UTC"
-                    mode="single"
-                    selected={plainDateToTZDate(date)}
-                    defaultMonth={plainDateToTZDate(date)}
-                    onSelect={(date) => {
-                      if (date) {
-                        setDate(tzDateToPlainDate(new TZDate(date, "UTC")));
-                        setIsCalendarOpen(false);
-                      }
-                    }}
-                    autoFocus
+                <PopoverContent>
+                  <MonthYearSelector
+                    defaultValue={date}
+                    onChange={setDate}
+                    onApply={() => setIsCalendarOpen(false)}
                   />
                 </PopoverContent>
               </Popover>
@@ -136,7 +127,7 @@ export function CalculationView() {
                 <ComponentInputs
                   key={component.id}
                   component={component}
-                  date={date}
+                  date={date.toPlainDate({ day: 1 })}
                 />
               ))
             )}
