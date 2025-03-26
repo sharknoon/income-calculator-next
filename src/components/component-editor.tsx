@@ -88,7 +88,7 @@ export default function ComponentEditor({
         calculation: {
           dependencies: [],
           inputs: [],
-          func: "return new BigNumber(0)",
+          func: "return 0;",
         },
       };
     } else {
@@ -108,7 +108,7 @@ export default function ComponentEditor({
             calculation: {
               dependencies: [],
               inputs: [],
-              func: "return new BigNumber(0)",
+              func: "return 0;",
             },
           },
         ],
@@ -206,7 +206,7 @@ export default function ComponentEditor({
       calculation: {
         dependencies: [],
         inputs: [],
-        func: "return new BigNumber(0)",
+        func: "return 0;",
       },
     };
 

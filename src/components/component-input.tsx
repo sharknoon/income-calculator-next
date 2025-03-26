@@ -42,7 +42,7 @@ export function ComponentInput({
             id={input.id}
             type="number"
             value={
-              typeof value === "number" ? value : (input.defaultValue ?? "")
+              typeof value === "number" ? value : (input.defaultValue ?? 0)
             }
             onChange={(e) =>
               onChange?.(input.id, Number.parseFloat(e.target.value) || 0)
@@ -76,7 +76,7 @@ export function ComponentInput({
     case "select":
       return (
         <Select
-          value={typeof value === "string" ? value : (input.defaultValue ?? "")}
+          value={typeof value === "string" ? value : input.defaultValue}
           onValueChange={(value) => onChange?.(input.id, value)}
           required={input.required !== false}
         >

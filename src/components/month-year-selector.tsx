@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -12,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Temporal } from "@js-temporal/polyfill";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface MonthYearSelectorProps {
   onChange?: (date: Temporal.PlainYearMonth) => void;
@@ -27,41 +26,22 @@ export function MonthYearSelector({
 }: MonthYearSelectorProps) {
   const [date, setDate] = useState<Temporal.PlainYearMonth>(defaultValue);
 
-  const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
+  useEffect(() => onChange?.(date), [date]);
 
   // Generate a range of years (current year - 100 to current year + 10)
-  const currentYear = new Date().getFullYear();
+  const currentYear = Temporal.Now.plainDateISO().year;
   const years = Array.from({ length: 111 }, (_, i) => currentYear - 100 + i);
 
   const handleMonthChange = (value: string) => {
-    const newDate = date.with({ month: Number.parseInt(value) });
-    setDate(newDate);
-    onChange?.(newDate);
+    setDate(date.with({ month: Number.parseInt(value) }));
   };
 
   const handleYearChange = (value: string) => {
-    const newDate = date.with({ year: Number.parseInt(value) });
-    setDate(newDate);
-    onChange?.(newDate);
+    setDate(date.with({ year: Number.parseInt(value) }));
   };
 
   const navigateMonth = (direction: number) => {
-    const newDate = date.add({ months: direction });
-    setDate(newDate);
-    onChange?.(newDate);
+    setDate(date.add({ months: direction }));
   };
 
   return (

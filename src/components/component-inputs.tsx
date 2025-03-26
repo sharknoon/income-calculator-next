@@ -11,9 +11,10 @@ import { ComponentInput } from "@/components/component-input";
 interface ComponentInputsProps {
   component: Component;
   date: Temporal.PlainDate;
+  onInputsChange?: (inputs: Record<string, InputValue>) => void;
 }
 
-export function ComponentInputs({ component, date }: ComponentInputsProps) {
+export function ComponentInputs({ component, date, onInputsChange }: ComponentInputsProps) {
   const inputs =
     component.type === "one-time"
       ? component.calculation.inputs
@@ -23,6 +24,7 @@ export function ComponentInputs({ component, date }: ComponentInputsProps) {
             (!period.period.endDate ||
               Temporal.PlainDate.compare(period.period.endDate, date) >= 0),
         )?.calculation.inputs ?? []);
+
   // Initialize input values from localStorage if available
   const [inputValues, setInputValues] = useState<Record<string, InputValue>>(
     {},
@@ -56,6 +58,7 @@ export function ComponentInputs({ component, date }: ComponentInputsProps) {
         console.error("Failed to save input values to localStorage:", error);
       }
     }
+    onInputsChange?.(inputValues);
   }, [inputValues, component.id]);
 
   if (inputs.length === 0) {

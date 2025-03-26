@@ -22,6 +22,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentInputs } from "@/components/component-inputs";
 import { Temporal } from "@js-temporal/polyfill";
 import { MonthYearSelector } from "./month-year-selector";
+import { InputValue } from "@/types/income";
+import { calculate, ComponentResult } from "@/lib/calculation";
+
 
 export function CalculationView() {
   const { components } = useComponents();
@@ -30,6 +33,10 @@ export function CalculationView() {
   const [date, setDate] = useState<Temporal.PlainYearMonth>(
     Temporal.Now.plainDateISO().toPlainYearMonth()
   );
+  const [overallResult, setOverallResult] = useState(0);
+  const [componentResults, setComponentResults] = useState<
+    Array<ComponentResult>
+  >([]);
   const [calculationTab, setCalculationTab] = useState("inputs");
 
   const formatDate = (date: Temporal.PlainYearMonth | undefined) => {
@@ -41,6 +48,18 @@ export function CalculationView() {
     });
   };
 
+  const formatCurrency = (amount: number) => {
+    return Intl.NumberFormat(undefined, {
+      style: "currency",
+      currency: "EUR",
+    }).format(amount);
+  };
+
+  const handleCalculation = (inputs: Record<string, InputValue>) => {
+    const results = calculate(components, date, inputs)
+    setComponentResults(results);
+  }
+  
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -86,7 +105,9 @@ export function CalculationView() {
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="font-medium">Total Income:</span>
-                <span className="text-xl font-bold">$0.00</span>
+                <span className="text-xl font-bold">
+                  {formatCurrency(overallResult)}
+                </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="font-medium">Components:</span>
@@ -128,6 +149,7 @@ export function CalculationView() {
                   key={component.id}
                   component={component}
                   date={date.toPlainDate({ day: 1 })}
+                  onInputsChange={handleCalculation}
                 />
               ))
             )}
@@ -143,18 +165,20 @@ export function CalculationView() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {components.length === 0 ? (
+                {componentResults.length === 0 ? (
                   <p className="text-muted-foreground">
                     No components to display
                   </p>
                 ) : (
-                  components.map((component) => (
+                  componentResults.map((result) => (
                     <div
-                      key={component.id}
+                      key={result.id}
                       className="flex justify-between items-center py-2 border-b"
                     >
-                      <span>{component.name}</span>
-                      <span className="font-medium">$0.00</span>
+                      <span>{result.name}</span>
+                      <span className="font-medium">
+                        {formatCurrency(result.amount)}
+                      </span>
                     </div>
                   ))
                 )}
