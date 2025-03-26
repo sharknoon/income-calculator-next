@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComponentsList } from "@/components/components-list";
 import { CalculationView } from "@/components/calculation-view";
+import { InputValuesProvider } from "@/context/input-values-context";
 
 export function IncomeCalculator() {
   const [activeTab, setActiveTab] = useState("components");
@@ -18,7 +19,9 @@ export function IncomeCalculator() {
         <ComponentsList />
       </TabsContent>
       <TabsContent value="calculation" className="py-4">
-        <CalculationView />
+        <InputValuesProvider>
+          <CalculationView />
+        </InputValuesProvider>
       </TabsContent>
     </Tabs>
   );

@@ -2,25 +2,21 @@
 
 import { Label } from "@/components/ui/label";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Component, InputValue } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
 import { ComponentInput } from "@/components/component-input";
+import { useInputValues } from "@/context/input-values-context";
 
 interface ComponentInputsProps {
   components: Array<Component>;
   date: Temporal.PlainDate;
-  onInputValuesChange?: (
-    inputValues: Record<string, Record<string, InputValue>>,
-  ) => void;
 }
 
-export function ComponentsInputs({
-  components,
-  date,
-  onInputValuesChange,
-}: ComponentInputsProps) {
+export function ComponentsInputs({ components, date }: ComponentInputsProps) {
+  const { inputValues, updateInputValues, updateInputValue } = useInputValues();
+
   const getInputsForDate = (component: Component, date: Temporal.PlainDate) => {
     if (component.type === "one-time") {
       return component.calculation.inputs;
@@ -88,37 +84,17 @@ export function ComponentsInputs({
     return inputValues;
   };
 
-  const [inputValues, setInputValues] = useState<
-    Record<string, Record<string, InputValue>>
-  >(getInputValues(components));
-
-  /*useEffect(
-    () => onInputValuesChange?.(inputValues),
-    [onInputValuesChange, inputValues]
-  );*/
+  useEffect(() => {
+    updateInputValues(getInputValues(components));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleInputChange = (
     componentId: string,
     inputId: string,
     value: InputValue,
   ) => {
-    setInputValues((prevInputValues) => ({
-      ...prevInputValues,
-      [componentId]: {
-        ...prevInputValues[componentId],
-        [inputId]: value,
-      },
-    }));
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem(
-          `incomeCalculator.inputValues.${componentId}`,
-          JSON.stringify(inputValues[componentId]),
-        );
-      } catch (error) {
-        console.error("Failed to save input values to localStorage:", error);
-      }
-    }
+    updateInputValue(componentId, inputId, value);
   };
 
   return components.map((component) => {
@@ -151,7 +127,7 @@ export function ComponentsInputs({
                   )}
                   <ComponentInput
                     input={input}
-                    value={inputValues[component.id][input.id]}
+                    value={inputValues[component.id]?.[input.id]}
                     onChange={(value) =>
                       handleInputChange(component.id, input.id, value)
                     }

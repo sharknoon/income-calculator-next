@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
 import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
@@ -19,14 +19,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ComponentsInputs } from "@/components/component-inputs";
+import { ComponentsInputs } from "@/components/components-inputs";
 import { Temporal } from "@js-temporal/polyfill";
 import { MonthYearSelector } from "./month-year-selector";
-import { InputValue } from "@/types/income";
 import { calculate, ComponentResult } from "@/lib/calculation";
+import { useInputValues } from "@/context/input-values-context";
 
 export function CalculationView() {
   const { components } = useComponents();
+  const { inputValues } = useInputValues();
 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [date, setDate] = useState<Temporal.PlainYearMonth>(
@@ -53,12 +54,10 @@ export function CalculationView() {
     }).format(amount);
   };
 
-  const handleCalculation = (
-    inputValues: Record<string, Record<string, InputValue>>,
-  ) => {
+  useEffect(() => {
     const results = calculate(components, date, inputValues);
     setComponentResults(results);
-  };
+  }, [components, date, inputValues]);
 
   return (
     <div className="space-y-6">
@@ -76,7 +75,7 @@ export function CalculationView() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-2">
-              <Label>Month</Label>
+              <div className="text-sm font-medium leading-none">Month</div>
               <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="self-start text-left">
@@ -151,7 +150,6 @@ export function CalculationView() {
               <ComponentsInputs
                 components={components}
                 date={date.toPlainDate({ day: 1 })}
-                onInputValuesChange={handleCalculation}
               />
             )}
           </div>
@@ -189,22 +187,5 @@ export function CalculationView() {
         </TabsContent>
       </Tabs>
     </div>
-  );
-}
-
-function Label({
-  children,
-  htmlFor,
-}: {
-  children: React.ReactNode;
-  htmlFor?: string;
-}) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-    >
-      {children}
-    </label>
   );
 }
