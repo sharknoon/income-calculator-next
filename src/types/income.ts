@@ -89,7 +89,7 @@ export type MonthPosition = {
 
 export type Monthly = BaseMonthly & (MonthDay | MonthPosition);
 
-type BaseYearly = {
+export type BaseYearly = {
   frequency: "yearly";
   every: number;
   months: Array<

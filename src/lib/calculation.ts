@@ -1,4 +1,5 @@
 import {
+  BaseYearly,
   Calculation,
   Component,
   InputValue,
@@ -368,6 +369,31 @@ export function getOverlappingPeriod(
   return { startDate: start, endDate: end };
 }
 
+const weekdayMap: Record<Weekly["weekdays"][number], number> = {
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+  sunday: 7,
+};
+
+const monthMap: Record<BaseYearly["months"][number], number> = {
+  january: 1,
+  february: 2,
+  march: 3,
+  april: 4,
+  may: 5,
+  june: 6,
+  july: 7,
+  august: 8,
+  september: 9,
+  october: 10,
+  november: 11,
+  december: 12,
+};
+
 export function getDailyOccurrences(
   period: { startDate: Temporal.PlainDate; endDate: Temporal.PlainDate },
   anchorDay: Temporal.PlainDate,
@@ -384,15 +410,6 @@ export function getDailyOccurrences(
   return occurrences;
 }
 
-const weekdayMap: Record<Weekly["weekdays"][number], number> = {
-  monday: 1,
-  tuesday: 2,
-  wednesday: 3,
-  thursday: 4,
-  friday: 5,
-  saturday: 6,
-  sunday: 7,
-};
 export function getWeeklyOccurrences(
   period: { startDate: Temporal.PlainDate; endDate: Temporal.PlainDate },
   anchorWeek: Temporal.PlainDate,
@@ -497,6 +514,68 @@ export function getMonthlyOccurrences(
       }
       current = current.add({ months: every });
     }
+  } else {
+    let currentMonth = Temporal.PlainYearMonth.from(anchorMonth);
+    const startMonth = Temporal.PlainYearMonth.from(period.startDate);
+    const endMonth = Temporal.PlainYearMonth.from(period.endDate);
+
+    // Adjust start point if anchor is before period start
+    while (Temporal.PlainYearMonth.compare(currentMonth, startMonth) < 0) {
+      currentMonth = currentMonth.add({ months: every });
+    }
+
+    // Generate occurrences
+    while (Temporal.PlainYearMonth.compare(currentMonth, endMonth) <= 0) {
+      const matchingDays: Temporal.PlainDate[] = [];
+      const daysInMonth = currentMonth.daysInMonth;
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = currentMonth.toPlainDate({ day });
+        if (matchesDayPosition(dayOfMonth.day, date)) {
+          matchingDays.push(date);
+        }
+      }
+      const occurrence = getOccurrence(dayOfMonth.on, matchingDays);
+
+      if (
+        occurrence &&
+        Temporal.PlainDate.compare(occurrence, period.startDate) >= 0 &&
+        Temporal.PlainDate.compare(occurrence, period.endDate) <= 0
+      ) {
+        occurrences.push(occurrence);
+      }
+
+      currentMonth = currentMonth.add({ months: every });
+    }
+  }
+  return occurrences;
+}
+
+export function getYearlyOccurrences(
+  period: { startDate: Temporal.PlainDate; endDate: Temporal.PlainDate },
+  anchorYear: Temporal.PlainDate,
+  every: number,
+  months: BaseYearly["months"],
+  dayOfMonth:
+    | { each: number }
+    | { day: MonthPosition["day"]; on: MonthPosition["on"] },
+) {
+  const occurrences: Temporal.PlainDate[] = [];
+  if ("each" in dayOfMonth) {
+    let currentYear = anchorYear.year;
+    for (const month of months) {
+      let current = Temporal.PlainDate.from({
+        day: dayOfMonth.each,
+        month: monthMap[month],
+        year: currentYear,
+      });
+      while (Temporal.PlainDate.compare(current, period.endDate) <= 0) {
+        if (Temporal.PlainDate.compare(current, period.startDate) >= 0) {
+          occurrences.push(current);
+        }
+      }
+    }
+    currentYear = currentYear + every;
   } else {
     let currentMonth = Temporal.PlainYearMonth.from(anchorMonth);
     const startMonth = Temporal.PlainYearMonth.from(period.startDate);
