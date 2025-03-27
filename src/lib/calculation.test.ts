@@ -8,6 +8,7 @@ import {
   getDailyOccurrences,
   getWeeklyOccurrences,
   getMonthlyOccurrences,
+  getYearlyOccurrences,
 } from "@/lib/calculation";
 import { Component, Weekly } from "@/types/income";
 
@@ -930,5 +931,192 @@ describe("getMonthlyOccurrences", () => {
       Temporal.PlainDate.from("2023-02-28"),
       Temporal.PlainDate.from("2023-03-28"),
     ]);
+  });
+});
+
+describe("getYearlyOccurrences", () => {
+  it("should return yearly occurrences on specific days of the month", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2023-01-01"),
+      endDate: Temporal.PlainDate.from("2025-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 1;
+    const months: Array<"january" | "july"> = ["january", "july"];
+    const dayOfMonth = { each: 15 };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([
+      Temporal.PlainDate.from("2023-01-15"),
+      Temporal.PlainDate.from("2023-07-15"),
+      Temporal.PlainDate.from("2024-01-15"),
+      Temporal.PlainDate.from("2024-07-15"),
+      Temporal.PlainDate.from("2025-01-15"),
+      Temporal.PlainDate.from("2025-07-15"),
+    ]);
+  });
+
+  it("should skip years before the start date of the period", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2024-01-01"),
+      endDate: Temporal.PlainDate.from("2025-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 1;
+    const months: Array<"january" | "july"> = ["january", "july"];
+    const dayOfMonth = { each: 15 };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([
+      Temporal.PlainDate.from("2024-01-15"),
+      Temporal.PlainDate.from("2024-07-15"),
+      Temporal.PlainDate.from("2025-01-15"),
+      Temporal.PlainDate.from("2025-07-15"),
+    ]);
+  });
+
+  it("should return occurrences with a step of 'every' years", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2023-01-01"),
+      endDate: Temporal.PlainDate.from("2029-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 2;
+    const months: Array<"january" | "july"> = ["january", "july"];
+    const dayOfMonth = { each: 15 };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([
+      Temporal.PlainDate.from("2023-01-15"),
+      Temporal.PlainDate.from("2023-07-15"),
+      Temporal.PlainDate.from("2025-01-15"),
+      Temporal.PlainDate.from("2025-07-15"),
+      Temporal.PlainDate.from("2027-01-15"),
+      Temporal.PlainDate.from("2027-07-15"),
+      Temporal.PlainDate.from("2029-01-15"),
+      Temporal.PlainDate.from("2029-07-15"),
+    ]);
+  });
+
+  it("should return occurrences based on day position within the month", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2023-01-01"),
+      endDate: Temporal.PlainDate.from("2025-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 1;
+    const months: Array<"march" | "november"> = ["march", "november"];
+    const dayOfMonth: { day: "monday"; on: "first" } = {
+      day: "monday",
+      on: "first",
+    };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([
+      Temporal.PlainDate.from("2023-03-06"),
+      Temporal.PlainDate.from("2023-11-06"),
+      Temporal.PlainDate.from("2024-03-04"),
+      Temporal.PlainDate.from("2024-11-04"),
+      Temporal.PlainDate.from("2025-03-03"),
+      Temporal.PlainDate.from("2025-11-03"),
+    ]);
+  });
+
+  it("should skip years where no matching day exists", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2023-01-01"),
+      endDate: Temporal.PlainDate.from("2025-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 1;
+    const months: Array<"february"> = ["february"];
+    const dayOfMonth: { day: "sunday"; on: "fifth" } = {
+      day: "sunday",
+      on: "fifth",
+    };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([]);
+  });
+
+  it("should handle months with fewer days than the specified day", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2023-01-01"),
+      endDate: Temporal.PlainDate.from("2025-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 1;
+    const months: Array<"february"> = ["february"];
+    const dayOfMonth = { each: 30 };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([
+      Temporal.PlainDate.from("2023-02-28"),
+      Temporal.PlainDate.from("2024-02-29"),
+      Temporal.PlainDate.from("2025-02-28"),
+    ]);
+  });
+
+  it("should return an empty array if the period start date is after the period end date", () => {
+    const period = {
+      startDate: Temporal.PlainDate.from("2025-01-01"),
+      endDate: Temporal.PlainDate.from("2023-12-31"),
+    };
+    const anchorYear = Temporal.PlainDate.from("2023-01-01");
+    const every = 1;
+    const months: Array<"january"> = ["january"];
+    const dayOfMonth = { each: 15 };
+
+    const result = getYearlyOccurrences(
+      period,
+      anchorYear,
+      every,
+      months,
+      dayOfMonth,
+    );
+
+    expect(result).toEqual([]);
   });
 });

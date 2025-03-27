@@ -8,7 +8,7 @@ import {
 } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
 
-export interface ComponentCalculation {
+export interface ComponentCalculations {
   id: string;
   name: string;
   calculations: Array<{
@@ -33,10 +33,10 @@ export function calculate(
   endDate: Temporal.PlainDate,
 ): ComponentResult[] {
   // Get all component calculations that match the given date
-  const componentCalculations: Array<ComponentCalculation> = [];
+  const componentCalculations: Array<ComponentCalculations> = [];
   for (const component of components) {
     const calculations = getCalculcationsForDate(component, startDate, endDate);
-    componentCalculations.push(...calculations);
+    componentCalculations.push(calculations);
   }
 
   // Store calculated results for reuse
@@ -47,13 +47,13 @@ export function calculate(
   const visitedBeforeCalculation = new Set<string>();
 
   // Create adjacency map for easier dependency lookup
-  const dependencyMap = new Map<string, ComponentCalculation>();
+  const dependencyMap = new Map<string, ComponentCalculations>();
   componentCalculations.forEach((item) => dependencyMap.set(item.id, item));
 
   // Result array
   const results: ComponentResult[] = [];
 
-  function calculateComponent(component: ComponentCalculation): number {
+  function calculateComponent(component: ComponentCalculations): number {
     // Check for cycles
     if (visitedBeforeCalculation.has(component.id)) {
       throw new Error(`Circular dependency detected involving ${component.id}`);
@@ -69,7 +69,7 @@ export function calculate(
 
     // Calculate all dependencies first
     const depValues = new Map<string, number>();
-    for (const depId of component.calculation.dependencies) {
+    for (const depId of component.calculations.dependencies) {
       const dependency = dependencyMap.get(depId);
       if (!dependency) {
         throw new Error(`Component with id ${depId} not found`);
@@ -146,7 +146,7 @@ export function getCalculcationsForDate(
   component: Component,
   startDate: Temporal.PlainDate,
   endDate: Temporal.PlainDate,
-): ComponentCalculation {
+): ComponentCalculations {
   if (component.type === "one-time") {
     if (isDateInPeriod(component.date, startDate, endDate)) {
       return {
@@ -228,56 +228,22 @@ export function getCalculcationsForDate(
           break;
         }
         case "yearly": {
-          // Simplified handling for Yearly frequency with MonthDay variant.
-          if ("each" in period) {
-            const monthsMap: Record<string, number> = {
-              january: 1,
-              february: 2,
-              march: 3,
-              april: 4,
-              may: 5,
-              june: 6,
-              july: 7,
-              august: 8,
-              september: 9,
-              october: 10,
-              november: 11,
-              december: 12,
-            };
-            for (
-              let year = effectiveStart.year;
-              year <= effectiveEnd.year;
-              year++
-            ) {
-              for (const monthName of period.months) {
-                const month = monthsMap[monthName];
-                try {
-                  const occurrence = Temporal.PlainDate.from({
-                    year,
-                    month,
-                    day: period.each,
-                  });
-                  if (
-                    Temporal.PlainDate.compare(occurrence, effectiveStart) >=
-                      0 &&
-                    Temporal.PlainDate.compare(occurrence, effectiveEnd) <= 0
-                  ) {
-                    calculations.push({
-                      date: occurrence,
-                      calculation: periodCalc.calculation,
-                    });
-                  }
-                } catch (e) {
-                  // Invalid date (e.g. February 30); skip this occurrence.
-                }
-              }
-            }
-          }
-          // TODO: Implement MonthPosition variant for yearly frequency.
+          occurrences = getYearlyOccurrences(
+            { startDate: effectiveStart, endDate: effectiveEnd },
+            period.startDate,
+            period.every,
+            period.months,
+            period.dayOfMonthType === "day"
+              ? { each: period.each }
+              : {
+                  day: period.day,
+                  on: period.on,
+                },
+          );
           break;
         }
         default: {
-          // Unsupported frequency; could log a warning here.
+          occurrences = [];
           break;
         }
       }
@@ -563,51 +529,67 @@ export function getYearlyOccurrences(
   const occurrences: Temporal.PlainDate[] = [];
   if ("each" in dayOfMonth) {
     let currentYear = anchorYear.year;
-    for (const month of months) {
-      let current = Temporal.PlainDate.from({
-        day: dayOfMonth.each,
-        month: monthMap[month],
-        year: currentYear,
-      });
-      while (Temporal.PlainDate.compare(current, period.endDate) <= 0) {
-        if (Temporal.PlainDate.compare(current, period.startDate) >= 0) {
+    const startYear = period.startDate.year;
+    const endYear = period.endDate.year;
+
+    // Adjust start point if anchor is before period start
+    while (currentYear < startYear) {
+      currentYear = currentYear + every;
+    }
+
+    while (currentYear <= endYear) {
+      for (const month of months) {
+        const current = Temporal.PlainDate.from({
+          day: dayOfMonth.each,
+          month: monthMap[month],
+          year: currentYear,
+        });
+        if (
+          Temporal.PlainDate.compare(current, period.startDate) >= 0 &&
+          Temporal.PlainDate.compare(current, period.endDate) <= 0
+        ) {
           occurrences.push(current);
         }
       }
+      currentYear = currentYear + every;
     }
-    currentYear = currentYear + every;
   } else {
-    let currentMonth = Temporal.PlainYearMonth.from(anchorMonth);
-    const startMonth = Temporal.PlainYearMonth.from(period.startDate);
-    const endMonth = Temporal.PlainYearMonth.from(period.endDate);
+    let currentYear = anchorYear.year;
+    const startYear = period.startDate.year;
+    const endYear = period.endDate.year;
 
     // Adjust start point if anchor is before period start
-    while (Temporal.PlainYearMonth.compare(currentMonth, startMonth) < 0) {
-      currentMonth = currentMonth.add({ months: every });
+    while (currentYear < startYear) {
+      currentYear = currentYear + every;
     }
 
     // Generate occurrences
-    while (Temporal.PlainYearMonth.compare(currentMonth, endMonth) <= 0) {
-      const matchingDays: Temporal.PlainDate[] = [];
-      const daysInMonth = currentMonth.daysInMonth;
+    while (currentYear <= endYear) {
+      for (const month of months) {
+        const matchingDays: Temporal.PlainDate[] = [];
+        const currentYearMonth = Temporal.PlainYearMonth.from({
+          year: currentYear,
+          month: monthMap[month],
+        });
+        const daysInMonth = currentYearMonth.daysInMonth;
 
-      for (let day = 1; day <= daysInMonth; day++) {
-        const date = currentMonth.toPlainDate({ day });
-        if (matchesDayPosition(dayOfMonth.day, date)) {
-          matchingDays.push(date);
+        for (let day = 1; day <= daysInMonth; day++) {
+          const date = currentYearMonth.toPlainDate({ day });
+          if (matchesDayPosition(dayOfMonth.day, date)) {
+            matchingDays.push(date);
+          }
+        }
+        const occurrence = getOccurrence(dayOfMonth.on, matchingDays);
+
+        if (
+          occurrence &&
+          Temporal.PlainDate.compare(occurrence, period.startDate) >= 0 &&
+          Temporal.PlainDate.compare(occurrence, period.endDate) <= 0
+        ) {
+          occurrences.push(occurrence);
         }
       }
-      const occurrence = getOccurrence(dayOfMonth.on, matchingDays);
-
-      if (
-        occurrence &&
-        Temporal.PlainDate.compare(occurrence, period.startDate) >= 0 &&
-        Temporal.PlainDate.compare(occurrence, period.endDate) <= 0
-      ) {
-        occurrences.push(occurrence);
-      }
-
-      currentMonth = currentMonth.add({ months: every });
+      currentYear = currentYear + every;
     }
   }
   return occurrences;
