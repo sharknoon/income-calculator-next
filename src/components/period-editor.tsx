@@ -370,6 +370,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                     <SelectItem value="second">Second</SelectItem>
                     <SelectItem value="third">Third</SelectItem>
                     <SelectItem value="fourth">Fourth</SelectItem>
+                    <SelectItem value="fifth">Fifth</SelectItem>
                     <SelectItem value="next-to-last">Next to last</SelectItem>
                     <SelectItem value="last">Last</SelectItem>
                   </SelectContent>
@@ -509,6 +510,8 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                     <SelectItem value="second">Second</SelectItem>
                     <SelectItem value="third">Third</SelectItem>
                     <SelectItem value="fourth">Fourth</SelectItem>
+                    <SelectItem value="fifth">Fifth</SelectItem>
+                    <SelectItem value="next-to-last">Next to last</SelectItem>
                     <SelectItem value="last">Last</SelectItem>
                   </SelectContent>
                 </Select>

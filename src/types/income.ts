@@ -40,7 +40,7 @@ type Daily = {
   every: number;
 };
 
-type Weekly = {
+export type Weekly = {
   frequency: "weekly";
   every: number;
   weekdays: Array<
@@ -77,7 +77,14 @@ export type MonthPosition = {
     | "day"
     | "weekday"
     | "weekend-day";
-  on: "first" | "second" | "third" | "fourth" | "next-to-last" | "last";
+  on:
+    | "first"
+    | "second"
+    | "third"
+    | "fourth"
+    | "fifth"
+    | "next-to-last"
+    | "last";
 };
 
 export type Monthly = BaseMonthly & (MonthDay | MonthPosition);
