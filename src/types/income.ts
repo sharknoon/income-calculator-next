@@ -1,6 +1,6 @@
 import { Temporal } from "@js-temporal/polyfill";
 
-type BaseComponent = {
+export type BaseComponent = {
   id: string;
   name: string;
   description?: string;

@@ -8,6 +8,7 @@ import {
   getWeeklyOccurrences,
   getMonthlyOccurrences,
   getYearlyOccurrences,
+  executeCalculation,
 } from "@/lib/calculation";
 import { Weekly } from "@/types/income";
 
@@ -864,5 +865,57 @@ describe("getYearlyOccurrences", () => {
     );
 
     expect(result).toEqual([]);
+  });
+});
+
+describe("executeCalculation", () => {
+  it("should execute the provided function string with input and dependency values", () => {
+    const func = "return inputs.a + dependencies.b;";
+    const inputValues = { a: 5 };
+    const dependencyValues = { b: 10 };
+
+    const result = executeCalculation(func, inputValues, dependencyValues);
+
+    expect(result).toBe(15);
+  });
+
+  it("should handle functions with no dependencies", () => {
+    const func = "return inputs.a * 2;";
+    const inputValues = { a: 7 };
+    const dependencyValues = {};
+
+    const result = executeCalculation(func, inputValues, dependencyValues);
+
+    expect(result).toBe(14);
+  });
+
+  it("should handle functions with no inputs", () => {
+    const func = "return dependencies.b - 3;";
+    const inputValues = {};
+    const dependencyValues = { b: 8 };
+
+    const result = executeCalculation(func, inputValues, dependencyValues);
+
+    expect(result).toBe(5);
+  });
+
+  it("should throw an error if the function string is invalid", () => {
+    const func = "return inputs.a + ;";
+    const inputValues = { a: 5 };
+    const dependencyValues = { b: 10 };
+
+    expect(() =>
+      executeCalculation(func, inputValues, dependencyValues),
+    ).toThrow(SyntaxError);
+  });
+
+  it("should return NaN if the function references undefined inputs or dependencies", () => {
+    const func = "return inputs.a + dependencies.c;";
+    const inputValues = { a: 5 };
+    const dependencyValues = { b: 10 };
+
+    const result = executeCalculation(func, inputValues, dependencyValues);
+
+    expect(result).toBeNaN();
   });
 });

@@ -1,4 +1,5 @@
 import {
+  BaseComponent,
   BaseYearly,
   Calculation,
   Component,
@@ -21,13 +22,157 @@ export interface ComponentResult {
   }>;
 }
 
+const resultsCache = new Map<Temporal.PlainDate, Map<string, number>>();
+const cycleDetection = new Map<Temporal.PlainDate, Set<string>>();
+
 export function calculate(
   components: Component[],
   inputValues: Record<string, Record<string, InputValue>>,
   startDate: Temporal.PlainDate,
   endDate: Temporal.PlainDate,
 ): ComponentResult[] {
-  // Implement this function
+  resultsCache.clear();
+  cycleDetection.clear();
+
+  const componentsByDate = new Map<
+    Temporal.PlainDate,
+    Array<BaseComponent & Calculation>
+  >();
+  const results: ComponentResult[] = [];
+
+  for (const component of components) {
+    // Prepare results array
+    results.push({
+      id: component.id,
+      name: component.name,
+      results: [],
+    });
+
+    // Resolve all periodic dates for the component
+    const calculations = getCalculcationsForPeriod(
+      component,
+      startDate,
+      endDate,
+    );
+
+    // Map the calculations by date
+    for (const calculation of calculations) {
+      if (!componentsByDate.has(calculation.date)) {
+        componentsByDate.set(calculation.date, []);
+      }
+      componentsByDate.get(calculation.date)!.push({
+        id: component.id,
+        name: component.name,
+        description: component.description,
+        ...calculation,
+      });
+    }
+  }
+
+  // for each date, calculate the result of the components
+  for (const [date, components] of componentsByDate) {
+    for (const component of components) {
+      // Caclulate the result for the component
+      const result = calculateSingleDate(
+        date,
+        component,
+        components,
+        inputValues,
+      );
+
+      // Save the result
+      const resultEntry = results.find((r) => r.id === component.id);
+      if (resultEntry) {
+        resultEntry.results.push({
+          date: date,
+          amount: result,
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+/**
+ * Calculates the result of the components for a single date
+ * IMPORTANT: all components must have the same date!
+ */
+function calculateSingleDate(
+  date: Temporal.PlainDate,
+  component: BaseComponent & Calculation,
+  componentsOnTheSameDate: Array<BaseComponent & Calculation>,
+  inputValues: Record<string, Record<string, InputValue>>,
+): number {
+  // Check for cycles
+  if (cycleDetection.has(date)) {
+    if (cycleDetection.get(date)!.has(component.id)) {
+      throw new Error(
+        `Circular dependency detected for component "${component.id}" on date ${date.toString()}`,
+      );
+    }
+  }
+
+  // Return cached result if available
+  if (resultsCache.has(date)) {
+    const componentsOnThatDate = resultsCache.get(date);
+    if (componentsOnThatDate?.has(component.id)) {
+      return componentsOnThatDate.get(component.id)!;
+    }
+  }
+
+  // Mark the component as visited for cycle detection
+  if (!cycleDetection.has(date)) {
+    cycleDetection.set(date, new Set());
+  }
+  cycleDetection.get(date)!.add(component.id);
+
+  // Calculate all dependencies first
+  const dependencyResults: Record<string, number> = {};
+  for (const dependency of component.dependencies) {
+    const dependencyComponent = componentsOnTheSameDate.find(
+      (c) => c.id === dependency,
+    );
+    if (!dependencyComponent) {
+      throw new Error(
+        `Dependency "${dependency}" not found for component "${component.id}" for date "${date.toString()}"\nPlease check if a) the dependency exists and b) the dependency is valid for the given date`,
+      );
+    }
+    const dependencyResult = calculateSingleDate(
+      date,
+      dependencyComponent,
+      componentsOnTheSameDate,
+      inputValues,
+    );
+    dependencyResults[dependency] = dependencyResult;
+  }
+
+  // Execute the calculation
+  const result = executeCalculation(
+    component.func,
+    inputValues[component.id],
+    dependencyResults,
+  );
+
+  // Cache the result
+  if (!resultsCache.has(date)) {
+    resultsCache.set(date, new Map());
+  }
+  resultsCache.get(date)!.set(component.id, result);
+
+  // Remove the component from cycle detection
+  cycleDetection.get(date)!.delete(component.id);
+
+  return result;
+}
+
+export function executeCalculation(
+  func: string,
+  inputValues: Record<string, InputValue>,
+  dependencyValues: Record<string, number>,
+): number {
+  const calc = new Function("inputs", "dependencies", func);
+  return calc(inputValues, dependencyValues);
 }
 
 /**

@@ -326,10 +326,17 @@ export default function ComponentEditor({
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {component.calculationPeriods.map((period, index) => (
-                    <div
-                      key={index}
-                      className={`
+                  {component.calculationPeriods
+                    .sort((a, b) =>
+                      Temporal.PlainDate.compare(
+                        a.period.startDate,
+                        b.period.startDate,
+                      ),
+                    )
+                    .map((period, index) => (
+                      <div
+                        key={index}
+                        className={`
                       px-3 py-1 rounded-md cursor-pointer flex items-center gap-2
                       ${
                         selectedPeriodIndex === index
@@ -337,28 +344,28 @@ export default function ComponentEditor({
                           : "bg-muted hover:bg-muted/80"
                       }
                     `}
-                      onClick={() => setSelectedPeriodIndex(index)}
-                    >
-                      <span>
-                        Period {index + 1} (
-                        {period.period.startDate.toLocaleString()} to{" "}
-                        {period.period.endDate?.toLocaleString() ||
-                          "indefinite"}
-                        )
-                      </span>
-                      {component.calculationPeriods.length > 1 && (
-                        <button
-                          className="text-xs hover:text-destructive"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            removeCalculationPeriod(index);
-                          }}
-                        >
-                          <X className="size-3" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                        onClick={() => setSelectedPeriodIndex(index)}
+                      >
+                        <span>
+                          Period {index + 1} (
+                          {period.period.startDate.toLocaleString()} to{" "}
+                          {period.period.endDate?.toLocaleString() ||
+                            "indefinite"}
+                          )
+                        </span>
+                        {component.calculationPeriods.length > 1 && (
+                          <button
+                            className="text-xs hover:text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeCalculationPeriod(index);
+                            }}
+                          >
+                            <X className="size-3" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
                 </div>
               </div>
             )}
