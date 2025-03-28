@@ -22,8 +22,11 @@ export interface ComponentResult {
   }>;
 }
 
-const resultsCache = new Map<Temporal.PlainDate, Map<string, number>>();
-const cycleDetection = new Map<Temporal.PlainDate, Set<string>>();
+// The export is for testing purposes only
+// Map<date, Map<componentId, result>>
+export const resultsCache = new Map<string, Map<string, number>>();
+// Map<date, Set<componentId>>
+export const cycleDetection = new Map<string, Set<string>>();
 
 export function calculate(
   components: Component[],
@@ -35,7 +38,7 @@ export function calculate(
   cycleDetection.clear();
 
   const componentsByDate = new Map<
-    Temporal.PlainDate,
+    string,
     Array<BaseComponent & Calculation>
   >();
   const results: ComponentResult[] = [];
@@ -57,10 +60,10 @@ export function calculate(
 
     // Map the calculations by date
     for (const calculation of calculations) {
-      if (!componentsByDate.has(calculation.date)) {
-        componentsByDate.set(calculation.date, []);
+      if (!componentsByDate.has(calculation.date.toString())) {
+        componentsByDate.set(calculation.date.toString(), []);
       }
-      componentsByDate.get(calculation.date)!.push({
+      componentsByDate.get(calculation.date.toString())!.push({
         id: component.id,
         name: component.name,
         description: component.description,
@@ -84,7 +87,7 @@ export function calculate(
       const resultEntry = results.find((r) => r.id === component.id);
       if (resultEntry) {
         resultEntry.results.push({
-          date: date,
+          date: Temporal.PlainDate.from(date),
           amount: result,
         });
       }
@@ -98,8 +101,8 @@ export function calculate(
  * Calculates the result of the components for a single date
  * IMPORTANT: all components must have the same date!
  */
-function calculateSingleDate(
-  date: Temporal.PlainDate,
+export function calculateSingleDate(
+  date: string,
   component: BaseComponent & Calculation,
   componentsOnTheSameDate: Array<BaseComponent & Calculation>,
   inputValues: Record<string, Record<string, InputValue>>,
@@ -108,7 +111,7 @@ function calculateSingleDate(
   if (cycleDetection.has(date)) {
     if (cycleDetection.get(date)!.has(component.id)) {
       throw new Error(
-        `Circular dependency detected for component "${component.id}" on date ${date.toString()}`,
+        `Circular dependency detected for component "${component.id}" on date ${date}`,
       );
     }
   }
@@ -135,7 +138,7 @@ function calculateSingleDate(
     );
     if (!dependencyComponent) {
       throw new Error(
-        `Dependency "${dependency}" not found for component "${component.id}" for date "${date.toString()}"\nPlease check if a) the dependency exists and b) the dependency is valid for the given date`,
+        `Dependency "${dependency}" not found for component "${component.id}" for date "${date}"\nPlease check if a) the dependency exists and b) the dependency is valid for the given date`,
       );
     }
     const dependencyResult = calculateSingleDate(

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { Temporal } from "@js-temporal/polyfill";
 import {
   isDateInPeriod,
@@ -9,8 +9,12 @@ import {
   getMonthlyOccurrences,
   getYearlyOccurrences,
   executeCalculation,
+  calculateSingleDate,
+  calculate,
+  resultsCache,
+  cycleDetection,
 } from "@/lib/calculation";
-import { Weekly } from "@/types/income";
+import { BaseComponent, Calculation, Component, Weekly } from "@/types/income";
 
 describe("isDateInPeriod", () => {
   it("should return true when the date is within the period", () => {
@@ -917,5 +921,367 @@ describe("executeCalculation", () => {
     const result = executeCalculation(func, inputValues, dependencyValues);
 
     expect(result).toBeNaN();
+  });
+});
+
+describe("calculateSingleDate", () => {
+  beforeEach(() => {
+    // Clear the cache before each test
+    resultsCache.clear();
+    cycleDetection.clear();
+  });
+
+  it("should calculate the result for a component without dependencies", () => {
+    const date = "2023-01-01";
+    const component = {
+      id: "comp1",
+      name: "Component 1",
+      inputs: [
+        {
+          id: "value",
+          name: "Value",
+          type: "number",
+        },
+      ],
+      dependencies: [],
+      func: "return inputs.value * 2;",
+    } as BaseComponent & Calculation;
+    const componentsOnTheSameDate = [component];
+    const inputValues = {
+      comp1: { value: 5 },
+    };
+
+    const result = calculateSingleDate(
+      date,
+      component,
+      componentsOnTheSameDate,
+      inputValues,
+    );
+
+    expect(result).toBe(10);
+  });
+
+  it("should calculate the result for a component with dependencies", () => {
+    const date = "2023-01-01";
+    const dependencyComponent = {
+      id: "dep1",
+      name: "Dependency 1",
+      inputs: [
+        {
+          id: "value",
+          name: "Value",
+          type: "number",
+        },
+      ],
+      dependencies: [],
+      func: "return inputs.value + 1;",
+    } as BaseComponent & Calculation;
+    const component = {
+      id: "comp1",
+      name: "Component 1",
+      inputs: [],
+      dependencies: ["dep1"],
+      func: "return dependencies.dep1 * 2;",
+    } as BaseComponent & Calculation;
+    const componentsOnTheSameDate = [dependencyComponent, component];
+    const inputValues = {
+      dep1: { value: 3 },
+      comp1: {},
+    };
+
+    const result = calculateSingleDate(
+      date,
+      component,
+      componentsOnTheSameDate,
+      inputValues,
+    );
+
+    expect(result).toBe(8);
+  });
+
+  it("should throw an error for circular dependencies", () => {
+    const date = "2023-01-01";
+    const componentA = {
+      id: "compA",
+      name: "Component A",
+      inputs: [],
+      dependencies: ["compB"],
+      func: "return dependencies.compB + 1;",
+    } as BaseComponent & Calculation;
+    const componentB = {
+      id: "compB",
+      name: "Component B",
+      inputs: [],
+      dependencies: ["compA"],
+      func: "return dependencies.compA + 1;",
+    } as BaseComponent & Calculation;
+    const componentsOnTheSameDate = [componentA, componentB];
+    const inputValues = {
+      compA: {},
+      compB: {},
+    };
+
+    expect(() =>
+      calculateSingleDate(
+        date,
+        componentA,
+        componentsOnTheSameDate,
+        inputValues,
+      ),
+    ).toThrowError(/Circular dependency detected/);
+  });
+
+  it("should throw an error if a dependency is not found", () => {
+    const date = "2023-01-01";
+    const component = {
+      id: "comp1",
+      name: "Component 1",
+      inputs: [],
+      dependencies: ["dep1"],
+      func: "return dependencies.dep1 * 2;",
+    } as BaseComponent & Calculation;
+    const componentsOnTheSameDate = [component];
+    const inputValues = {
+      comp1: {},
+    };
+
+    expect(() =>
+      calculateSingleDate(
+        date,
+        component,
+        componentsOnTheSameDate,
+        inputValues,
+      ),
+    ).toThrowError(/Dependency "dep1" not found/);
+  });
+});
+
+describe("calculate", () => {
+  it("should calculate results for components without dependencies", () => {
+    const components: Component[] = [
+      {
+        id: "comp1",
+        name: "Component 1",
+        type: "one-time",
+        date: Temporal.PlainDate.from("2023-01-01"),
+        calculation: {
+          inputs: [
+            {
+              id: "value",
+              name: "Value",
+              type: "number",
+            },
+          ],
+          dependencies: [],
+          func: "return inputs.value * 2;",
+        },
+      },
+    ];
+    const inputValues = {
+      comp1: { value: 5 },
+    };
+    const startDate = Temporal.PlainDate.from("2023-01-01");
+    const endDate = Temporal.PlainDate.from("2023-12-31");
+
+    const results = calculate(components, inputValues, startDate, endDate);
+
+    expect(results).toEqual([
+      {
+        id: "comp1",
+        name: "Component 1",
+        results: [
+          {
+            date: Temporal.PlainDate.from("2023-01-01"),
+            amount: 10,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should calculate results for components with dependencies", () => {
+    const components: Component[] = [
+      {
+        id: "dep1",
+        name: "Dependency 1",
+        type: "one-time",
+        date: Temporal.PlainDate.from("2023-01-01"),
+        calculation: {
+          inputs: [
+            {
+              id: "value",
+              name: "Value",
+              type: "number",
+            },
+          ],
+          dependencies: [],
+          func: "return inputs.value + 1;",
+        },
+      },
+      {
+        id: "comp1",
+        name: "Component 1",
+        type: "one-time",
+        date: Temporal.PlainDate.from("2023-01-01"),
+        calculation: {
+          inputs: [],
+          dependencies: ["dep1"],
+          func: "return dependencies.dep1 * 2;",
+        },
+      },
+    ];
+    const inputValues = {
+      dep1: { value: 3 },
+    };
+    const startDate = Temporal.PlainDate.from("2023-01-01");
+    const endDate = Temporal.PlainDate.from("2023-12-31");
+
+    const results = calculate(components, inputValues, startDate, endDate);
+
+    expect(results).toEqual([
+      {
+        id: "dep1",
+        name: "Dependency 1",
+        results: [
+          {
+            date: Temporal.PlainDate.from("2023-01-01"),
+            amount: 4,
+          },
+        ],
+      },
+      {
+        id: "comp1",
+        name: "Component 1",
+        results: [
+          {
+            date: Temporal.PlainDate.from("2023-01-01"),
+            amount: 8,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("should handle components with recurring calculations", () => {
+    const components: Component[] = [
+      {
+        id: "comp1",
+        name: "Component 1",
+        type: "recurring",
+        calculationPeriods: [
+          {
+            period: {
+              startDate: Temporal.PlainDate.from("2023-01-01"),
+              endDate: Temporal.PlainDate.from("2023-01-05"),
+              frequency: "daily",
+              every: 1,
+            },
+            calculation: {
+              inputs: [
+                {
+                  id: "value",
+                  name: "Value",
+                  type: "number",
+                },
+              ],
+              dependencies: [],
+              func: "return inputs.value * 2;",
+            },
+          },
+        ],
+      },
+    ];
+    const inputValues = {
+      comp1: { value: 5 },
+    };
+    const startDate = Temporal.PlainDate.from("2022-01-01");
+    const endDate = Temporal.PlainDate.from("2024-12-31");
+
+    const results = calculate(components, inputValues, startDate, endDate);
+
+    expect(results).toEqual([
+      {
+        id: "comp1",
+        name: "Component 1",
+        results: [
+          { date: Temporal.PlainDate.from("2023-01-01"), amount: 10 },
+          { date: Temporal.PlainDate.from("2023-01-02"), amount: 10 },
+          { date: Temporal.PlainDate.from("2023-01-03"), amount: 10 },
+          { date: Temporal.PlainDate.from("2023-01-04"), amount: 10 },
+          { date: Temporal.PlainDate.from("2023-01-05"), amount: 10 },
+        ],
+      },
+    ]);
+  });
+
+  it("should throw an error for circular dependencies", () => {
+    const components: Component[] = [
+      {
+        id: "compA",
+        name: "Component A",
+        type: "one-time",
+        date: Temporal.PlainDate.from("2023-01-01"),
+        calculation: {
+          inputs: [],
+          dependencies: ["compB"],
+          func: "return dependencies.compB + 1;",
+        },
+      },
+      {
+        id: "compB",
+        name: "Component B",
+        type: "one-time",
+        date: Temporal.PlainDate.from("2023-01-01"),
+        calculation: {
+          inputs: [],
+          dependencies: ["compA"],
+          func: "return dependencies.compA + 1;",
+        },
+      },
+    ];
+    const inputValues = {};
+    const startDate = Temporal.PlainDate.from("2023-01-01");
+    const endDate = Temporal.PlainDate.from("2023-12-31");
+
+    expect(() =>
+      calculate(components, inputValues, startDate, endDate),
+    ).toThrowError(/Circular dependency detected/);
+  });
+
+  it("should return an empty result for components outside the date range", () => {
+    const components: Component[] = [
+      {
+        id: "comp1",
+        name: "Component 1",
+        type: "one-time",
+        date: Temporal.PlainDate.from("2022-12-31"),
+        calculation: {
+          inputs: [
+            {
+              id: "value",
+              name: "Value",
+              type: "number",
+            },
+          ],
+          dependencies: [],
+          func: "return inputs.value * 2;",
+        },
+      },
+    ];
+    const inputValues = {
+      comp1: { value: 5 },
+    };
+    const startDate = Temporal.PlainDate.from("2023-01-01");
+    const endDate = Temporal.PlainDate.from("2023-12-31");
+
+    const results = calculate(components, inputValues, startDate, endDate);
+
+    expect(results).toEqual([
+      {
+        id: "comp1",
+        name: "Component 1",
+        results: [],
+      },
+    ]);
   });
 });
