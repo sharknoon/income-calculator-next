@@ -28,6 +28,7 @@ export function ComponentsInputs({
   const { inputValues, updateInputValue } = useInputValues();
 
   type PeriodWithInputs = {
+    id: string;
     startDate: Temporal.PlainDate;
     endDate: Temporal.PlainDate;
     inputs: Array<Input>;
@@ -42,6 +43,7 @@ export function ComponentsInputs({
     if (component.type === "one-time") {
       if (isDateInPeriod(component.date, startDate, endDate)) {
         results.push({
+          id: "",
           startDate: component.date,
           endDate: component.date,
           inputs: component.calculation.inputs,
@@ -58,6 +60,7 @@ export function ComponentsInputs({
             ? earlierPlainDate(period.period.endDate, endDate)
             : endDate;
           results.push({
+            id: period.id,
             startDate: newStartDate,
             endDate: newEndDate,
             inputs: period.calculation.inputs,
@@ -105,9 +108,14 @@ export function ComponentsInputs({
                     )}
                     <ComponentInput
                       input={input}
-                      value={inputValues[component.id][input.id]}
+                      value={inputValues[component.id]?.[period.id]?.[input.id]}
                       onChange={(value) =>
-                        updateInputValue(component.id, input.id, value)
+                        updateInputValue(
+                          component.id,
+                          period.id,
+                          input.id,
+                          value,
+                        )
                       }
                     />
                   </div>

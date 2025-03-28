@@ -9,9 +9,13 @@ import {
 } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
 
-export type CalculationWithDate = Calculation & {
+export type CalculationDate = Calculation & {
+  calculationPeriodID: string;
   date: Temporal.PlainDate;
 };
+
+export type ComponentDate = BaseComponent &
+  CalculationDate & { inputValues: Record<string, InputValue> };
 
 export interface ComponentResult {
   id: string;
@@ -30,17 +34,14 @@ export const cycleDetection = new Map<string, Set<string>>();
 
 export function calculate(
   components: Component[],
-  inputValues: Record<string, Record<string, InputValue>>,
+  inputValues: Record<string, Record<string, Record<string, InputValue>>>,
   startDate: Temporal.PlainDate,
   endDate: Temporal.PlainDate,
 ): ComponentResult[] {
   resultsCache.clear();
   cycleDetection.clear();
 
-  const componentsByDate = new Map<
-    string,
-    Array<BaseComponent & Calculation>
-  >();
+  const componentsByDate = new Map<string, Array<ComponentDate>>();
   const results: ComponentResult[] = [];
 
   for (const component of components) {
@@ -67,6 +68,8 @@ export function calculate(
         id: component.id,
         name: component.name,
         description: component.description,
+        inputValues:
+          inputValues[component.id]?.[calculation.calculationPeriodID] ?? {},
         ...calculation,
       });
     }
@@ -76,12 +79,7 @@ export function calculate(
   for (const [date, components] of componentsByDate) {
     for (const component of components) {
       // Caclulate the result for the component
-      const result = calculateSingleDate(
-        date,
-        component,
-        components,
-        inputValues,
-      );
+      const result = calculateSingleDate(component, components);
 
       // Save the result
       const resultEntry = results.find((r) => r.id === component.id);
@@ -102,11 +100,11 @@ export function calculate(
  * IMPORTANT: all components must have the same date!
  */
 export function calculateSingleDate(
-  date: string,
-  component: BaseComponent & Calculation,
-  componentsOnTheSameDate: Array<BaseComponent & Calculation>,
-  inputValues: Record<string, Record<string, InputValue>>,
+  component: ComponentDate,
+  componentsOnTheSameDate: Array<ComponentDate>,
 ): number {
+  const date = component.date.toString();
+
   // Check for cycles
   if (cycleDetection.has(date)) {
     if (cycleDetection.get(date)!.has(component.id)) {
@@ -142,10 +140,8 @@ export function calculateSingleDate(
       );
     }
     const dependencyResult = calculateSingleDate(
-      date,
       dependencyComponent,
       componentsOnTheSameDate,
-      inputValues,
     );
     dependencyResults[dependency] = dependencyResult;
   }
@@ -153,7 +149,7 @@ export function calculateSingleDate(
   // Execute the calculation
   const result = executeCalculation(
     component.func,
-    inputValues[component.id],
+    component.inputValues,
     dependencyResults,
   );
 
@@ -175,7 +171,7 @@ export function executeCalculation(
   dependencyValues: Record<string, number>,
 ): number {
   const calc = new Function("inputs", "dependencies", func);
-  return calc(inputValues, dependencyValues);
+  return calc(inputValues ?? {}, dependencyValues ?? {});
 }
 
 /**
@@ -189,20 +185,21 @@ export function getCalculcationsForPeriod(
   component: Component,
   startDate: Temporal.PlainDate,
   endDate: Temporal.PlainDate,
-): Array<CalculationWithDate> {
+): Array<CalculationDate> {
   if (component.type === "one-time") {
     if (isDateInPeriod(component.date, startDate, endDate)) {
       return [
         {
           ...component.calculation,
           date: component.date,
+          calculationPeriodID: "",
         },
       ];
     } else {
       return [];
     }
   } else {
-    const calculations: Array<CalculationWithDate> = [];
+    const calculations: Array<CalculationDate> = [];
 
     // For each calculation period, generate occurrences in [startDate, endDate]
     for (const calculationPeriod of component.calculationPeriods) {
@@ -283,6 +280,7 @@ export function getCalculcationsForPeriod(
         calculations.push({
           ...calculationPeriod.calculation,
           date: occurrence,
+          calculationPeriodID: calculationPeriod.id,
         });
       }
     }

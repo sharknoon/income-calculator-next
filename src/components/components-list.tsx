@@ -48,6 +48,7 @@ export function ComponentsList() {
       type: "recurring",
       calculationPeriods: [
         {
+          id: crypto.randomUUID(),
           period: {
             startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
             frequency: "monthly",

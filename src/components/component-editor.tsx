@@ -37,7 +37,9 @@ export default function ComponentEditor({
   const [component, setComponent] = useState(c);
   const router = useRouter();
   const [editorTab, setEditorTab] = useState("details");
-  const [selectedPeriodIndex, setSelectedPeriodIndex] = useState(0);
+  const [selectedPeriodId, setSelectedPeriodId] = useState<string | undefined>(
+    c.type === "recurring" ? c.calculationPeriods[0].id : undefined,
+  );
 
   if (!component) {
     return null;
@@ -98,6 +100,7 @@ export default function ComponentEditor({
         type: "recurring",
         calculationPeriods: [
           {
+            id: crypto.randomUUID(),
             period: {
               startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
               frequency: "monthly",
@@ -125,8 +128,8 @@ export default function ComponentEditor({
 
     const updatedComponent = {
       ...component,
-      calculationPeriods: component.calculationPeriods.map((p, i) =>
-        i === selectedPeriodIndex ? { ...p, period: period } : p,
+      calculationPeriods: component.calculationPeriods.map((p) =>
+        p.id === selectedPeriodId ? { ...p, period: period } : p,
       ),
     };
 
@@ -159,8 +162,8 @@ export default function ComponentEditor({
     } else {
       updatedComponent = {
         ...component,
-        calculationPeriods: component.calculationPeriods.map((p, i) =>
-          i === selectedPeriodIndex
+        calculationPeriods: component.calculationPeriods.map((p) =>
+          p.id === selectedPeriodId
             ? { ...p, calculation: { ...p.calculation, inputs: inputs } }
             : p,
         ),
@@ -180,8 +183,8 @@ export default function ComponentEditor({
     } else {
       updatedComponent = {
         ...component,
-        calculationPeriods: component.calculationPeriods.map((p, i) =>
-          i === selectedPeriodIndex ? { ...p, calculation: calculation } : p,
+        calculationPeriods: component.calculationPeriods.map((p) =>
+          p.id === selectedPeriodId ? { ...p, calculation: calculation } : p,
         ),
       };
     }
@@ -195,6 +198,7 @@ export default function ComponentEditor({
     }
 
     const newCalculationPeriod: CalculationPeriod = {
+      id: crypto.randomUUID(),
       period: {
         startDate: Temporal.Now.plainDateISO().with({ day: 1 }),
         frequency: "monthly",
@@ -219,10 +223,10 @@ export default function ComponentEditor({
     };
 
     setComponent(updatedComponent);
-    setSelectedPeriodIndex(updatedComponent.calculationPeriods.length - 1);
+    setSelectedPeriodId(newCalculationPeriod.id);
   };
 
-  const removeCalculationPeriod = (index: number) => {
+  const removeCalculationPeriod = (id: string) => {
     if (component.type !== "recurring") {
       return;
     }
@@ -231,8 +235,9 @@ export default function ComponentEditor({
       return; // Don't remove the last period
     }
 
-    const updatedCalculationPeriods = [...component.calculationPeriods];
-    updatedCalculationPeriods.splice(index, 1);
+    const updatedCalculationPeriods = component.calculationPeriods.filter(
+      (period) => period.id !== id,
+    );
 
     const updatedComponent: RecurringComponent = {
       ...component,
@@ -240,7 +245,9 @@ export default function ComponentEditor({
     };
 
     setComponent(updatedComponent);
-    setSelectedPeriodIndex(updatedCalculationPeriods.length - 1);
+    const lastPeriod =
+      updatedCalculationPeriods[updatedCalculationPeriods.length - 1];
+    setSelectedPeriodId(lastPeriod.id);
   };
 
   const handleSave = () => {
@@ -335,16 +342,16 @@ export default function ComponentEditor({
                     )
                     .map((period, index) => (
                       <div
-                        key={index}
+                        key={period.id}
                         className={`
                       px-3 py-1 rounded-md cursor-pointer flex items-center gap-2
                       ${
-                        selectedPeriodIndex === index
+                        selectedPeriodId === period.id
                           ? "bg-primary text-primary-foreground"
                           : "bg-muted hover:bg-muted/80"
                       }
                     `}
-                        onClick={() => setSelectedPeriodIndex(index)}
+                        onClick={() => setSelectedPeriodId(period.id)}
                       >
                         <span>
                           Period {index + 1} (
@@ -358,7 +365,7 @@ export default function ComponentEditor({
                             className="text-xs hover:text-destructive"
                             onClick={(e) => {
                               e.stopPropagation();
-                              removeCalculationPeriod(index);
+                              removeCalculationPeriod(period.id);
                             }}
                           >
                             <X className="size-3" />
@@ -386,7 +393,9 @@ export default function ComponentEditor({
                 {component.type === "recurring" && (
                   <PeriodEditor
                     period={
-                      component.calculationPeriods[selectedPeriodIndex]?.period
+                      component.calculationPeriods.find(
+                        (p) => p.id === selectedPeriodId,
+                      )!.period
                     }
                     onPeriodChange={handleRecurringPeriodChange}
                   />
@@ -403,8 +412,9 @@ export default function ComponentEditor({
                   inputs={
                     component.type === "one-time"
                       ? component.calculation.inputs
-                      : component.calculationPeriods[selectedPeriodIndex]
-                          ?.calculation.inputs
+                      : component.calculationPeriods.find(
+                          (p) => p.id === selectedPeriodId,
+                        )!.calculation.inputs
                   }
                   onInputChange={handleInputChange}
                 />
@@ -415,8 +425,9 @@ export default function ComponentEditor({
                   calculation={
                     component.type === "one-time"
                       ? component.calculation
-                      : component.calculationPeriods[selectedPeriodIndex]
-                          ?.calculation
+                      : component.calculationPeriods.find(
+                          (p) => p.id === selectedPeriodId,
+                        )!.calculation
                   }
                   onCalculationChange={handleCalculationChange}
                 />

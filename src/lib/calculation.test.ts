@@ -13,8 +13,9 @@ import {
   calculate,
   resultsCache,
   cycleDetection,
+  ComponentDate,
 } from "@/lib/calculation";
-import { BaseComponent, Calculation, Component, Weekly } from "@/types/income";
+import { Component, Weekly } from "@/types/income";
 
 describe("isDateInPeriod", () => {
   it("should return true when the date is within the period", () => {
@@ -932,7 +933,6 @@ describe("calculateSingleDate", () => {
   });
 
   it("should calculate the result for a component without dependencies", () => {
-    const date = "2023-01-01";
     const component = {
       id: "comp1",
       name: "Component 1",
@@ -945,24 +945,18 @@ describe("calculateSingleDate", () => {
       ],
       dependencies: [],
       func: "return inputs.value * 2;",
-    } as BaseComponent & Calculation;
+      calculationPeriodID: "period1",
+      date: Temporal.PlainDate.from("2023-01-01"),
+      inputValues: { value: 5 },
+    } as ComponentDate;
     const componentsOnTheSameDate = [component];
-    const inputValues = {
-      comp1: { value: 5 },
-    };
 
-    const result = calculateSingleDate(
-      date,
-      component,
-      componentsOnTheSameDate,
-      inputValues,
-    );
+    const result = calculateSingleDate(component, componentsOnTheSameDate);
 
     expect(result).toBe(10);
   });
 
   it("should calculate the result for a component with dependencies", () => {
-    const date = "2023-01-01";
     const dependencyComponent = {
       id: "dep1",
       name: "Dependency 1",
@@ -975,83 +969,69 @@ describe("calculateSingleDate", () => {
       ],
       dependencies: [],
       func: "return inputs.value + 1;",
-    } as BaseComponent & Calculation;
+      calculationPeriodID: "period1",
+      date: Temporal.PlainDate.from("2023-01-01"),
+      inputValues: { value: 3 },
+    } as ComponentDate;
     const component = {
       id: "comp1",
       name: "Component 1",
       inputs: [],
       dependencies: ["dep1"],
       func: "return dependencies.dep1 * 2;",
-    } as BaseComponent & Calculation;
+      calculationPeriodID: "period1",
+      date: Temporal.PlainDate.from("2023-01-01"),
+      inputValues: {},
+    } as ComponentDate;
     const componentsOnTheSameDate = [dependencyComponent, component];
-    const inputValues = {
-      dep1: { value: 3 },
-      comp1: {},
-    };
 
-    const result = calculateSingleDate(
-      date,
-      component,
-      componentsOnTheSameDate,
-      inputValues,
-    );
+    const result = calculateSingleDate(component, componentsOnTheSameDate);
 
     expect(result).toBe(8);
   });
 
   it("should throw an error for circular dependencies", () => {
-    const date = "2023-01-01";
     const componentA = {
       id: "compA",
       name: "Component A",
       inputs: [],
       dependencies: ["compB"],
       func: "return dependencies.compB + 1;",
-    } as BaseComponent & Calculation;
+      calculationPeriodID: "period1",
+      date: Temporal.PlainDate.from("2023-01-01"),
+      inputValues: {},
+    } as ComponentDate;
     const componentB = {
       id: "compB",
       name: "Component B",
       inputs: [],
       dependencies: ["compA"],
       func: "return dependencies.compA + 1;",
-    } as BaseComponent & Calculation;
+      calculationPeriodID: "period1",
+      date: Temporal.PlainDate.from("2023-01-01"),
+      inputValues: {},
+    } as ComponentDate;
     const componentsOnTheSameDate = [componentA, componentB];
-    const inputValues = {
-      compA: {},
-      compB: {},
-    };
 
     expect(() =>
-      calculateSingleDate(
-        date,
-        componentA,
-        componentsOnTheSameDate,
-        inputValues,
-      ),
+      calculateSingleDate(componentA, componentsOnTheSameDate),
     ).toThrowError(/Circular dependency detected/);
   });
 
   it("should throw an error if a dependency is not found", () => {
-    const date = "2023-01-01";
     const component = {
       id: "comp1",
       name: "Component 1",
       inputs: [],
       dependencies: ["dep1"],
       func: "return dependencies.dep1 * 2;",
-    } as BaseComponent & Calculation;
+      calculationPeriodID: "period1",
+      date: Temporal.PlainDate.from("2023-01-01"),
+      inputValues: {},
+    } as ComponentDate;
     const componentsOnTheSameDate = [component];
-    const inputValues = {
-      comp1: {},
-    };
-
     expect(() =>
-      calculateSingleDate(
-        date,
-        component,
-        componentsOnTheSameDate,
-        inputValues,
-      ),
+      calculateSingleDate(component, componentsOnTheSameDate),
     ).toThrowError(/Dependency "dep1" not found/);
   });
 });
@@ -1078,7 +1058,7 @@ describe("calculate", () => {
       },
     ];
     const inputValues = {
-      comp1: { value: 5 },
+      comp1: { "": { value: 5 } },
     };
     const startDate = Temporal.PlainDate.from("2023-01-01");
     const endDate = Temporal.PlainDate.from("2023-12-31");
@@ -1131,7 +1111,7 @@ describe("calculate", () => {
       },
     ];
     const inputValues = {
-      dep1: { value: 3 },
+      dep1: { "": { value: 3 } },
     };
     const startDate = Temporal.PlainDate.from("2023-01-01");
     const endDate = Temporal.PlainDate.from("2023-12-31");
@@ -1170,6 +1150,7 @@ describe("calculate", () => {
         type: "recurring",
         calculationPeriods: [
           {
+            id: "period1",
             period: {
               startDate: Temporal.PlainDate.from("2023-01-01"),
               endDate: Temporal.PlainDate.from("2023-01-05"),
@@ -1192,7 +1173,7 @@ describe("calculate", () => {
       },
     ];
     const inputValues = {
-      comp1: { value: 5 },
+      comp1: { period1: { value: 5 } },
     };
     const startDate = Temporal.PlainDate.from("2022-01-01");
     const endDate = Temporal.PlainDate.from("2024-12-31");
@@ -1269,7 +1250,7 @@ describe("calculate", () => {
       },
     ];
     const inputValues = {
-      comp1: { value: 5 },
+      comp1: { "": { value: 5 } },
     };
     const startDate = Temporal.PlainDate.from("2023-01-01");
     const endDate = Temporal.PlainDate.from("2023-12-31");

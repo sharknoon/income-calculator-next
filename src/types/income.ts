@@ -20,6 +20,7 @@ export type RecurringComponent = BaseComponent & {
 export type Component = OneTimeComponent | RecurringComponent;
 
 export type CalculationPeriod = {
+  id: string;
   period: Period;
   calculation: Calculation;
 };
