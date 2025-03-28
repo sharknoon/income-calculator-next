@@ -2,6 +2,7 @@
 
 import { InputValue } from "@/types/income";
 import { createContext, ReactNode, useContext, useState } from "react";
+import { toast } from "sonner";
 
 interface InputValuesContextType {
   inputValues: Record<string, Record<string, InputValue>>;
@@ -10,9 +11,6 @@ interface InputValuesContextType {
     inputID: string,
     value: InputValue,
   ) => void;
-  updateInputValues: (
-    inputValues: Record<string, Record<string, InputValue>>,
-  ) => void;
 }
 
 const InputValuesContext = createContext<InputValuesContextType | undefined>(
@@ -20,9 +18,29 @@ const InputValuesContext = createContext<InputValuesContextType | undefined>(
 );
 
 export function InputValuesProvider({ children }: { children: ReactNode }) {
+  const loadSavedInputValues = () => {
+    if (typeof window !== "undefined") {
+      const savedInputValues: Record<string, Record<string, InputValue>> = {};
+      for (const key in localStorage) {
+        if (key.startsWith("incomeCalculator.inputValues.")) {
+          const componentID = key.replace("incomeCalculator.inputValues.", "");
+          try {
+            savedInputValues[componentID] = JSON.parse(
+              localStorage.getItem(key) || "{}",
+            );
+          } catch (error) {
+            toast.error("Could not save input values" + error);
+          }
+        }
+      }
+      return savedInputValues;
+    }
+    return {};
+  };
+
   const [inputValues, setInputValues] = useState<
     Record<string, Record<string, InputValue>>
-  >({});
+  >(loadSavedInputValues());
 
   const updateInputValue = (
     componentID: string,
@@ -37,16 +55,16 @@ export function InputValuesProvider({ children }: { children: ReactNode }) {
       newInputValues[componentID][inputID] = value;
       return newInputValues;
     });
-  };
-
-  const updateInputValues = (
-    newInputValues: Record<string, Record<string, InputValue>>,
-  ) => {
-    setInputValues(newInputValues);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(
+        `incomeCalculator.inputValues.${componentID}`,
+        JSON.stringify(inputValues[componentID]),
+      );
+    }
   };
 
   return (
-    <InputValuesContext.Provider value={{ inputValues, updateInputValue, updateInputValues }}>
+    <InputValuesContext.Provider value={{ inputValues, updateInputValue }}>
       {children}
     </InputValuesContext.Provider>
   );

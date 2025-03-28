@@ -8,14 +8,9 @@ import {
 } from "@/types/income";
 import { Temporal } from "@js-temporal/polyfill";
 
-export interface ComponentCalculations {
-  id: string;
-  name: string;
-  calculations: Array<{
-    date: Temporal.PlainDate;
-    calculation: Calculation;
-  }>;
-}
+export type CalculationWithDate = Calculation & {
+  date: Temporal.PlainDate;
+};
 
 export interface ComponentResult {
   id: string;
@@ -33,10 +28,14 @@ export function calculate(
   endDate: Temporal.PlainDate,
 ): ComponentResult[] {
   // Get all component calculations that match the given date
-  const componentCalculations: Array<ComponentCalculations> = [];
+  const componentCalculations: Array<CalculationWithDate> = [];
   for (const component of components) {
-    const calculations = getCalculcationsForDate(component, startDate, endDate);
-    componentCalculations.push(calculations);
+    const calculations = getCalculcationsForPeriod(
+      component,
+      startDate,
+      endDate,
+    );
+    componentCalculations.push(...calculations);
   }
 
   // Store calculated results for reuse
@@ -142,39 +141,28 @@ export function calculate(
  * @param endDate The end date of the period
  * @returns The calculations for the given period
  */
-export function getCalculcationsForDate(
+export function getCalculcationsForPeriod(
   component: Component,
   startDate: Temporal.PlainDate,
   endDate: Temporal.PlainDate,
-): ComponentCalculations {
+): Array<CalculationWithDate> {
   if (component.type === "one-time") {
     if (isDateInPeriod(component.date, startDate, endDate)) {
-      return {
-        id: component.id,
-        name: component.name,
-        calculations: [
-          {
-            date: component.date,
-            calculation: component.calculation,
-          },
-        ],
-      };
+      return [
+        {
+          ...component.calculation,
+          date: component.date,
+        },
+      ];
     } else {
-      return {
-        id: component.id,
-        name: component.name,
-        calculations: [],
-      };
+      return [];
     }
   } else {
-    const calculations: Array<{
-      date: Temporal.PlainDate;
-      calculation: Calculation;
-    }> = [];
+    const calculations: Array<CalculationWithDate> = [];
 
     // For each calculation period, generate occurrences in [startDate, endDate]
-    for (const periodCalc of component.calculationPeriods) {
-      const period = periodCalc.period;
+    for (const calculationPeriod of component.calculationPeriods) {
+      const period = calculationPeriod.period;
 
       // Skip if the recurring period does not overlap the given range
       if (
@@ -249,17 +237,13 @@ export function getCalculcationsForDate(
       }
       for (const occurrence of occurrences) {
         calculations.push({
+          ...calculationPeriod.calculation,
           date: occurrence,
-          calculation: periodCalc.calculation,
         });
       }
     }
 
-    return {
-      id: component.id,
-      name: component.name,
-      calculations,
-    };
+    return calculations;
   }
 }
 
@@ -593,4 +577,18 @@ export function getYearlyOccurrences(
     }
   }
   return occurrences;
+}
+
+export function laterPlainDate(
+  date1: Temporal.PlainDate,
+  date2: Temporal.PlainDate,
+) {
+  return Temporal.PlainDate.compare(date1, date2) > 0 ? date1 : date2;
+}
+
+export function earlierPlainDate(
+  date1: Temporal.PlainDate,
+  date2: Temporal.PlainDate,
+) {
+  return Temporal.PlainDate.compare(date1, date2) < 0 ? date1 : date2;
 }

@@ -156,7 +156,7 @@ type RangeInput = {
   min: number;
   max: number;
   step: number;
-  defaultValue: number;
+  defaultValue?: number;
 };
 
 export type Input = BaseInput &

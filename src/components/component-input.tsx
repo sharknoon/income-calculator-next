@@ -42,7 +42,9 @@ export function ComponentInput({
             id={input.id}
             type="number"
             value={
-              typeof value === "number" ? value : (input.defaultValue ?? 0)
+              typeof value === "number"
+                ? value
+                : (input.defaultValue ?? input.min ?? 0)
             }
             onChange={(e) => onChange?.(Number.parseFloat(e.target.value) || 0)}
             placeholder={input.placeholder || ""}
@@ -74,7 +76,11 @@ export function ComponentInput({
     case "select":
       return (
         <Select
-          value={typeof value === "string" ? value : input.defaultValue}
+          value={
+            typeof value === "string"
+              ? value
+              : (input.defaultValue ?? input.options[0]?.id)
+          }
           onValueChange={(value) => onChange?.(value)}
           required={input.required !== false}
         >
@@ -98,7 +104,11 @@ export function ComponentInput({
             min={input.min}
             max={input.max}
             step={input.step}
-            value={typeof value === "number" ? [value] : [input.defaultValue]}
+            value={
+              typeof value === "number"
+                ? [value]
+                : [input.defaultValue ?? input.min ?? 0]
+            }
             onValueChange={(values) => onChange?.(values[0])}
           />
           <div className="flex justify-between text-xs text-muted-foreground">

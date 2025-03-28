@@ -32,10 +32,12 @@ export function CalculationView() {
   const { inputValues } = useInputValues();
 
   const [startDate, setStartDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO(),
+    Temporal.Now.plainDateISO().with({ day: 1 }),
   );
   const [endDate, setEndDate] = useState<Temporal.PlainDate>(
-    Temporal.Now.plainDateISO(),
+    Temporal.Now.plainDateISO().with({
+      day: Temporal.Now.plainDateISO().daysInMonth,
+    }),
   );
   const [componentResults, setComponentResults] = useState<
     Array<ComponentResult>
@@ -158,9 +160,12 @@ export function CalculationView() {
                 <span className="font-medium">Total Income:</span>
                 <span className="text-xl font-bold">
                   {formatCurrency(
-                    componentResults.length > 0
-                      ? componentResults[componentResults.length - 1].amount
-                      : 0,
+                    componentResults.reduce(
+                      (total, result) =>
+                        total +
+                        result.results.reduce((sum, r) => sum + r.amount, 0),
+                      0,
+                    ),
                   )}
                 </span>
               </div>
@@ -232,17 +237,39 @@ export function CalculationView() {
                     No components to display
                   </p>
                 ) : (
-                  componentResults.map((result) => (
-                    <div
-                      key={result.id}
-                      className="flex justify-between items-center py-2 border-b"
-                    >
-                      <span>{result.name}</span>
-                      <span className="font-medium">
-                        {formatCurrency(result.amount)}
-                      </span>
-                    </div>
-                  ))
+                  componentResults.map((result) => {
+                    if (result.results.length === 1) {
+                      return (
+                        <div
+                          key={result.id}
+                          className="flex justify-between items-center py-2 border-b"
+                        >
+                          <span>{result.name}</span>
+                          <span className="font-medium">
+                            {formatCurrency(result.results[0].amount)}
+                          </span>
+                        </div>
+                      );
+                    } else if (result.results.length > 1) {
+                      return (
+                        <div key={result.id} className="border-b">
+                          {result.results.map((subResult, index) => (
+                            <div
+                              key={index}
+                              className="flex justify-between items-center py-2"
+                            >
+                              <span>
+                                {result.name} ({formatDate(subResult.date)})
+                              </span>
+                              <span className="font-medium">
+                                {formatCurrency(subResult.amount)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    }
+                  })
                 )}
               </div>
             </CardContent>
