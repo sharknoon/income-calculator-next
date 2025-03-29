@@ -10,6 +10,7 @@ import {
 import type { Component } from "@/lib/types";
 import { Temporal } from "@js-temporal/polyfill";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 interface ComponentsContextType {
   components: Component[];
@@ -24,6 +25,7 @@ const ComponentsContext = createContext<ComponentsContextType | undefined>(
 
 export function ComponentsProvider({ children }: { children: ReactNode }) {
   const [components, setComponents] = useState<Component[]>([]);
+  const t = useTranslations("ComponentsProvider");
 
   // Load from localStorage after component mounts (client-side only)
   useEffect(() => {
@@ -60,11 +62,12 @@ export function ComponentsProvider({ children }: { children: ReactNode }) {
           "incomeCalculator.components",
           JSON.stringify(components),
         );
+        toast.success(t("save-successful"));
       } catch (error) {
         console.error("Failed to save components to localStorage:", error);
       }
     }
-    toast.success("Component saved successfully");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [components]);
 
   const addComponent = (component: Component) => {

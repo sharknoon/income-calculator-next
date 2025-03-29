@@ -181,5 +181,8 @@
   },
   "LanguageSwitcher": {
     "language": "Language"
+  },
+  "ComponentsProvider": {
+    "save-successful": "Component saved successfully"
   }
 }

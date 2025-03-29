@@ -79,7 +79,7 @@ export function ComponentCard({ component }: ComponentCardProps) {
           )}
         </div>
       </CardContent>
-      <CardFooter className="flex justify-end gap-2">
+      <CardFooter className="mt-auto flex justify-end gap-2">
         <Button
           variant="outline"
           size="sm"

@@ -72,9 +72,9 @@ export function ComponentsList() {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 md:flex-row md:justify-between">
         <h2 className="text-2xl font-bold">{t("title")}</h2>
-        <div className="flex gap-2">
+        <div className="flex gap-2 justify-end md:justify-start">
           <Button variant="outline" onClick={handleUploadComponent}>
             <Upload />
           </Button>

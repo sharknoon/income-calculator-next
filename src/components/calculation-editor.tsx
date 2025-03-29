@@ -131,6 +131,14 @@ export function CalculationEditor({
     }
   }, [resolvedTheme, editor]);
 
+  useEffect(() => {
+    if (editor) {
+      editor.updateOptions({
+        automaticLayout: true,
+      });
+    }
+  }, [editor]);
+
   const handleChangeCalculationFunc = (calculationFunc: string) => {
     const newCalculation = { ...calculation };
     newCalculation.func = calculationFunc;
