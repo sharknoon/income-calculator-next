@@ -6,7 +6,7 @@ import {
   InputValue,
   MonthPosition,
   Weekly,
-} from "@/types/income";
+} from "@/lib/types";
 import { Temporal } from "@js-temporal/polyfill";
 
 export type CalculationDate = Calculation & {

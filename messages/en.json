@@ -1,0 +1,48 @@
+{
+  "Home": {
+    "title": "Income Calculator",
+    "tagline": "Build your income structure and verify your employer's calculations"
+  },
+  "IncomeCalculator": {
+    "tab-components": "Components",
+    "tab-calculation": "Calculation"
+  },
+  "ComponentsList": {
+    "new-component-name": "New Component",
+    "title": "Income Components",
+    "button-add-component": "Add Component",
+    "card-title-no-components": "No Components",
+    "card-description-no-components": "You haven't added any income components yet. Click the button above to get started."
+  },
+  "ComponentCard": {
+    "badge-recurring": "Recurring",
+    "badge-one-time": "One-time",
+    "no-description": "No description provided",
+    "period-n": "Period {period}:",
+    "period-range": "{startDate} - {endDate}",
+    "indefinite": "indefinite",
+    "date": "Date:",
+    "button-edit": "Edit"
+  },
+  "CalculationView": {
+    "title": "Income Calculation",
+    "card-date-range-title": "Date Range",
+    "card-date-range-description": "Select the period for your income calculation",
+    "card-date-range-start-date": "Start Date",
+    "card-date-range-end-date": "End Date",
+    "card-summary-title": "Summary",
+    "card-summary-description": "Your income calculation summary",
+    "card-summary-total-income": "Total Income:",
+    "card-summary-components": "Components:",
+    "card-summary-period": "Period:",
+    "card-summary-period-range": "{startDate} - {endDate}",
+    "alert-error-title": "Error",
+    "tab-inputs": "Inputs",
+    "tab-breakdown": "Breakdown",
+    "card-no-components-title": "No Components",
+    "card-no-components-description": "You haven't added any income components yet. Go to the Components tab to add some.",
+    "card-breakdown-title": "Income Breakdown",
+    "card-breakdown-description": "Detailed breakdown of your income components",
+    "card-breakdown-no-components": "No components to display"
+  }
+}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
+import "@/app/globals.css";
+import { NextIntlClientProvider, useLocale } from "next-intl";
 import { Toaster } from "@/components/ui/sonner";
 import { ComponentsProvider } from "@/context/components-context";
 
@@ -26,12 +27,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = useLocale();
+
   return (
-    <html lang="en">
+    <html lang={locale}>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ComponentsProvider>{children}</ComponentsProvider>
+        <NextIntlClientProvider>
+          <ComponentsProvider>{children}</ComponentsProvider>
+        </NextIntlClientProvider>
         <Toaster />
       </body>
     </html>

@@ -17,7 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import type { Monthly, MonthPosition, Period } from "@/types/income";
+import type { Monthly, MonthPosition, Period } from "@/lib/types";
 import { tzDateToPlainDate, plainDateToTZDate } from "@/lib/date";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -141,7 +141,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                 variant="outline"
                 className="w-full justify-start text-left"
               >
-                <Calendar className="mr-2 h-4 w-4" />
+                <Calendar className="mr-2 size-4" />
                 {period.startDate.toLocaleString()}
               </Button>
             </PopoverTrigger>
@@ -190,7 +190,7 @@ export function PeriodEditor({ period, onPeriodChange }: PeriodEditorProps) {
                     period.endDate && "rounded-r-none",
                   )}
                 >
-                  <Calendar className="mr-2 h-4 w-4" />
+                  <Calendar className="mr-2 size-4" />
                   {period.endDate ? (
                     period.endDate.toLocaleString()
                   ) : (

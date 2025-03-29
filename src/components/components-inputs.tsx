@@ -3,7 +3,7 @@
 import { Label } from "@/components/ui/label";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Component, Input } from "@/types/income";
+import type { Component, Input } from "@/lib/types";
 import { Temporal } from "@js-temporal/polyfill";
 import { ComponentInput } from "@/components/component-input";
 import { useInputValues } from "@/context/input-values-context";
@@ -79,7 +79,8 @@ export function ComponentsInputs({
           <CardTitle>{component.name}</CardTitle>
         </CardHeader>
         <CardContent>
-          {periods.length === 0 && (
+          {(periods.length === 0 ||
+            periods.every((p) => p.inputs.length === 0)) && (
             <p className="text-muted-foreground">
               No inputs required for this component
             </p>

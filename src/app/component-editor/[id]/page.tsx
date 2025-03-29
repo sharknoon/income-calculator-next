@@ -2,7 +2,7 @@
 
 import ComponentEditor from "@/components/component-editor";
 import { useComponents } from "@/context/components-context";
-import { Component } from "@/types/income";
+import { Component } from "@/lib/types";
 import { useParams, useRouter } from "next/navigation";
 
 export default function ComponentEditorPage() {

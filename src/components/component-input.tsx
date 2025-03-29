@@ -1,4 +1,4 @@
-import { Input as InputType, InputValue } from "@/types/income";
+import { Input as InputType, InputValue } from "@/lib/types";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,

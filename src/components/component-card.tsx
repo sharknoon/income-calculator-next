@@ -12,8 +12,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useComponents } from "@/context/components-context";
-import type { Component } from "@/types/income";
+import type { Component } from "@/lib/types";
 import { mergeDatePeriods } from "@/lib/date";
+import { useLocale, useTranslations } from "next-intl";
 
 interface ComponentCardProps {
   component: Component;
@@ -22,6 +23,8 @@ interface ComponentCardProps {
 export function ComponentCard({ component }: ComponentCardProps) {
   const { removeComponent } = useComponents();
   const router = useRouter();
+  const t = useTranslations("ComponentCard");
+  const locale = useLocale();
 
   const handleEdit = () => {
     router.push(`/component-editor/${component.id}`);
@@ -33,11 +36,13 @@ export function ComponentCard({ component }: ComponentCardProps) {
         <div className="flex justify-between items-start">
           <CardTitle>{component.name}</CardTitle>
           <Badge variant="outline">
-            {component.type === "one-time" ? "One-time" : "Recurring"}
+            {component.type === "one-time"
+              ? t("badge-one-time")
+              : t("badge-recurring")}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          {component.description || "No description provided"}
+          {component.description || t("no-description")}
         </p>
       </CardHeader>
       <CardContent>
@@ -50,20 +55,25 @@ export function ComponentCard({ component }: ComponentCardProps) {
                 key={index}
                 className="flex items-center text-sm border rounded-md p-2"
               >
-                <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-                <span className="font-medium mr-1">Period {index + 1}:</span>
+                <Calendar className="size-3.5 mr-2 text-muted-foreground" />
+                <span className="font-medium mr-1">
+                  {t("period-n", { period: index + 1 })}
+                </span>
                 <span className="text-muted-foreground">
-                  ({period.startDate.toLocaleString()} to{" "}
-                  {period.endDate?.toLocaleString() || "indefinite"})
+                  {t("period-range", {
+                    startDate: period.startDate.toLocaleString(locale),
+                    endDate:
+                      period.endDate?.toLocaleString(locale) || t("indefinite"),
+                  })}
                 </span>
               </div>
             ))}
           {component.type === "one-time" && (
             <div className="flex items-center text-sm border rounded-md p-2">
-              <Calendar className="h-3.5 w-3.5 mr-2 text-muted-foreground" />
-              <span className="font-medium mr-1">Date:</span>
+              <Calendar className="size-3.5 mr-2 text-muted-foreground" />
+              <span className="font-medium mr-1">{t("date")}</span>
               <span className="text-muted-foreground">
-                {component.date.toLocaleString()}
+                {component.date.toLocaleString(locale)}
               </span>
             </div>
           )}
@@ -75,7 +85,7 @@ export function ComponentCard({ component }: ComponentCardProps) {
           size="sm"
           onClick={() => removeComponent(component.id)}
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="size-4" />
         </Button>
         <Button
           variant="outline"
@@ -92,11 +102,11 @@ export function ComponentCard({ component }: ComponentCardProps) {
             URL.revokeObjectURL(url);
           }}
         >
-          <Download className="h-4 w-4" />
+          <Download className="size-4" />
         </Button>
         <Button size="sm" onClick={handleEdit}>
-          <Edit className="mr-2 h-4 w-4" />
-          Edit
+          <Edit className="mr-2 size-4" />
+          {t("button-edit")}
         </Button>
       </CardFooter>
     </Card>

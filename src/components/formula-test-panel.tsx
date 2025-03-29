@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Calculator } from "lucide-react";
-import type { Calculation, InputValue } from "@/types/income";
+import type { Calculation, InputValue } from "@/lib/types";
 import { ComponentInput } from "@/components/component-input";
 
 interface FormulaTestPanelProps {
@@ -103,7 +103,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center">
-          <Calculator className="mr-2 h-5 w-5" />
+          <Calculator className="mr-2 size-5" />
           Formula Test Panel
         </CardTitle>
         <CardDescription>
@@ -170,13 +170,13 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
           {/* Execute button and result */}
           <div className="space-y-4">
             <Button onClick={executeFormula} className="w-full">
-              <Calculator className="mr-2 h-4 w-4" />
+              <Calculator className="mr-2 size-4" />
               Calculate Result
             </Button>
 
             {error && (
               <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
+                <AlertCircle className="size-4" />
                 <AlertTitle>Error</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>

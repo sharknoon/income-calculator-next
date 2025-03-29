@@ -26,10 +26,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "./ui/label";
 import { plainDateToTZDate, tzDateToPlainDate } from "@/lib/date";
 import { TZDate } from "react-day-picker";
+import { useLocale, useTranslations } from "next-intl";
 
 export function CalculationView() {
   const { components } = useComponents();
   const { inputValues } = useInputValues();
+  const t = useTranslations("CalculationView");
+  const locale = useLocale();
 
   const [startDate, setStartDate] = useState<Temporal.PlainDate>(
     Temporal.Now.plainDateISO().with({ day: 1 }),
@@ -47,15 +50,11 @@ export function CalculationView() {
 
   const formatDate = (date: Temporal.PlainDate | undefined) => {
     if (!date) return "";
-    return date.toLocaleString(undefined, {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+    return date.toLocaleString(locale);
   };
 
   const formatCurrency = (amount: number) => {
-    return Intl.NumberFormat(undefined, {
+    return Intl.NumberFormat(locale, {
       style: "currency",
       currency: "EUR",
     }).format(amount);
@@ -74,28 +73,28 @@ export function CalculationView() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Income Calculation</h2>
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>Date Range</CardTitle>
+            <CardTitle>{t("card-date-range-title")}</CardTitle>
             <CardDescription>
-              Select the period for your income calculation
+              {t("card-date-range-description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>Start Date</Label>
+                <Label>{t("card-date-range-start-date")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left"
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <Calendar className="mr-2 size-4" />
                       {formatDate(startDate)}
                     </Button>
                   </PopoverTrigger>
@@ -117,14 +116,14 @@ export function CalculationView() {
                 </Popover>
               </div>
               <div className="space-y-2">
-                <Label>End Date</Label>
+                <Label>{t("card-date-range-end-date")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className="w-full justify-start text-left"
                     >
-                      <Calendar className="mr-2 h-4 w-4" />
+                      <Calendar className="mr-2 size-4" />
                       {formatDate(endDate)}
                     </Button>
                   </PopoverTrigger>
@@ -151,13 +150,15 @@ export function CalculationView() {
 
         <Card>
           <CardHeader>
-            <CardTitle>Summary</CardTitle>
-            <CardDescription>Your income calculation summary</CardDescription>
+            <CardTitle>{t("card-summary-title")}</CardTitle>
+            <CardDescription>{t("card-summary-description")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between items-center">
-                <span className="font-medium">Total Income:</span>
+                <span className="font-medium">
+                  {t("card-summary-total-income")}
+                </span>
                 <span className="text-xl font-bold">
                   {formatCurrency(
                     componentResults.reduce(
@@ -170,13 +171,18 @@ export function CalculationView() {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-medium">Components:</span>
+                <span className="font-medium">
+                  {t("card-summary-components")}
+                </span>
                 <span>{components.length}</span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="font-medium">Date:</span>
+                <span className="font-medium">{t("card-summary-period")}</span>
                 <span>
-                  {formatDate(startDate)} to {formatDate(endDate)}
+                  {t("card-summary-period-range", {
+                    startDate: formatDate(startDate),
+                    endDate: formatDate(endDate),
+                  })}
                 </span>
               </div>
             </div>
@@ -186,8 +192,8 @@ export function CalculationView() {
 
       {error && (
         <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertCircle className="size-4" />
+          <AlertTitle>{t("alert-error-title")}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -198,18 +204,17 @@ export function CalculationView() {
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="inputs">Inputs</TabsTrigger>
-          <TabsTrigger value="breakdown">Breakdown</TabsTrigger>
+          <TabsTrigger value="inputs">{t("tab-inputs")}</TabsTrigger>
+          <TabsTrigger value="breakdown">{t("tab-breakdown")}</TabsTrigger>
         </TabsList>
         <TabsContent value="inputs" className="py-4">
           <div className="space-y-6">
             {components.length === 0 ? (
               <Card>
                 <CardHeader>
-                  <CardTitle>No Components</CardTitle>
+                  <CardTitle>{t("card-no-components-title")}</CardTitle>
                   <CardDescription>
-                    You haven&apos;t added any income components yet. Go to the
-                    Components tab to add some.
+                    {t("card-no-components-description")}
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -225,16 +230,16 @@ export function CalculationView() {
         <TabsContent value="breakdown" className="py-4">
           <Card>
             <CardHeader>
-              <CardTitle>Income Breakdown</CardTitle>
+              <CardTitle>{t("card-breakdown-title")}</CardTitle>
               <CardDescription>
-                Detailed breakdown of your income components
+                {t("card-breakdown-description")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {componentResults.length === 0 ? (
                   <p className="text-muted-foreground">
-                    No components to display
+                    {t("card-breakdown-no-components")}
                   </p>
                 ) : (
                   componentResults.map((result) => {

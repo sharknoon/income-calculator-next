@@ -21,7 +21,7 @@ import {
   Input as InputType,
   Period,
   RecurringComponent,
-} from "@/types/income";
+} from "@/lib/types";
 import { DateEditor } from "@/components/date-editor";
 import {
   AlertDialog,

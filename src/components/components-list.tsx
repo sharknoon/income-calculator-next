@@ -12,10 +12,12 @@ import {
 import { useComponents } from "@/context/components-context";
 import { ComponentCard } from "@/components/component-card";
 import { Temporal } from "@js-temporal/polyfill";
+import { useTranslations } from "next-intl";
 
 export function ComponentsList() {
   const { components, addComponent } = useComponents();
   const router = useRouter();
+  const t = useTranslations("ComponentsList");
 
   const handleUploadComponent = () => {
     const fileInput = document.createElement("input");
@@ -44,7 +46,7 @@ export function ComponentsList() {
     const newId = (Math.random() + 1).toString(36).substring(7);
     addComponent({
       id: newId,
-      name: "New Component",
+      name: t("new-component-name"),
       type: "recurring",
       calculationPeriods: [
         {
@@ -71,14 +73,14 @@ export function ComponentsList() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Income Components</h2>
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleUploadComponent}>
             <Upload />
           </Button>
           <Button onClick={handleAddComponent}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Component
+            <Plus className="mr-2 size-4" />
+            {t("button-add-component")}
           </Button>
         </div>
       </div>
@@ -86,10 +88,9 @@ export function ComponentsList() {
       {components.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>No Components</CardTitle>
+            <CardTitle>{t("card-title-no-components")}</CardTitle>
             <CardDescription>
-              You haven&apos;t added any income components yet. Click the button
-              above to get started.
+              {t("card-description-no-components")}
             </CardDescription>
           </CardHeader>
         </Card>

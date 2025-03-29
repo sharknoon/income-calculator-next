@@ -7,7 +7,7 @@ import {
   type ReactNode,
   useEffect,
 } from "react";
-import type { Component } from "@/types/income";
+import type { Component } from "@/lib/types";
 import { Temporal } from "@js-temporal/polyfill";
 import { toast } from "sonner";
 

@@ -15,7 +15,7 @@ import {
   cycleDetection,
   ComponentDate,
 } from "@/lib/calculation";
-import { Component, Weekly } from "@/types/income";
+import { Component, Weekly } from "@/lib/types";
 
 describe("isDateInPeriod", () => {
   it("should return true when the date is within the period", () => {

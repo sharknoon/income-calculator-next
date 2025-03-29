@@ -1,6 +1,6 @@
 "use client";
 
-import { InputValue } from "@/types/income";
+import { InputValue } from "@/lib/types";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { toast } from "sonner";
 

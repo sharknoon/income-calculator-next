@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useComponents } from "@/context/components-context";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import type { Calculation, Input } from "@/types/income";
+import type { Calculation, Input } from "@/lib/types";
 import { Play } from "lucide-react";
 import { FormulaTestPanel } from "@/components/formula-test-panel";
 import Editor, { type Monaco } from "@monaco-editor/react";
@@ -157,7 +157,7 @@ export function CalculationEditor({
             size="sm"
             onClick={() => setShowTestPanel(!showTestPanel)}
           >
-            <Play className="mr-2 h-4 w-4" />
+            <Play className="mr-2 size-4" />
             {showTestPanel ? "Hide Test Panel" : "Test Formula"}
           </Button>
         </div>

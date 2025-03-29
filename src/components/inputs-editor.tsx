@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { Input as InputType } from "@/types/income";
+import type { Input as InputType } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 
 interface InputsEditorProps {
@@ -75,7 +75,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Input Parameters</h3>
         <Button onClick={handleAddInput} size="sm">
-          <Plus className="mr-2 h-4 w-4" />
+          <Plus className="mr-2 size-4" />
           Add Input
         </Button>
       </div>
@@ -126,7 +126,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       handleRemoveInput(input.id);
                     }}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="size-4" />
                   </Button>
                 </div>
               ))}
@@ -587,7 +587,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                                 });
                               }}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="size-4" />
                             </Button>
                           )}
                         </div>
@@ -609,7 +609,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           });
                         }}
                       >
-                        <Plus className="mr-2 h-4 w-4" />
+                        <Plus className="mr-2 size-4" />
                         Add Option
                       </Button>
                     </div>

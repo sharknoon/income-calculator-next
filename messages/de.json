@@ -1,0 +1,48 @@
+{
+  "Home": {
+    "title": "Einkommensrechner",
+    "tagline": "Erstellen Sie Ihre Einkommensstruktur und überprüfen Sie die Berechnungen Ihres Arbeitgebers"
+  },
+  "IncomeCalculator": {
+    "tab-components": "Komponenten",
+    "tab-calculation": "Berechnung"
+  },
+  "ComponentsList": {
+    "new-component-name": "Neue Komponente",
+    "title": "Einkommenskomponenten",
+    "button-add-component": "Komponente hinzufügen",
+    "card-title-no-components": "Keine Komponenten",
+    "card-description-no-components": "Sie haben noch keine Einkommenskomponenten hinzugefügt. Klicken Sie auf die Schaltfläche oben, um zu beginnen."
+  },
+  "ComponentCard": {
+    "badge-recurring": "Wiederkehrend",
+    "badge-one-time": "Einmalig",
+    "no-description": "Keine Beschreibung angegeben",
+    "period-n": "Zeitraum {period}:",
+    "period-range": "{startDate} - {endDate}",
+    "indefinite": "unbegrenzt",
+    "date": "Datum:",
+    "button-edit": "Bearbeiten"
+  },
+  "CalculationView": {
+    "title": "Einkommensberechnung",
+    "card-date-range-title": "Datumsbereich",
+    "card-date-range-description": "Wählen Sie den Zeitraum für Ihre Einkommensberechnung",
+    "card-date-range-start-date": "Startdatum",
+    "card-date-range-end-date": "Enddatum",
+    "card-summary-title": "Zusammenfassung",
+    "card-summary-description": "Ihre Einkommensberechnung im Überblick",
+    "card-summary-total-income": "Gesamteinkommen:",
+    "card-summary-components": "Komponenten:",
+    "card-summary-period": "Zeitraum:",
+    "card-summary-period-range": "{startDate} - {endDate}",
+    "alert-error-title": "Fehler",
+    "tab-inputs": "Eingaben",
+    "tab-breakdown": "Aufschlüsselung",
+    "card-no-components-title": "Keine Komponenten",
+    "card-no-components-description": "Sie haben noch keine Einkommenskomponenten hinzugefügt. Gehen Sie zur Registerkarte Komponenten, um einige hinzuzufügen.",
+    "card-breakdown-title": "Einkommensaufschlüsselung",
+    "card-breakdown-description": "Detaillierte Aufschlüsselung Ihrer Einkommenskomponenten",
+    "card-breakdown-no-components": "Keine Komponenten zum Anzeigen"
+  }
+}
