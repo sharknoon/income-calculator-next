@@ -562,22 +562,24 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                             }}
                             className="rounded-l-none"
                           />
-                          <Button
-                            variant="ghost"
-                            className="ml-2"
-                            size="sm"
-                            onClick={() => {
-                              const newOptions = selectedInput.options.filter(
-                                (_, i) => i !== index,
-                              );
-                              handleInputChange(selectedInput.id, {
-                                ...selectedInput,
-                                options: newOptions,
-                              });
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {selectedInput.options.length > 1 && (
+                            <Button
+                              variant="ghost"
+                              className="ml-2"
+                              size="sm"
+                              onClick={() => {
+                                const newOptions = selectedInput.options.filter(
+                                  (_, i) => i !== index,
+                                );
+                                handleInputChange(selectedInput.id, {
+                                  ...selectedInput,
+                                  options: newOptions,
+                                });
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       ))}
                       <Button

@@ -15,7 +15,9 @@ export type CalculationDate = Calculation & {
 };
 
 export type ComponentDate = BaseComponent &
-  CalculationDate & { inputValues: Record<string, InputValue> };
+  CalculationDate & {
+    inputValues: Record<string, InputValue>;
+  };
 
 export interface ComponentResult {
   id: string;
@@ -61,6 +63,32 @@ export function calculate(
 
     // Map the calculations by date
     for (const calculation of calculations) {
+      // Create default input values
+      const inputValuesForPeriod =
+        inputValues[component.id]?.[calculation.calculationPeriodID] ?? {};
+      for (const input of calculation.inputs) {
+        if (!inputValuesForPeriod[input.id]) {
+          let defaultInputValue: InputValue;
+          if (input.defaultValue !== undefined && input.defaultValue !== null) {
+            defaultInputValue = input.defaultValue;
+          } else if (input.type === "number") {
+            defaultInputValue = input.min ?? 0;
+          } else if (input.type === "boolean") {
+            defaultInputValue = false;
+          } else if (input.type === "text") {
+            defaultInputValue = "";
+          } else if (input.type === "select") {
+            defaultInputValue = input.options[0].id;
+          } else if (input.type === "range") {
+            defaultInputValue = input.min ?? 0;
+          } else {
+            defaultInputValue = "";
+          }
+          inputValuesForPeriod[input.id] = defaultInputValue;
+        }
+      }
+
+      // Map calculations by date
       if (!componentsByDate.has(calculation.date.toString())) {
         componentsByDate.set(calculation.date.toString(), []);
       }
@@ -68,8 +96,7 @@ export function calculate(
         id: component.id,
         name: component.name,
         description: component.description,
-        inputValues:
-          inputValues[component.id]?.[calculation.calculationPeriodID] ?? {},
+        inputValues: inputValuesForPeriod,
         ...calculation,
       });
     }
