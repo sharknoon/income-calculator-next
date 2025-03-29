@@ -16,6 +16,7 @@ import { AlertCircle, Calculator } from "lucide-react";
 import type { Calculation, InputValue } from "@/lib/types";
 import { ComponentInput } from "@/components/component-input";
 import { useTranslations } from "next-intl";
+import { useComponents } from "@/context/components-context";
 
 interface FormulaTestPanelProps {
   calculation: Calculation;
@@ -38,6 +39,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
   >({});
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { components } = useComponents();
   const t = useTranslations("FormulaTestPanel");
 
   // Reset values when calculation changes
@@ -128,7 +130,8 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
                 {calculation.dependencies.map((depId) => (
                   <div key={depId} className="space-y-2">
                     <Label>
-                      TODO name of component
+                      {components.find((c) => c.id === depId)?.name ??
+                        t("unknown-dependency")}
                       <span className="ml-1 text-xs text-muted-foreground">
                         (dependencies.{depId})
                       </span>

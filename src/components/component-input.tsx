@@ -32,7 +32,6 @@ export function ComponentInput({
           minLength={input.minLength}
           maxLength={input.maxLength}
           required={input.required !== false}
-          pattern={input.validation?.source}
         />
       );
     case "number":
@@ -53,7 +52,6 @@ export function ComponentInput({
             step={input.step || 1}
             required={input.required !== false}
             className="flex-1"
-            pattern={input.validation?.source}
           />
           {input.unit && (
             <span className="text-muted-foreground">{input.unit}</span>

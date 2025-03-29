@@ -136,6 +136,7 @@ export default function ComponentEditor({
           },
         ],
       };
+      setSelectedPeriodId(updatedComponent.calculationPeriods[0].id);
     }
 
     setComponent(updatedComponent);

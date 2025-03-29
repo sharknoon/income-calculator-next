@@ -126,7 +126,6 @@ export type TextInput = {
   defaultValue?: string;
   minLength?: number;
   maxLength?: number;
-  validation?: RegExp;
   placeholder?: string;
 };
 
@@ -137,7 +136,6 @@ export type NumberInput = {
   min?: number;
   max?: number;
   step?: number;
-  validation?: RegExp;
   placeholder?: string;
 };
 

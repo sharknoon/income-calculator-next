@@ -228,7 +228,6 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           defaultValue: "",
                           minLength: undefined,
                           maxLength: undefined,
-                          validation: undefined,
                           placeholder: "",
                         };
                       } else if (value === "number") {
@@ -240,7 +239,6 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           min: undefined,
                           max: undefined,
                           step: 1,
-                          validation: undefined,
                           placeholder: "",
                         };
                       } else if (value === "boolean") {
@@ -389,34 +387,6 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         }
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="input-validation">
-                        {t("input-text-regex-validation")}
-                      </Label>
-                      <Input
-                        id="input-validation"
-                        value={selectedInput.validation?.source || ""}
-                        onChange={(e) =>
-                          handleInputChange(selectedInput.id, {
-                            ...selectedInput,
-                            validation: new RegExp(e.target.value),
-                          })
-                        }
-                      />
-                      <Label className="text-muted-foreground text-xs">
-                        {t.rich("input-text-regex-validation-description", {
-                          link: () => (
-                            <a
-                              href="https://regex101.com"
-                              target="_blank"
-                              className="hover:underline"
-                            >
-                              regex101.com
-                            </a>
-                          ),
-                        })}
-                      </Label>
-                    </div>
                   </>
                 )}
 
@@ -525,34 +495,6 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           })
                         }
                       />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="input-validation">
-                        {t("input-number-regex-validation")}
-                      </Label>
-                      <Input
-                        id="input-validation"
-                        value={selectedInput.validation?.source || ""}
-                        onChange={(e) =>
-                          handleInputChange(selectedInput.id, {
-                            ...selectedInput,
-                            validation: new RegExp(e.target.value),
-                          })
-                        }
-                      />
-                      <Label className="text-muted-foreground text-xs">
-                        {t.rich("input-number-regex-validation-description", {
-                          link: () => (
-                            <a
-                              href="https://regex101.com"
-                              target="_blank"
-                              className="hover:underline"
-                            >
-                              regex101.com
-                            </a>
-                          ),
-                        })}
-                      </Label>
                     </div>
                   </>
                 )}

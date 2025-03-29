@@ -1,21 +1,31 @@
 "use server";
 
 import { cookies, headers } from "next/headers";
-import { Locale, defaultLocale } from "@/i18n/config";
+import { Locale, defaultLocale, locales } from "@/i18n/config";
 
 const COOKIE_NAME = "NEXT_LOCALE";
 
 export async function getUserLocale() {
-  const cookieLocale = (await cookies()).get(COOKIE_NAME)?.value;
+  let cookieLocale = (await cookies()).get(COOKIE_NAME)?.value;
   if (cookieLocale) {
-    return cookieLocale;
+    if (cookieLocale.length > 2) {
+      cookieLocale = cookieLocale.substring(0, 2);
+    }
+    if (locales.includes(cookieLocale as Locale)) {
+      return cookieLocale;
+    }
   }
 
   const acceptLanguage = (await headers()).get("accept-language");
   if (acceptLanguage) {
-    const headerLocale = parseAcceptLanguage(acceptLanguage)[0];
+    let headerLocale = parseAcceptLanguage(acceptLanguage)[0];
     if (headerLocale) {
-      return headerLocale;
+      if (headerLocale.length > 2) {
+        headerLocale = headerLocale.substring(0, 2);
+      }
+      if (locales.includes(headerLocale as Locale)) {
+        return headerLocale;
+      }
     }
   }
 
