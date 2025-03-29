@@ -8,6 +8,7 @@ import type { Calculation, Input } from "@/types/income";
 import { Play } from "lucide-react";
 import { FormulaTestPanel } from "@/components/formula-test-panel";
 import Editor, { type Monaco } from "@monaco-editor/react";
+import { editor } from "monaco-editor";
 
 interface CalculationEditorProps {
   componentId: string;
@@ -22,10 +23,10 @@ export function CalculationEditor({
 }: CalculationEditorProps) {
   const { components } = useComponents();
   const availableDependencies = components.filter((c) => c.id !== componentId);
-  const [calculationFunc, setCalculationFunc] = useState(
-    calculation.func || "",
-  );
   const [showTestPanel, setShowTestPanel] = useState(false);
+  const [editor, setEditor] = useState<editor.IStandaloneCodeEditor | null>(
+    null,
+  );
   const [monaco, setMonaco] = useState<Monaco | null>(null);
 
   useEffect(() => {
@@ -60,34 +61,65 @@ export function CalculationEditor({
             break;
         }
         lines.push(`"${input.id}": ${jsType};`);
-        const types = lines.join("\n");
-        console.log(types);
-        return types;
+        return lines.join("\n");
       }
 
-      // extra libraries
-      const libSource = [
+      function formatDependencyType(dependencyId: string): string {
+        const lines = [`/**`, ` * ${dependencyId}`];
+        lines.push(` */`);
+        lines.push(`"${dependencyId}": number;`);
+        return lines.join("\n");
+      }
+
+      const inputsSource = [
         "interface Inputs {",
         ...calculation.inputs.map(formatInputType),
         "}",
         "declare const inputs: Inputs;",
       ].join("\n");
 
-      const libUri = "ts:filename/inputs.d.ts";
-      const libUriParsed = monaco.Uri.parse(libUri);
-      monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        libSource,
-        libUri,
+      const inputsUri = "ts:filename/inputs.d.ts";
+      const inputsUriParsed = monaco.Uri.parse(inputsUri);
+
+      const dependenciesSource = [
+        "interface Dependencies {",
+        ...calculation.dependencies.map(formatDependencyType),
+        "}",
+        "declare const dependencies: Dependencies;",
+      ].join("\n");
+      const dependenciesUri = "ts:filename/dependencies.d.ts";
+      const dependenciesUriParsed = monaco.Uri.parse(dependenciesUri);
+
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(
+        inputsSource,
+        inputsUri,
       );
+      monaco.languages.typescript.typescriptDefaults.addExtraLib(
+        dependenciesSource,
+        dependenciesUri,
+      );
+
       // When resolving definitions and references, the editor will try to use created models.
       // Creating a model for the library allows "peek definition/references" commands to work with the library.
-      monaco.editor.getModel(libUriParsed)?.dispose();
-      console.log("setting types");
-      monaco.editor.createModel(libSource, "typescript", libUriParsed);
+      monaco.editor.getModel(inputsUriParsed)?.dispose();
+      monaco.editor.createModel(inputsSource, "typescript", inputsUriParsed);
+
+      monaco.editor.getModel(dependenciesUriParsed)?.dispose();
+      monaco.editor.createModel(
+        dependenciesSource,
+        "typescript",
+        dependenciesUriParsed,
+      );
     }
   }, [monaco, calculation]);
 
-  const handleSaveCalculationFunc = () => {
+  useEffect(() => {
+    if (editor) {
+      editor.setValue(calculation.func);
+    }
+  }, [calculation.func, editor]);
+
+  const handleChangeCalculationFunc = (calculationFunc: string) => {
     const newCalculation = { ...calculation };
     newCalculation.func = calculationFunc;
 
@@ -131,20 +163,26 @@ export function CalculationEditor({
         </div>
         <Editor
           height="10rem"
-          defaultLanguage="typescript"
-          onChange={(value) => setCalculationFunc(value || "")}
+          language="typescript"
+          onChange={(value) => handleChangeCalculationFunc(value || "")}
           className="border"
-          onMount={(_, monaco) => setMonaco(monaco)}
+          onMount={(editor, monaco) => {
+            setEditor(editor);
+            setMonaco(monaco);
+          }}
           defaultValue={calculation.func}
         />
 
         <p className="text-xs text-muted-foreground">
-          Use JavaScript to create your calculation formula. Access
-          input/dependency values using the their ID, e.g.,{" "}
-          <code>return inputs.hourlyRate * inputs.hoursWorked</code>
+          Use JavaScript or TypeScript to create your calculation formula.
+          Access input/dependency values using the their ID.
+          <br />
+          <span className="font-semibold">Examples</span>
+          <br />
+          <code>return inputs.hourlyRate * inputs.hoursWorked;</code>
+          <br />
+          <code>return dependencies.salary;</code>
         </p>
-
-        <Button onClick={handleSaveCalculationFunc}>Save Calculation</Button>
       </div>
 
       {showTestPanel && <FormulaTestPanel calculation={calculation} />}

@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Plus, Save, X } from "lucide-react";
+import { ArrowLeft, Copy, Plus, Save, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +23,17 @@ import {
   RecurringComponent,
 } from "@/types/income";
 import { DateEditor } from "@/components/date-editor";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface ComponentEditorProps {
   component: Component;
@@ -40,6 +51,12 @@ export default function ComponentEditor({
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | undefined>(
     c.type === "recurring" ? c.calculationPeriods[0].id : undefined,
   );
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  useEffect(() => {
+    const hasChanges = JSON.stringify(c) !== JSON.stringify(component);
+    setHasUnsavedChanges(hasChanges);
+  }, [c, component]);
 
   if (!component) {
     return null;
@@ -250,6 +267,37 @@ export default function ComponentEditor({
     setSelectedPeriodId(lastPeriod.id);
   };
 
+  const duplicateCalculationPeriod = (id: string) => {
+    if (component.type !== "recurring") {
+      return;
+    }
+
+    const periodToDuplicate = component.calculationPeriods.find(
+      (period) => period.id === id,
+    );
+    if (!periodToDuplicate) {
+      return;
+    }
+
+    const duplicatedPeriod: CalculationPeriod = {
+      ...JSON.parse(JSON.stringify(periodToDuplicate), (key, value) => {
+        // Reconstruct the date object
+        if ((key === "startDate" || key === "endDate") && value) {
+          return Temporal.PlainDate.from(value);
+        }
+        return value;
+      }),
+      id: crypto.randomUUID(),
+    };
+    const updatedComponent: RecurringComponent = {
+      ...component,
+      calculationPeriods: [...component.calculationPeriods, duplicatedPeriod],
+    };
+
+    setComponent(updatedComponent);
+    setSelectedPeriodId(duplicatedPeriod.id);
+  };
+
   const handleSave = () => {
     onComponentChange(oldID, component);
   };
@@ -257,9 +305,47 @@ export default function ComponentEditor({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" onClick={() => router.push("/")}>
-          <ArrowLeft className="h-4 w-4" />
-        </Button>
+        {hasUnsavedChanges && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="outline" size="icon">
+                <ArrowLeft className="size-4" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+                <AlertDialogDescription>
+                  You have unsaved changes that will be lost if you leave this
+                  page. What would you like to do?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button variant="destructive" onClick={() => router.push("/")}>
+                  Discard Changes
+                </Button>
+                <AlertDialogAction
+                  onClick={() => {
+                    handleSave();
+                    router.push("/");
+                  }}
+                >
+                  Save Changes
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        )}
+        {!hasUnsavedChanges && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.push("/")}
+          >
+            <ArrowLeft className="size-4" />
+          </Button>
+        )}
         <h2 className="text-2xl font-bold">Edit Component</h2>
       </div>
 
@@ -344,11 +430,11 @@ export default function ComponentEditor({
                       <div
                         key={period.id}
                         className={`
-                      px-3 py-1 rounded-md cursor-pointer flex items-center gap-2
+                      group transition-colors px-3 py-1 rounded-md cursor-pointer flex items-center gap-2
                       ${
                         selectedPeriodId === period.id
                           ? "bg-primary text-primary-foreground"
-                          : "bg-muted hover:bg-muted/80"
+                          : "bg-muted"
                       }
                     `}
                         onClick={() => setSelectedPeriodId(period.id)}
@@ -360,17 +446,32 @@ export default function ComponentEditor({
                             "indefinite"}
                           )
                         </span>
-                        {component.calculationPeriods.length > 1 && (
+                        <div className="relative">
                           <button
-                            className="text-xs hover:text-destructive"
+                            className={`p-2 absolute opacity-0 group-hover:opacity-100 transition left-0 top-1/2 -translate-x-full -translate-y-1/2 ${
+                              selectedPeriodId === period.id
+                                ? "bg-primary text-primary-foreground hover:text-blue-400"
+                                : "bg-muted hover:text-blue-700"
+                            }`}
                             onClick={(e) => {
                               e.stopPropagation();
-                              removeCalculationPeriod(period.id);
+                              duplicateCalculationPeriod(period.id);
                             }}
                           >
-                            <X className="size-3" />
+                            <Copy className="size-3" />
                           </button>
-                        )}
+                          {component.calculationPeriods.length > 1 && (
+                            <button
+                              className="hover:text-destructive transition-colors"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeCalculationPeriod(period.id);
+                              }}
+                            >
+                              <X className="size-3" />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))}
                 </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,6 +59,16 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
       setSelectedInputId(updatedInput.id);
     }
   };
+
+  // On period switch, make sure there is always an input selected
+  useEffect(() => {
+    if (
+      selectedInputId &&
+      !inputs.some((input) => input.id === selectedInputId)
+    ) {
+      setSelectedInputId(inputs[0]?.id || null);
+    }
+  }, [inputs, selectedInputId]);
 
   return (
     <div className="space-y-4">

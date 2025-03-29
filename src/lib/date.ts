@@ -29,8 +29,17 @@ export function mergeDatePeriods(
     return [];
   }
 
+  // Deep clone the periods to avoid mutating the original array
+  const clonedPeriods = JSON.parse(JSON.stringify(periods), (key, value) => {
+    // Reconstruct the date object
+    if ((key === "startDate" || key === "endDate") && value) {
+      return Temporal.PlainDate.from(value);
+    }
+    return value;
+  }) as DatePeriod[];
+
   // Create a copy and sort by startDate
-  const sortedPeriods = [...periods].sort((a, b) =>
+  const sortedPeriods = clonedPeriods.sort((a, b) =>
     Temporal.PlainDate.compare(a.startDate, b.startDate),
   );
 
