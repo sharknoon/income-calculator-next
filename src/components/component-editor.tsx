@@ -34,6 +34,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { useLocale, useTranslations } from "next-intl";
 
 interface ComponentEditorProps {
   component: Component;
@@ -52,6 +53,8 @@ export default function ComponentEditor({
     c.type === "recurring" ? c.calculationPeriods[0].id : undefined,
   );
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const t = useTranslations("ComponentEditor");
+  const locale = useLocale();
 
   useEffect(() => {
     const hasChanges = JSON.stringify(c) !== JSON.stringify(component);
@@ -314,16 +317,19 @@ export default function ComponentEditor({
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+                <AlertDialogTitle>
+                  {t("alert-dialog-unsaved-changes-title")}
+                </AlertDialogTitle>
                 <AlertDialogDescription>
-                  You have unsaved changes that will be lost if you leave this
-                  page. What would you like to do?
+                  {t("alert-dialog-unsaved-changes-description")}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>
+                  {t("alert-dialog-unsaved-changes-cancel")}
+                </AlertDialogCancel>
                 <Button variant="destructive" onClick={() => router.push("/")}>
-                  Discard Changes
+                  {t("alert-dialog-unsaved-changes-discard")}
                 </Button>
                 <AlertDialogAction
                   onClick={() => {
@@ -331,7 +337,7 @@ export default function ComponentEditor({
                     router.push("/");
                   }}
                 >
-                  Save Changes
+                  {t("alert-dialog-unsaved-changes-save")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -346,14 +352,14 @@ export default function ComponentEditor({
             <ArrowLeft className="size-4" />
           </Button>
         )}
-        <h2 className="text-2xl font-bold">Edit Component</h2>
+        <h2 className="text-2xl font-bold">{t("title")}</h2>
       </div>
 
       <Card>
         <CardContent>
           <div className="space-y-4">
             <div>
-              <Label htmlFor="id">ID</Label>
+              <Label htmlFor="id">{t("input-id")}</Label>
               <Input
                 id="id"
                 value={component.id || ""}
@@ -363,7 +369,7 @@ export default function ComponentEditor({
             </div>
 
             <div>
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{t("input-name")}</Label>
               <Input
                 id="name"
                 value={component.name || ""}
@@ -373,18 +379,18 @@ export default function ComponentEditor({
             </div>
 
             <div>
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">{t("input-description")}</Label>
               <Textarea
                 id="description"
                 value={component.description || ""}
                 onChange={handleDescriptionChange}
-                placeholder="Describe this income component"
+                placeholder={t("input-description-placeholder")}
                 className="mt-1"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Component Type</Label>
+              <Label>{t("component-type")}</Label>
               <RadioGroup
                 value={component.type}
                 onValueChange={handleTypeChange}
@@ -393,13 +399,13 @@ export default function ComponentEditor({
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="one-time" id="one-time" />
                   <Label htmlFor="one-time" className="cursor-pointer">
-                    One-time payment
+                    {t("component-type-one-time")}
                   </Label>
                 </div>
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem value="recurring" id="recurring" />
                   <Label htmlFor="recurring" className="cursor-pointer">
-                    Recurring payment
+                    {t("component-type-recurring")}
                   </Label>
                 </div>
               </RadioGroup>
@@ -408,13 +414,13 @@ export default function ComponentEditor({
             {component.type === "recurring" && (
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
-                  <Label>Periods</Label>
+                  <Label>{t("periods")}</Label>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={addNewCalculationPeriod}
                   >
-                    <Plus className="size-4 mr-1" /> Add Period
+                    <Plus className="size-4 mr-1" /> {t("button-add-period")}
                   </Button>
                 </div>
 
@@ -440,11 +446,14 @@ export default function ComponentEditor({
                         onClick={() => setSelectedPeriodId(period.id)}
                       >
                         <span>
-                          Period {index + 1} (
-                          {period.period.startDate.toLocaleString()} to{" "}
-                          {period.period.endDate?.toLocaleString() ||
-                            "indefinite"}
-                          )
+                          {t("badge-period", {
+                            period: index + 1,
+                            startDate:
+                              period.period.startDate.toLocaleString(locale),
+                            endDate:
+                              period.period.endDate?.toLocaleString(locale) ||
+                              t("badge-period-indefinite"),
+                          })}
                         </span>
                         <div className="relative">
                           <button
@@ -485,10 +494,14 @@ export default function ComponentEditor({
             >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="details">
-                  {component.type === "one-time" ? "Date" : "Period"}
+                  {component.type === "one-time"
+                    ? t("tab-date")
+                    : t("tab-period")}
                 </TabsTrigger>
-                <TabsTrigger value="inputs">Inputs</TabsTrigger>
-                <TabsTrigger value="calculation">Calculation</TabsTrigger>
+                <TabsTrigger value="inputs">{t("tab-inputs")}</TabsTrigger>
+                <TabsTrigger value="calculation">
+                  {t("tab-calculation")}
+                </TabsTrigger>
               </TabsList>
               <TabsContent value="details" className="pt-4">
                 {component.type === "recurring" && (
@@ -539,7 +552,7 @@ export default function ComponentEditor({
         <CardFooter className="flex justify-end">
           <Button onClick={handleSave}>
             <Save />
-            Save Changes
+            {t("button-save")}
           </Button>
         </CardFooter>
       </Card>

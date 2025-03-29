@@ -27,6 +27,7 @@ import { Label } from "./ui/label";
 import { plainDateToTZDate, tzDateToPlainDate } from "@/lib/date";
 import { TZDate } from "react-day-picker";
 import { useLocale, useTranslations } from "next-intl";
+import { getReactDayPickerLocale } from "@/i18n/utils";
 
 export function CalculationView() {
   const { components } = useComponents();
@@ -102,6 +103,7 @@ export function CalculationView() {
                     <CalendarComponent
                       timeZone="UTC"
                       mode="single"
+                      locale={getReactDayPickerLocale(locale)}
                       selected={plainDateToTZDate(startDate)}
                       onSelect={(date) =>
                         date
@@ -131,6 +133,7 @@ export function CalculationView() {
                     <CalendarComponent
                       timeZone="UTC"
                       mode="single"
+                      locale={getReactDayPickerLocale(locale)}
                       selected={plainDateToTZDate(endDate)}
                       onSelect={(date) =>
                         date

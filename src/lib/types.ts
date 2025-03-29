@@ -31,12 +31,12 @@ export type Calculation = {
   func: string; // js code
 };
 
-type BasePeriod = {
+export type BasePeriod = {
   startDate: Temporal.PlainDate;
   endDate?: Temporal.PlainDate; // Default is indefinite
 };
 
-type Daily = {
+export type Daily = {
   frequency: "daily";
   every: number;
 };
@@ -55,12 +55,12 @@ export type Weekly = {
   >;
 };
 
-type BaseMonthly = {
+export type BaseMonthly = {
   frequency: "monthly";
   every: number;
 };
 
-type MonthDay = {
+export type MonthDay = {
   dayOfMonthType: "day";
   each: number;
 };
@@ -109,7 +109,7 @@ export type BaseYearly = {
   >;
 };
 
-type Yearly = BaseYearly & (MonthDay | MonthPosition);
+export type Yearly = BaseYearly & (MonthDay | MonthPosition);
 
 export type Period = BasePeriod & (Daily | Weekly | Monthly | Yearly);
 
@@ -121,7 +121,7 @@ export type BaseInput = {
   required?: boolean;
 };
 
-type TextInput = {
+export type TextInput = {
   type: "text";
   defaultValue?: string;
   minLength?: number;
@@ -130,7 +130,7 @@ type TextInput = {
   placeholder?: string;
 };
 
-type NumberInput = {
+export type NumberInput = {
   type: "number";
   defaultValue?: number;
   unit?: string;
@@ -141,18 +141,18 @@ type NumberInput = {
   placeholder?: string;
 };
 
-type BooleanInput = {
+export type BooleanInput = {
   type: "boolean";
   defaultValue?: boolean;
 };
 
-type SelectInput = {
+export type SelectInput = {
   type: "select";
   options: Array<{ id: string; label: string }>;
   defaultValue?: string;
 };
 
-type RangeInput = {
+export type RangeInput = {
   type: "range";
   min: number;
   max: number;
