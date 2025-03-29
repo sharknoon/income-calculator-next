@@ -315,7 +315,7 @@ export default function ComponentEditor({
                 <ArrowLeft className="size-4" />
               </Button>
             </AlertDialogTrigger>
-            <AlertDialogContent>
+            <AlertDialogContent className="sm:min-w-xl">
               <AlertDialogHeader>
                 <AlertDialogTitle>
                   {t("alert-dialog-unsaved-changes-title")}
@@ -459,8 +459,8 @@ export default function ComponentEditor({
                           <button
                             className={`p-2 absolute opacity-0 group-hover:opacity-100 transition left-0 top-1/2 -translate-x-full -translate-y-1/2 ${
                               selectedPeriodId === period.id
-                                ? "bg-primary text-primary-foreground hover:text-blue-400"
-                                : "bg-muted hover:text-blue-700"
+                                ? "bg-primary text-primary-foreground hover:text-blue-400 dark:hover:text-blue-700"
+                                : "bg-muted hover:text-blue-700 dark:hover:text-blue-400"
                             }`}
                             onClick={(e) => {
                               e.stopPropagation();

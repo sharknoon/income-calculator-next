@@ -45,6 +45,10 @@
     "card-breakdown-description": "Detailed breakdown of your income components",
     "card-breakdown-no-components": "No components to display"
   },
+  "ComponentsInputs": {
+    "no-inputs-required": "No inputs required for this component",
+    "input-range": "({startDate} - {endDate})"
+  },
   "ComponentEditor": {
     "alert-dialog-unsaved-changes-title": "Unsaved Changes",
     "alert-dialog-unsaved-changes-description": "You have unsaved changes that will be lost if you leave this page. What would you like to do?",
@@ -100,5 +104,85 @@
   },
   "DateEditor": {
     "date": "Date"
+  },
+  "InputsEditor": {
+    "new-input-name": "New Input",
+    "input-parameters": "Input Parameters",
+    "button-add-input": "Add Input",
+    "card-no-inputs-title": "No Inputs",
+    "card-no-inputs-description": "Add inputs to collect data for your calculation.",
+    "available-inputs": "Available Inputs",
+    "input-type-text": "Text",
+    "input-type-number": "Number",
+    "input-type-boolean": "Boolean",
+    "input-type-select": "Select",
+    "input-type-range": "Range",
+    "input-id": "ID",
+    "input-id-description": "Must start with a letter and only contain letters, numbers, underscores, and dollar signs",
+    "input-name": "Name",
+    "input-description": "Description",
+    "input-description-placeholder": "Describe this input",
+    "input-type": "Type",
+    "default-option-1-name": "Option 1",
+    "default-option-2-name": "Option 2",
+    "input-required": "Required",
+    "input-text-default-value": "Default Value",
+    "input-text-min-length": "Min Length",
+    "input-text-max-length": "Max Length",
+    "input-text-placeholder": "Placeholder",
+    "input-text-regex-validation": "Regex Validation",
+    "input-text-regex-validation-description": "Test your Regex here: <link></link>",
+    "input-number-default-value": "Default Value",
+    "input-number-unit": "Unit",
+    "input-number-min": "Min",
+    "input-number-max": "Max",
+    "input-number-step": "Step",
+    "input-number-placeholder": "Placeholder",
+    "input-number-regex-validation": "Regex Validation",
+    "input-number-regex-validation-description": "Test your Regex here: <link></link>",
+    "input-boolean-default-value": "Default Value",
+    "input-boolean-true": "True",
+    "input-boolean-false": "False",
+    "input-select-options": "Options",
+    "input-select-options-description": "IDs must start with a letter and only contain letters, numbers, underscores, and dollar signs",
+    "input-select-option-id": "ID",
+    "input-select-option-name": "Name",
+    "input-select-add-option": "Add Option",
+    "input-select-default-option": "Default Option",
+    "input-range-default-value": "Default Value",
+    "input-range-min": "Min",
+    "input-range-max": "Max",
+    "input-range-step": "Step",
+    "no-input-selected": "No Input selected",
+    "no-input-selected-description": "Select an input from the list or add a new one."
+  },
+  "CalculationEditor": {
+    "calculation-formula": "Calculation Formula",
+    "button-test-formula": "Test Formula",
+    "button-hide-test-panel": "Hide Test Panel",
+    "editor-description": "Use JavaScript or TypeScript to create your calculation formula. Access input/dependency values using the their ID.<br></br><examples>Examples</examples><br></br><code>return inputs.hourlyRate * inputs.hoursWorked;</code><br></br><code>return dependencies.salary;</code>",
+    "dependencies": "Dependencies",
+    "dependencies-description": "Select other components that this calculation depends on:",
+    "no-components-available": "No other components available",
+    "dependency-access": "Access dependency values in your calculation using:"
+  },
+  "FormulaTestPanel": {
+    "title": "Formula Test Panel",
+    "description": "Enter test values for your inputs and dependencies to see the formula result",
+    "input-values": "Input Values",
+    "dependency-values": "Dependency Values",
+    "dependency-value-placeholder": "Enter value",
+    "button-calculate-result": "Calculate Result",
+    "error": "Error",
+    "result": "Result:"
+  },
+  "ThemeSwitcher": {
+    "theme": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "LanguageSwitcher": {
+    "language": "Language"
   }
 }

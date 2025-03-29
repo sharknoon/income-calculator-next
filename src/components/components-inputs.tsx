@@ -13,6 +13,7 @@ import {
   isDateInPeriod,
   laterPlainDate,
 } from "@/lib/calculation";
+import { useLocale, useTranslations } from "next-intl";
 
 interface ComponentInputsProps {
   components: Array<Component>;
@@ -26,6 +27,8 @@ export function ComponentsInputs({
   endDate,
 }: ComponentInputsProps) {
   const { inputValues, updateInputValue } = useInputValues();
+  const t = useTranslations("ComponentsInputs");
+  const locale = useLocale();
 
   type PeriodWithInputs = {
     id: string;
@@ -71,6 +74,10 @@ export function ComponentsInputs({
     return results;
   };
 
+  const formatDate = (date: Temporal.PlainDate) => {
+    return date.toLocaleString(locale);
+  };
+
   return components.map((component) => {
     const periods = getMatchingPeriodsWithInputs(component, startDate, endDate);
     return (
@@ -81,9 +88,7 @@ export function ComponentsInputs({
         <CardContent>
           {(periods.length === 0 ||
             periods.every((p) => p.inputs.length === 0)) && (
-            <p className="text-muted-foreground">
-              No inputs required for this component
-            </p>
+            <p className="text-muted-foreground">{t("no-inputs-required")}</p>
           )}
           {periods.length > 0 && (
             <div className="space-y-4">
@@ -97,8 +102,10 @@ export function ComponentsInputs({
                       )}
                       {periods.length > 1 && (
                         <span className="text-muted-foreground ml-1">
-                          ({period.startDate.toLocaleString()} -{" "}
-                          {period.endDate.toLocaleString()})
+                          {t("input-range", {
+                            startDate: formatDate(period.startDate),
+                            endDate: formatDate(period.endDate),
+                          })}
                         </span>
                       )}
                     </Label>

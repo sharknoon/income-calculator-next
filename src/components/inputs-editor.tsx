@@ -17,6 +17,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { Input as InputType } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
+import { useTranslations } from "next-intl";
 
 interface InputsEditorProps {
   inputs: Array<InputType>;
@@ -27,6 +28,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
   const [selectedInputId, setSelectedInputId] = useState<string | null>(
     inputs.length > 0 ? inputs[0].id : null,
   );
+  const t = useTranslations("InputsEditor");
 
   const selectedInput = inputs.find((input) => input.id === selectedInputId);
 
@@ -34,7 +36,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
     const newInputId = (Math.random() + 1).toString(36).substring(7);
     const newInput: InputType = {
       id: newInputId,
-      name: "New Input",
+      name: t("new-input-name"),
       type: "text",
       required: true,
     };
@@ -70,31 +72,48 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
     }
   }, [inputs, selectedInputId]);
 
+  function translateInputType(type: InputType["type"]) {
+    switch (type) {
+      case "text":
+        return t("input-type-text");
+      case "number":
+        return t("input-type-number");
+      case "boolean":
+        return t("input-type-boolean");
+      case "select":
+        return t("input-type-select");
+      case "range":
+        return t("input-type-range");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Input Parameters</h3>
+        <h3 className="text-lg font-medium">{t("input-parameters")}</h3>
         <Button onClick={handleAddInput} size="sm">
           <Plus className="mr-2 size-4" />
-          Add Input
+          {t("button-add-input")}
         </Button>
       </div>
 
       {inputs.length === 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">No Inputs</CardTitle>
+            <CardTitle className="text-base">
+              {t("card-no-inputs-title")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">
-              Add inputs to collect data for your calculation.
+              {t("card-no-inputs-description")}
             </p>
           </CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="md:col-span-1 space-y-2">
-            <Label>Available Inputs</Label>
+            <Label>{t("available-inputs")}</Label>
             <div className="border rounded-md overflow-hidden">
               {inputs.map((input) => (
                 <div
@@ -115,7 +134,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      {input.type}
+                      {translateInputType(input.type)}
                     </p>
                   </div>
                   <Button
@@ -137,7 +156,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
             {selectedInput ? (
               <div className="space-y-4 border rounded-md p-4">
                 <div className="space-y-2">
-                  <Label htmlFor="input-id">ID</Label>
+                  <Label htmlFor="input-id">{t("input-id")}</Label>
                   <Input
                     id="input-id"
                     value={selectedInput.id}
@@ -154,13 +173,12 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     }}
                   />
                   <Label className="text-muted-foreground text-xs">
-                    Must start with a letter and only contain letters, numbers,
-                    underscores, and dollar signs
+                    {t("input-id-description")}
                   </Label>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="input-name">Name</Label>
+                  <Label htmlFor="input-name">{t("input-name")}</Label>
                   <Input
                     id="input-name"
                     value={selectedInput.name}
@@ -174,7 +192,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="input-description">Description</Label>
+                  <Label htmlFor="input-description">
+                    {t("input-description")}
+                  </Label>
                   <Textarea
                     id="input-description"
                     value={selectedInput.description || ""}
@@ -184,12 +204,12 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         description: e.target.value,
                       })
                     }
-                    placeholder="Describe this input"
+                    placeholder={t("input-description-placeholder")}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="input-type">Type</Label>
+                  <Label htmlFor="input-type">{t("input-type")}</Label>
                   <Select
                     value={selectedInput.type}
                     onValueChange={(value: InputType["type"]) => {
@@ -230,12 +250,15 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                           defaultValue: false,
                         };
                       } else if (value === "select") {
+                        const defaultValue = (Math.random() + 1)
+                          .toString(36)
+                          .substring(7);
                         newInput = {
                           ...baseInput,
                           type: "select",
                           options: [
                             {
-                              id: (Math.random() + 1).toString(36).substring(7),
+                              id: defaultValue,
                               label: "Option 1",
                             },
                             {
@@ -243,7 +266,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                               label: "Option 2",
                             },
                           ],
-                          defaultValue: "option1",
+                          defaultValue,
                         };
                       } else {
                         newInput = {
@@ -263,11 +286,21 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="text">Text</SelectItem>
-                      <SelectItem value="number">Number</SelectItem>
-                      <SelectItem value="boolean">Boolean</SelectItem>
-                      <SelectItem value="select">Select</SelectItem>
-                      <SelectItem value="range">Range</SelectItem>
+                      <SelectItem value="text">
+                        {t("input-type-text")}
+                      </SelectItem>
+                      <SelectItem value="number">
+                        {t("input-type-number")}
+                      </SelectItem>
+                      <SelectItem value="boolean">
+                        {t("input-type-boolean")}
+                      </SelectItem>
+                      <SelectItem value="select">
+                        {t("input-type-select")}
+                      </SelectItem>
+                      <SelectItem value="range">
+                        {t("input-type-range")}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -283,13 +316,15 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       })
                     }
                   />
-                  <Label htmlFor="input-required">Required</Label>
+                  <Label htmlFor="input-required">{t("input-required")}</Label>
                 </div>
 
                 {selectedInput.type === "text" && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="input-default">Default Value</Label>
+                      <Label htmlFor="input-default">
+                        {t("input-text-default-value")}
+                      </Label>
                       <Input
                         id="input-default"
                         value={selectedInput.defaultValue || ""}
@@ -303,7 +338,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="input-min-length">Min Length</Label>
+                        <Label htmlFor="input-min-length">
+                          {t("input-text-min-length")}
+                        </Label>
                         <Input
                           id="input-min-length"
                           type="number"
@@ -319,7 +356,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="input-max-length">Max Length</Label>
+                        <Label htmlFor="input-max-length">
+                          {t("input-text-max-length")}
+                        </Label>
                         <Input
                           id="input-max-length"
                           type="number"
@@ -336,7 +375,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="input-placeholder">Placeholder</Label>
+                      <Label htmlFor="input-placeholder">
+                        {t("input-text-placeholder")}
+                      </Label>
                       <Input
                         id="input-placeholder"
                         value={selectedInput.placeholder || ""}
@@ -350,7 +391,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="input-validation">
-                        Regexp Validation
+                        {t("input-text-regex-validation")}
                       </Label>
                       <Input
                         id="input-validation"
@@ -363,14 +404,17 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         }
                       />
                       <Label className="text-muted-foreground text-xs">
-                        Test your Regexp here:
-                        <a
-                          href="https://regex101.com"
-                          target="_blank"
-                          className="hover:underline"
-                        >
-                          regex101.com
-                        </a>
+                        {t.rich("input-text-regex-validation-description", {
+                          link: () => (
+                            <a
+                              href="https://regex101.com"
+                              target="_blank"
+                              className="hover:underline"
+                            >
+                              regex101.com
+                            </a>
+                          ),
+                        })}
                       </Label>
                     </div>
                   </>
@@ -379,7 +423,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                 {selectedInput.type === "number" && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="input-default">Default Value</Label>
+                      <Label htmlFor="input-default">
+                        {t("input-number-default-value")}
+                      </Label>
                       <Input
                         id="input-default"
                         type="number"
@@ -395,7 +441,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="input-unit">Unit</Label>
+                      <Label htmlFor="input-unit">
+                        {t("input-number-unit")}
+                      </Label>
                       <Input
                         id="input-unit"
                         value={selectedInput.unit || ""}
@@ -409,7 +457,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="input-min">Min</Label>
+                        <Label htmlFor="input-min">
+                          {t("input-number-min")}
+                        </Label>
                         <Input
                           id="input-min"
                           type="number"
@@ -425,7 +475,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="input-max">Max</Label>
+                        <Label htmlFor="input-max">
+                          {t("input-number-max")}
+                        </Label>
                         <Input
                           id="input-max"
                           type="number"
@@ -441,7 +493,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="input-step">Step</Label>
+                        <Label htmlFor="input-step">
+                          {t("input-number-step")}
+                        </Label>
                         <Input
                           id="input-step"
                           type="number"
@@ -458,7 +512,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="input-placeholder">Placeholder</Label>
+                      <Label htmlFor="input-placeholder">
+                        {t("input-number-placeholder")}
+                      </Label>
                       <Input
                         id="input-placeholder"
                         value={selectedInput.placeholder || ""}
@@ -472,7 +528,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="input-validation">
-                        Regexp Validation
+                        {t("input-number-regex-validation")}
                       </Label>
                       <Input
                         id="input-validation"
@@ -485,14 +541,17 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         }
                       />
                       <Label className="text-muted-foreground text-xs">
-                        Test your Regexp here:
-                        <a
-                          href="https://regex101.com"
-                          target="_blank"
-                          className="hover:underline"
-                        >
-                          regex101.com
-                        </a>
+                        {t.rich("input-number-regex-validation-description", {
+                          link: () => (
+                            <a
+                              href="https://regex101.com"
+                              target="_blank"
+                              className="hover:underline"
+                            >
+                              regex101.com
+                            </a>
+                          ),
+                        })}
                       </Label>
                     </div>
                   </>
@@ -500,7 +559,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
 
                 {selectedInput.type === "boolean" && (
                   <div className="space-y-2">
-                    <Label htmlFor="input-default">Default Value</Label>
+                    <Label htmlFor="input-default">
+                      {t("input-boolean-default-value")}
+                    </Label>
                     <Select
                       value={selectedInput.defaultValue ? "true" : "false"}
                       onValueChange={(value) =>
@@ -514,8 +575,12 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         <SelectValue placeholder="Select default value" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="true">True</SelectItem>
-                        <SelectItem value="false">False</SelectItem>
+                        <SelectItem value="true">
+                          {t("input-boolean-true")}
+                        </SelectItem>
+                        <SelectItem value="false">
+                          {t("input-boolean-false")}
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -524,15 +589,14 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                 {selectedInput.type === "select" && (
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Options</Label>
+                      <Label>{t("input-select-options")}</Label>
                       <Label className="text-muted-foreground text-xs">
-                        IDs must start with a letter and only contain letters,
-                        numbers, underscores, and dollar signs
+                        {t("input-select-options-description")}
                       </Label>
                       {selectedInput.options.map((option, index) => (
                         <div key={index} className="flex items-center">
                           <div className="self-stretch flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
-                            ID
+                            {t("input-select-option-id")}
                           </div>
                           <Input
                             value={option.id}
@@ -555,7 +619,7 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                             className="rounded-l-none"
                           />
                           <div className="self-stretch ml-2 flex items-center justify-center rounded-l-md border border-r-0 border-input bg-muted px-3 text-sm text-muted-foreground">
-                            Name
+                            {t("input-select-option-name")}
                           </div>
                           <Input
                             value={option.label}
@@ -610,12 +674,12 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         }}
                       >
                         <Plus className="mr-2 size-4" />
-                        Add Option
+                        {t("input-select-add-option")}
                       </Button>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="input-default-option">
-                        Default Option
+                        {t("input-select-default-option")}
                       </Label>
                       <Select
                         value={selectedInput.defaultValue || ""}
@@ -644,7 +708,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                 {selectedInput.type === "range" && (
                   <>
                     <div className="space-y-2">
-                      <Label htmlFor="input-default-range">Default Value</Label>
+                      <Label htmlFor="input-default-range">
+                        {t("input-range-default-value")}
+                      </Label>
                       <Input
                         id="input-default-range"
                         type="number"
@@ -660,7 +726,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                     </div>
                     <div className="grid grid-cols-3 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="input-min-range">Min</Label>
+                        <Label htmlFor="input-min-range">
+                          {t("input-range-min")}
+                        </Label>
                         <Input
                           id="input-min-range"
                           type="number"
@@ -674,7 +742,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="input-max-range">Max</Label>
+                        <Label htmlFor="input-max-range">
+                          {t("input-range-max")}
+                        </Label>
                         <Input
                           id="input-max-range"
                           type="number"
@@ -688,7 +758,9 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="input-step-range">Step</Label>
+                        <Label htmlFor="input-step-range">
+                          {t("input-range-step")}
+                        </Label>
                         <Input
                           id="input-step-range"
                           type="number"
@@ -708,11 +780,13 @@ export function InputsEditor({ inputs, onInputChange }: InputsEditorProps) {
             ) : (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">No Input Selected</CardTitle>
+                  <CardTitle className="text-base">
+                    {t("no-input-selected")}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Select an input from the list or add a new one.
+                    {t("no-input-selected-description")}
                   </p>
                 </CardContent>
               </Card>

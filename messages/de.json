@@ -26,7 +26,7 @@
   },
   "CalculationView": {
     "title": "Einkommensberechnung",
-    "card-date-range-title": "Datumsbereich",
+    "card-date-range-title": "Zeitraum",
     "card-date-range-description": "Wählen Sie den Zeitraum für Ihre Einkommensberechnung",
     "card-date-range-start-date": "Startdatum",
     "card-date-range-end-date": "Enddatum",
@@ -44,6 +44,10 @@
     "card-breakdown-title": "Einkommensaufschlüsselung",
     "card-breakdown-description": "Detaillierte Aufschlüsselung Ihrer Einkommenskomponenten",
     "card-breakdown-no-components": "Keine Komponenten zum Anzeigen"
+  },
+  "ComponentsInputs": {
+    "no-inputs-required": "Keine Eingaben für diese Komponente erforderlich",
+    "input-range": "({startDate} - {endDate})"
   },
   "ComponentEditor": {
     "alert-dialog-unsaved-changes-title": "Nicht gespeicherte Änderungen",
@@ -100,5 +104,85 @@
   },
   "DateEditor": {
     "date": "Datum"
+  },
+  "InputsEditor": {
+    "new-input-name": "Neue Eingabe",
+    "input-parameters": "Eingabeparameter",
+    "button-add-input": "Eingabe hinzufügen",
+    "card-no-inputs-title": "Keine Eingaben",
+    "card-no-inputs-description": "Fügen Sie Eingaben hinzu, um Daten für Ihre Berechnung anzufragen.",
+    "available-inputs": "Verfügbare Eingaben",
+    "input-type-text": "Text",
+    "input-type-number": "Nummer",
+    "input-type-boolean": "Boolean",
+    "input-type-select": "Auswahl",
+    "input-type-range": "Wertbereich",
+    "input-id": "ID",
+    "input-id-description": "Muss mit einem Buchstaben beginnen und darf nur Buchstaben, Zahlen, Unterstriche und Dollarzeichen enthalten",
+    "input-name": "Name",
+    "input-description": "Beschreibung",
+    "input-description-placeholder": "Beschreiben Sie diese Eingabe",
+    "input-type": "Typ",
+    "default-option-1-name": "Option 1",
+    "default-option-2-name": "Option 2",
+    "input-required": "Erforderlich",
+    "input-text-default-value": "Standardwert",
+    "input-text-min-length": "Minimale Länge",
+    "input-text-max-length": "Maximale Länge",
+    "input-text-placeholder": "Platzhalter",
+    "input-text-regex-validation": "Regex-Validierung",
+    "input-text-regex-validation-description": "Testen Sie Ihre Regex hier: <link></link>",
+    "input-number-default-value": "Standardwert",
+    "input-number-unit": "Einheit",
+    "input-number-min": "Minimum",
+    "input-number-max": "Maximum",
+    "input-number-step": "Schritt",
+    "input-number-placeholder": "Platzhalter",
+    "input-number-regex-validation": "Regex-Validierung",
+    "input-number-regex-validation-description": "Testen Sie Ihre Regex hier: <link></link>",
+    "input-boolean-default-value": "Standardwert",
+    "input-boolean-true": "Wahr",
+    "input-boolean-false": "Falsch",
+    "input-select-options": "Optionen",
+    "input-select-options-description": "IDs müssen mit einem Buchstaben beginnen und dürfen nur Buchstaben, Zahlen, Unterstriche und Dollarzeichen enthalten",
+    "input-select-option-id": "ID",
+    "input-select-option-name": "Name",
+    "input-select-add-option": "Option hinzufügen",
+    "input-select-default-option": "Standardoption",
+    "input-range-default-value": "Standardwert",
+    "input-range-min": "Minimum",
+    "input-range-max": "Maximum",
+    "input-range-step": "Schritt",
+    "no-input-selected": "Keine Eingabe ausgewählt",
+    "no-input-selected-description": "Wählen Sie eine Eingabe aus der Liste aus oder fügen Sie eine neue hinzu."
+  },
+  "CalculationEditor": {
+    "calculation-formula": "Berechnungsformel",
+    "button-test-formula": "Formel testen",
+    "button-hide-test-panel": "Testbereich ausblenden",
+    "editor-description": "Verwenden Sie JavaScript oder TypeScript, um Ihre Berechnungsformel zu erstellen. Greifen Sie auf Eingabe-/Abhängigkeitswerte mithilfe ihrer ID zu.<br></br><examples>Beispiele</examples><br></br><code>return inputs.stundensatz * inputs.wochenstunden;</code><br></br><code>return dependencies.grundentgelt;</code>",
+    "dependencies": "Abhängigkeiten",
+    "dependencies-description": "Wählen Sie andere Komponenten aus, von denen diese Berechnung abhängt:",
+    "no-components-available": "Keine anderen Komponenten verfügbar",
+    "dependency-access": "Greifen Sie in Ihrer Berechnung auf Abhängigkeitswerte zu mit:"
+  },
+  "FormulaTestPanel": {
+    "title": "Formel-Testbereich",
+    "description": "Geben Sie Testwerte für Ihre Eingaben und Abhängigkeiten ein, um das Ergebnis der Formel zu sehen",
+    "input-values": "Eingabewerte",
+    "dependency-values": "Abhängigkeitswerte",
+    "dependency-value-placeholder": "Wert eingeben",
+    "button-calculate-result": "Ergebnis berechnen",
+    "error": "Fehler",
+    "result": "Ergebnis:"
+  },
+  "ThemeSwitcher": {
+    "theme": "Thema",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "system": "System"
+  },
+  "LanguageSwitcher": {
+    "language": "Sprache"
   }
 }

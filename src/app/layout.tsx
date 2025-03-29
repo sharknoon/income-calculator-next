@@ -4,6 +4,7 @@ import "@/app/globals.css";
 import { NextIntlClientProvider, useLocale } from "next-intl";
 import { Toaster } from "@/components/ui/sonner";
 import { ComponentsProvider } from "@/context/components-context";
+import { ThemeContext } from "@/context/theme-context";
 
 const geistSans = localFont({
   variable: "--font-geist-sans",
@@ -30,12 +31,14 @@ export default function RootLayout({
   const locale = useLocale();
 
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider>
-          <ComponentsProvider>{children}</ComponentsProvider>
+          <ThemeContext attribute="class" defaultTheme="system" enableSystem>
+            <ComponentsProvider>{children}</ComponentsProvider>
+          </ThemeContext>
         </NextIntlClientProvider>
         <Toaster />
       </body>

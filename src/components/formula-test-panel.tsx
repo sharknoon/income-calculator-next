@@ -15,6 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, Calculator } from "lucide-react";
 import type { Calculation, InputValue } from "@/lib/types";
 import { ComponentInput } from "@/components/component-input";
+import { useTranslations } from "next-intl";
 
 interface FormulaTestPanelProps {
   calculation: Calculation;
@@ -37,6 +38,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
   >({});
   const [result, setResult] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const t = useTranslations("FormulaTestPanel");
 
   // Reset values when calculation changes
   useEffect(() => {
@@ -72,30 +74,14 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
 
   const executeFormula = async () => {
     try {
-      // Create a safe execution context with BigNumber available
-      const inputs = { ...inputValues };
-      const dependencies = { ...dependencyValues };
+      const calc = new Function("inputs", "dependencies", calculation.func);
+      const result = calc(inputValues ?? {}, dependencyValues ?? {});
 
-      // Create a function that will execute the formula in a controlled context
-      const ShadowRealm = (await import("shadowrealm-api")).default;
-      const realm = new ShadowRealm();
-      const calculationResult = realm.evaluate(
-        "function calculate() {" +
-          `const inputs = JSON.parse('${JSON.stringify(inputs)}');` +
-          `const dependencies = JSON.parse('${JSON.stringify(dependencies)}');` +
-          calculation.func +
-          "}" +
-          "calculate();",
-      );
-
-      // Format the result
-      setResult(String(calculationResult));
+      setResult(String(result));
       setError(null);
     } catch (err) {
       setResult(null);
-      setError(
-        `Error executing formula: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      setError(err instanceof Error ? err.message : String(err));
     }
   };
 
@@ -104,19 +90,16 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
       <CardHeader>
         <CardTitle className="flex items-center">
           <Calculator className="mr-2 size-5" />
-          Formula Test Panel
+          {t("title")}
         </CardTitle>
-        <CardDescription>
-          Enter test values for your inputs and dependencies to see the formula
-          result
-        </CardDescription>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           {/* Input values section */}
           {calculation.inputs.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Input Values</h3>
+              <h3 className="text-sm font-medium">{t("input-values")}</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {calculation.inputs.map((input) => (
                   <div key={input.id} className="space-y-2">
@@ -140,7 +123,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
           {/* Dependency values section */}
           {calculation.dependencies.length > 0 && (
             <div className="space-y-4">
-              <h3 className="text-sm font-medium">Dependency Values</h3>
+              <h3 className="text-sm font-medium">{t("dependency-values")}</h3>
               <div className="grid gap-4 md:grid-cols-2">
                 {calculation.dependencies.map((depId) => (
                   <div key={depId} className="space-y-2">
@@ -159,7 +142,7 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
                           Number.parseFloat(e.target.value) || 0,
                         )
                       }
-                      placeholder="Enter value"
+                      placeholder={t("dependency-value-placeholder")}
                     />
                   </div>
                 ))}
@@ -171,20 +154,20 @@ export function FormulaTestPanel({ calculation }: FormulaTestPanelProps) {
           <div className="space-y-4">
             <Button onClick={executeFormula} className="w-full">
               <Calculator className="mr-2 size-4" />
-              Calculate Result
+              {t("button-calculate-result")}
             </Button>
 
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="size-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>{t("error")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             {result !== null && !error && (
               <div className="p-4 border rounded-md">
-                <div className="text-sm font-medium mb-1">Result:</div>
+                <div className="text-sm font-medium mb-1">{t("result")}</div>
                 <div className="text-xl font-bold">{result}</div>
               </div>
             )}

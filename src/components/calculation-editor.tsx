@@ -9,6 +9,8 @@ import { Play } from "lucide-react";
 import { FormulaTestPanel } from "@/components/formula-test-panel";
 import Editor, { type Monaco } from "@monaco-editor/react";
 import { editor } from "monaco-editor";
+import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 
 interface CalculationEditorProps {
   componentId: string;
@@ -28,6 +30,8 @@ export function CalculationEditor({
     null,
   );
   const [monaco, setMonaco] = useState<Monaco | null>(null);
+  const { resolvedTheme } = useTheme();
+  const t = useTranslations("CalculationEditor");
 
   useEffect(() => {
     if (monaco) {
@@ -119,6 +123,14 @@ export function CalculationEditor({
     }
   }, [calculation.func, editor]);
 
+  useEffect(() => {
+    if (editor) {
+      editor.updateOptions({
+        theme: resolvedTheme === "dark" ? "vs-dark" : "vs",
+      });
+    }
+  }, [resolvedTheme, editor]);
+
   const handleChangeCalculationFunc = (calculationFunc: string) => {
     const newCalculation = { ...calculation };
     newCalculation.func = calculationFunc;
@@ -151,14 +163,16 @@ export function CalculationEditor({
     <div className="space-y-6">
       <div className="space-y-2">
         <div className="flex justify-between items-center">
-          <Label htmlFor="calculation">Calculation Formula</Label>
+          <Label htmlFor="calculation">{t("calculation-formula")}</Label>
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowTestPanel(!showTestPanel)}
           >
             <Play className="mr-2 size-4" />
-            {showTestPanel ? "Hide Test Panel" : "Test Formula"}
+            {showTestPanel
+              ? t("button-hide-test-panel")
+              : t("button-test-formula")}
           </Button>
         </div>
         <Editor
@@ -174,29 +188,26 @@ export function CalculationEditor({
         />
 
         <p className="text-xs text-muted-foreground">
-          Use JavaScript or TypeScript to create your calculation formula.
-          Access input/dependency values using the their ID.
-          <br />
-          <span className="font-semibold">Examples</span>
-          <br />
-          <code>return inputs.hourlyRate * inputs.hoursWorked;</code>
-          <br />
-          <code>return dependencies.salary;</code>
+          {t.rich("editor-description", {
+            br: () => <br />,
+            examples: (chunks) => (
+              <span className="font-semibold">{chunks}</span>
+            ),
+            code: (chunks) => <code>{chunks}</code>,
+          })}
         </p>
       </div>
 
       {showTestPanel && <FormulaTestPanel calculation={calculation} />}
 
       <div className="space-y-2">
-        <Label>Dependencies</Label>
+        <Label>{t("dependencies")}</Label>
         <div className="border rounded-md p-4">
-          <p className="text-sm mb-2">
-            Select other components that this calculation depends on:
-          </p>
+          <p className="text-sm mb-2">{t("dependencies-description")}</p>
 
           {availableDependencies.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              No other components available
+              {t("no-components-available")}
             </p>
           ) : (
             <div className="space-y-2">
@@ -222,9 +233,7 @@ export function CalculationEditor({
 
           {calculation.dependencies.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm mb-2">
-                Access dependency values in your calculation using:
-              </p>
+              <p className="text-sm mb-2">{t("dependency-access")}</p>
               <pre className="bg-muted p-2 rounded text-xs overflow-x-auto">
                 {calculation.dependencies.map((depId) => {
                   const dep = components.find((c) => c.id === depId);
