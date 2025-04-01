@@ -3,7 +3,7 @@ import { Temporal } from "@js-temporal/polyfill";
 export type BaseComponent = {
   id: string;
   name: string;
-  description?: string;
+  description: string;
 };
 
 export type OneTimeComponent = BaseComponent & {
@@ -116,32 +116,32 @@ export type Period = BasePeriod & (Daily | Weekly | Monthly | Yearly);
 export type BaseInput = {
   id: string;
   name: string;
-  description?: string;
+  description: string;
   /** Whether the input is required. `undefined` means required. */
-  required?: boolean;
+  required: boolean;
 };
 
 export type TextInput = {
   type: "text";
-  defaultValue?: string;
-  minLength?: number;
-  maxLength?: number;
-  placeholder?: string;
+  defaultValue: string;
+  minLength: number;
+  maxLength: number;
+  placeholder: string;
 };
 
 export type NumberInput = {
   type: "number";
-  defaultValue?: number;
-  unit?: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  placeholder?: string;
+  defaultValue: number;
+  unit: string;
+  min: number;
+  max: number;
+  step: number;
+  placeholder: string;
 };
 
 export type BooleanInput = {
   type: "boolean";
-  defaultValue?: boolean;
+  defaultValue: boolean;
 };
 
 export type SelectInput = {
@@ -155,7 +155,7 @@ export type RangeInput = {
   min: number;
   max: number;
   step: number;
-  defaultValue?: number;
+  defaultValue: number;
 };
 
 export type Input = BaseInput &

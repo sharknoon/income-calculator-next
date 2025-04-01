@@ -105,6 +105,7 @@ export default function ComponentEditor({
       updatedComponent = {
         id: component.id,
         name: component.name,
+        description: component.description,
         type: "one-time",
         date: Temporal.Now.plainDateISO(),
         calculation: {
@@ -117,6 +118,7 @@ export default function ComponentEditor({
       updatedComponent = {
         id: component.id,
         name: component.name,
+        description: component.description,
         type: "recurring",
         calculationPeriods: [
           {
@@ -537,6 +539,7 @@ export default function ComponentEditor({
               <TabsContent value="calculation" className="pt-4">
                 <CalculationEditor
                   componentId={component.id}
+                  periodId={selectedPeriodId ?? ""}
                   calculation={
                     component.type === "one-time"
                       ? component.calculation

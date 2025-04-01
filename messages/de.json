@@ -22,7 +22,10 @@
     "period-range": "{startDate} - {endDate}",
     "indefinite": "unbegrenzt",
     "date": "Datum:",
-    "button-edit": "Bearbeiten"
+    "button-edit": "Bearbeiten",
+    "error-dependency": "Komponente \"{component}\" kann nicht entfernt werden, da die Komponente \"{dependendcomponent}\" davon abhängt. Entfernen Sie zuerst diese Komponente.",
+    "alert-dialog-error-title": "Fehler",
+    "alert-dialog-error-ok": "Ok"
   },
   "CalculationView": {
     "title": "Einkommensberechnung",
@@ -91,13 +94,13 @@
     "weekly-repeat-on": "Wiederhole am",
     "day-of-month-day": "Tag <input></input> des Monats",
     "day-of-month-position": "Der <position></position> <day></day> des Monats",
-    "day-of-month-position-first": "Erste",
-    "day-of-month-position-second": "Zweite",
-    "day-of-month-position-third": "Dritte",
-    "day-of-month-position-fourth": "Vierte",
-    "day-of-month-position-fifth": "Fünfte",
-    "day-of-month-position-next-to-last": "Vorletzte",
-    "day-of-month-position-last": "Letzte",
+    "day-of-month-position-first": "erste",
+    "day-of-month-position-second": "zweite",
+    "day-of-month-position-third": "dritte",
+    "day-of-month-position-fourth": "vierte",
+    "day-of-month-position-fifth": "fünfte",
+    "day-of-month-position-next-to-last": "vorletzte",
+    "day-of-month-position-last": "letzte",
     "day-of-month-position-day": "Tag",
     "day-of-month-position-weekday": "Wochentag",
     "day-of-month-position-weekend-day": "Wochenendtag"
@@ -123,8 +126,7 @@
     "input-description": "Beschreibung",
     "input-description-placeholder": "Beschreiben Sie diese Eingabe",
     "input-type": "Typ",
-    "default-option-1-name": "Option 1",
-    "default-option-2-name": "Option 2",
+    "default-option-n-name": "Option {n}",
     "input-required": "Erforderlich",
     "input-text-default-value": "Standardwert",
     "input-text-min-length": "Minimale Länge",
@@ -150,7 +152,8 @@
     "input-range-max": "Maximum",
     "input-range-step": "Schritt",
     "no-input-selected": "Keine Eingabe ausgewählt",
-    "no-input-selected-description": "Wählen Sie eine Eingabe aus der Liste aus oder fügen Sie eine neue hinzu."
+    "no-input-selected-description": "Wählen Sie eine Eingabe aus der Liste aus oder fügen Sie eine neue hinzu.",
+    "input-select-select-default-option": "Standardoption auswählen"
   },
   "CalculationEditor": {
     "calculation-formula": "Berechnungsformel",

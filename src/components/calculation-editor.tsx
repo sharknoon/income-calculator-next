@@ -14,12 +14,14 @@ import { useTranslations } from "next-intl";
 
 interface CalculationEditorProps {
   componentId: string;
+  periodId: string;
   calculation: Calculation;
   onCalculationChange: (calculation: Calculation) => void;
 }
 
 export function CalculationEditor({
   componentId,
+  periodId,
   calculation,
   onCalculationChange,
 }: CalculationEditorProps) {
@@ -30,6 +32,7 @@ export function CalculationEditor({
     null,
   );
   const [monaco, setMonaco] = useState<Monaco | null>(null);
+  const [oldPeriodId, setOldPeriodId] = useState(periodId);
   const { resolvedTheme } = useTheme();
   const t = useTranslations("CalculationEditor");
 
@@ -117,11 +120,15 @@ export function CalculationEditor({
     }
   }, [monaco, calculation]);
 
+  // Only change the value of the editor when the period tabs change
+  // This is to avoid the editor to reset the cursor when the user is typing
   useEffect(() => {
-    if (editor) {
+    if (editor && periodId !== oldPeriodId) {
+      setOldPeriodId(periodId);
       editor.setValue(calculation.func);
     }
-  }, [calculation.func, editor]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [periodId, editor]);
 
   useEffect(() => {
     if (editor) {
@@ -184,7 +191,7 @@ export function CalculationEditor({
           </Button>
         </div>
         <Editor
-          height="10rem"
+          height="35rem"
           language="typescript"
           onChange={(value) => handleChangeCalculationFunc(value || "")}
           className="border"

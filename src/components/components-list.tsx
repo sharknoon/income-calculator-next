@@ -47,6 +47,7 @@ export function ComponentsList() {
     addComponent({
       id: newId,
       name: t("new-component-name"),
+      description: "",
       type: "recurring",
       calculationPeriods: [
         {
@@ -57,7 +58,7 @@ export function ComponentsList() {
             every: 1,
             dayOfMonthType: "position",
             on: "last",
-            day: "friday",
+            day: "weekday",
           },
           calculation: {
             dependencies: [],

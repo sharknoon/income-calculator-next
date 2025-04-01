@@ -22,7 +22,10 @@
     "period-range": "{startDate} - {endDate}",
     "indefinite": "indefinite",
     "date": "Date:",
-    "button-edit": "Edit"
+    "button-edit": "Edit",
+    "error-dependency": "Component \"{component}\" can't be removed because the Component \"{dependendcomponent}\" depends on it. Remove that component first.",
+    "alert-dialog-error-title": "Error",
+    "alert-dialog-error-ok": "Ok"
   },
   "CalculationView": {
     "title": "Income Calculation",
@@ -91,16 +94,16 @@
     "weekly-repeat-on": "Repeat on",
     "day-of-month-day": "Day <input></input> of the month",
     "day-of-month-position": "The <position></position> <day></day> of the month",
-    "day-of-month-position-first": "First",
-    "day-of-month-position-second": "Second",
-    "day-of-month-position-third": "Third",
-    "day-of-month-position-fourth": "Fourth",
-    "day-of-month-position-fifth": "Fifth",
-    "day-of-month-position-next-to-last": "Next to last",
-    "day-of-month-position-last": "Last",
-    "day-of-month-position-day": "Day",
-    "day-of-month-position-weekday": "Weekday",
-    "day-of-month-position-weekend-day": "Weekend day"
+    "day-of-month-position-first": "first",
+    "day-of-month-position-second": "second",
+    "day-of-month-position-third": "third",
+    "day-of-month-position-fourth": "fourth",
+    "day-of-month-position-fifth": "fifth",
+    "day-of-month-position-next-to-last": "next to last",
+    "day-of-month-position-last": "last",
+    "day-of-month-position-day": "day",
+    "day-of-month-position-weekday": "weekday",
+    "day-of-month-position-weekend-day": "weekend day"
   },
   "DateEditor": {
     "date": "Date"
@@ -123,8 +126,7 @@
     "input-description": "Description",
     "input-description-placeholder": "Describe this input",
     "input-type": "Type",
-    "default-option-1-name": "Option 1",
-    "default-option-2-name": "Option 2",
+    "default-option-n-name": "Option {n}",
     "input-required": "Required",
     "input-text-default-value": "Default Value",
     "input-text-min-length": "Min Length",
@@ -150,7 +152,8 @@
     "input-range-max": "Max",
     "input-range-step": "Step",
     "no-input-selected": "No Input selected",
-    "no-input-selected-description": "Select an input from the list or add a new one."
+    "no-input-selected-description": "Select an input from the list or add a new one.",
+    "input-select-select-default-option": "Select default option"
   },
   "CalculationEditor": {
     "calculation-formula": "Calculation Formula",
