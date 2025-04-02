@@ -147,7 +147,7 @@ export type BooleanInput = {
 export type SelectInput = {
   type: "select";
   options: Array<{ id: string; label: string }>;
-  defaultValue?: string;
+  defaultValue: string;
 };
 
 export type RangeInput = {

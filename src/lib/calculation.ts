@@ -68,23 +68,7 @@ export function calculate(
         inputValues[component.id]?.[calculation.calculationPeriodID] ?? {};
       for (const input of calculation.inputs) {
         if (!inputValuesForPeriod[input.id]) {
-          let defaultInputValue: InputValue;
-          if (input.defaultValue !== undefined && input.defaultValue !== null) {
-            defaultInputValue = input.defaultValue;
-          } else if (input.type === "number") {
-            defaultInputValue = input.min ?? 0;
-          } else if (input.type === "boolean") {
-            defaultInputValue = false;
-          } else if (input.type === "text") {
-            defaultInputValue = "";
-          } else if (input.type === "select") {
-            defaultInputValue = input.options[0].id;
-          } else if (input.type === "range") {
-            defaultInputValue = input.min ?? 0;
-          } else {
-            defaultInputValue = "";
-          }
-          inputValuesForPeriod[input.id] = defaultInputValue;
+          inputValuesForPeriod[input.id] = input.defaultValue;
         }
       }
 
